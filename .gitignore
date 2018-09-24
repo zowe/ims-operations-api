@@ -2,7 +2,9 @@
 *.class
 .classpath
 clientdb.xml
-/RemoteSystemsTempFiles/
+RemoteSystemsTempFiles/
+.recommenders
+.metadata
 
 # Log file
 *.log
