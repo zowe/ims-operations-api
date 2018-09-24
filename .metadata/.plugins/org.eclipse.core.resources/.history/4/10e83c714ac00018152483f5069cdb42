@@ -1,0 +1,152 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.imsplex;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.ImsResource;
+import com.ibm.ims.ea.om.datastore.ImsTransactionTable;
+
+public class Imsplex extends ImsResource {
+	private static final Logger logger = LoggerFactory.getLogger(Imsplex.class);
+	/**
+	 * Constructor helpful in creating an empty bean particularly in areas reflection is used. 
+	 * Should be used with ({@link Program#setMap(Map)}
+	 */
+	public Imsplex() {
+		this.resourceType = ResourceType.IMSPLX;
+	}
+
+	/**
+	 * Method creates an instance of the bean given a Map representing the resource from an OM interaction
+	 * @param omResourceResponse Map representation for IMS resource such as 
+	 * a Imsplex or database query.
+	 * @param properties
+	 */
+	public Imsplex(Map<String, String> properties) {
+		super(properties);
+		this.resourceType = ResourceType.IMSPLX;
+	}
+
+
+	@Override
+	public void setMap(Map<String, String> resourceMap) {
+		this.properties = resourceMap;
+		this.resourceType = ResourceType.IMSPLX;
+	}
+
+	public String getProperty(ImsplexResponseAttribute key){
+		return this.properties.get(key.toString());
+	}
+	
+	/**
+	 * Method creates an instance of the bean from an SQL ResultSet
+	 * @param resultSet
+	 * @throws SQLException
+	 */
+	public Imsplex(ResultSet sqlResultSet) throws SQLException{
+		//if (logger.isDebugEnabled()) { logger.debug(this.getClass() + "Imsplex(ResultSet)"); }
+	
+		resourceType = ResourceType.IMSPLX;
+		ResultSetMetaData rsMetaData = sqlResultSet.getMetaData();
+		int numberOfColumns = rsMetaData.getColumnCount();
+		
+		try {					
+			for (int i = 1; i < numberOfColumns + 1; i++) {
+			      String columnName = rsMetaData.getColumnName(i);
+			      
+			      if (columnName.equals(ImsTransactionTable.SYSPLEX_ID) ){
+						properties.put(columnName, String.valueOf(sqlResultSet.getInt(columnName)));
+					}else {
+						if (sqlResultSet.getString(columnName) != null) {
+							properties.put(columnName, sqlResultSet.getString(columnName));
+						}
+					}
+			    }
+		} catch(SQLException e) {
+			if(logger.isDebugEnabled()){
+				logger.debug(IQEO.IQEO0000E.msg(new Object[] {Arrays.toString(e.getStackTrace())}));
+			}
+		}
+
+		//if (logger.isDebugEnabled()) { logger.debug(this.getClass() + 	"Imsplex(ResultSet results): " + results.toString()); }
+	}
+
+	/**
+	 * IMS IMSPLX Output fields that are returned for this resource type. 
+	 * Depending on the command some fields when queried will return null.
+	 */
+	public enum ImsplexResponseAttribute {
+		
+	    //NOTE: IMSPLX here is an attribute, where as other beans its a non-keyword because its not part of the query response
+		MBR, IMSPLX, STYP, JOB, TYP, IMSMBR, VER, STT, OS, CC,
+		
+		//NON-KEYWORD
+		SYSPLEX_ID;
+		
+		
+		
+		public String value() {
+			return name();
+		}
+
+		public static ImsplexResponseAttribute fromValue(String v) {
+			return valueOf(v);
+		}
+
+		@Override
+		public String toString(){
+			return name();
+		}
+	}
+	
+	/**
+	 * Displays Imsplex members that displays at atleast one of the specified status.
+	 */
+	public static enum STATUS {
+		ABENDED("ABENDED"),
+		ACTIVE("ACTIVE"),
+		NOTREACHABLE("NOTREACHABLE"),
+		OLD("OLD"),
+		READY("READY");
+		
+        private String value = "";
+
+        private STATUS(String val){
+            this.value = val;
+        }
+
+        private STATUS(){}
+
+        @Override
+        public String toString(){
+            return this.value;
+        }
+	}
+	
+	@Override
+	public void setAttribute(String key, String value) {
+		this.properties.put(key, value);
+	}
+}
+
+
+
+
+
+

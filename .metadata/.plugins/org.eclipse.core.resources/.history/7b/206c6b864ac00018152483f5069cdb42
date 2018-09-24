@@ -1,0 +1,276 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.ims.ea.base.version.Version;
+import com.ibm.ims.ea.om.cmd.exceptions.OmCommandGenerationException;
+import com.ibm.ims.ea.om.cmd.utilities.Type2CommandSerializable;
+import com.ibm.ims.ea.om.cmd.v14.query.imsplex.QueryImsPlex;
+import com.ibm.ims.ea.om.cmd.v14.query.odbm.type.datastore.QueryOdbmTypeDatastore;
+import com.ibm.ims.ea.om.cmd.v14.type2.Type2Command;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.exception.OmRuntimeException;
+import com.ibm.ims.ea.om.common.result.OmResultSet;
+import com.ibm.ims.ea.om.common.service.OdbmService;
+import com.ibm.ims.ea.om.datastore.ImsBaseDastoreConstants;
+import com.ibm.ims.ea.om.odbm.Odbm;
+/**
+ * <pre>
+ * Class provides methods to interact with OM for IMS Connect Resource type. 
+ * Return types are generalized for all interactions as a Collection of {@link Icon} objects. 
+ * 
+ * It should be noted that the Collection only manages the response for the particular 
+ * resource and that OM Messages including Reason Codes, Reason Text, etc are accessible 
+ * from the {@link Om} instance managing the interaction. 
+ * 
+ * See  <code>{@link Om#getOmMessageContexts()} </code> on how to access OM Messages.
+ * </pre>
+ * 
+ * @author ddimatos
+ *
+ */
+public final class OdbmServices extends ServicesHelper implements OdbmService{
+
+	private static final Logger logger = LoggerFactory.getLogger(OdbmServices.class);
+	
+	//This must remain protected else the Om instance will not be able to aggregate all the Om Messages
+	protected OdbmServices(Om om) {
+		super(om);
+		
+		try {
+			this.resourceVersion = om.getImsplexService().getResourceVersions(new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.IMS});
+		} catch (Exception e) {
+			version = Version.IMS_ZERO_RELEASE;
+		}
+	}
+
+	@Override
+	public Collection<Odbm> getImsOdbms(String[] datastoreName) throws OmException, OmConnectionException, OmDatastoreException {
+		if(logger.isDebugEnabled()) logger.debug(">> getImsOdbms("+datastoreName+")");
+		
+		//Note the method key to be used for associating the service
+		String methodKey = "getImsOdbms";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try {
+			
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.resourceVersion.get("latestResourceVersion");
+			
+			QueryOdbmTypeDatastore queryOdbmTypeDatastore = new QueryOdbmTypeDatastore();
+			
+			Type2Command type2Command = new Type2Command();
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+			type2Command.setResource(Type2Command.ResourceOptions.ODBM);
+			
+			queryOdbmTypeDatastore.setTYPE(QueryOdbmTypeDatastore.TypeOptions.DATASTORE);
+			queryOdbmTypeDatastore.getNAME().addAll(Arrays.asList(datastoreName));
+			queryOdbmTypeDatastore.getSHOW().add(QueryOdbmTypeDatastore.ShowOptions.ALL);
+			
+			type2Command.setQueryOdbmTypeDatastore(queryOdbmTypeDatastore);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			return propertiesToCollection(omResultSet);
+
+		} catch (OmCommandGenerationException e) {
+			throw new OmRuntimeException(e);
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(om.getOMConnection().getImsplex());
+			throw e;
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getImsOdbms("+datastoreName+")");
+			
+			this.setOmInteractionContext(omResultSet, methodKey);
+		}
+	}
+
+	@Override
+	public Collection<Odbm> getImsOdbms(String[] datastoreName,String[] imsSystemName) throws OmException, OmConnectionException, OmDatastoreException {
+		if(logger.isDebugEnabled()) logger.debug(">> getImsOdbms("+datastoreName+","+ Arrays.toString(imsSystemName)+")");
+
+		//Note the method key to be used for associating the service
+		String methodKey = "getImsOdbms";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+        
+		try{
+			
+			imsSystemName = this.routeMemberFormater(imsSystemName);
+
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.setVersion(this.resourceVersion , imsSystemName);
+			
+			QueryOdbmTypeDatastore queryOdbmTypeDatastore = new QueryOdbmTypeDatastore();
+			
+			Type2Command type2Command = new Type2Command();
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+			type2Command.setResource(Type2Command.ResourceOptions.ODBM);
+			type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+			
+			queryOdbmTypeDatastore.setTYPE(QueryOdbmTypeDatastore.TypeOptions.DATASTORE);
+			queryOdbmTypeDatastore.getNAME().addAll(Arrays.asList(datastoreName));
+			queryOdbmTypeDatastore.getSHOW().add(QueryOdbmTypeDatastore.ShowOptions.ALL);
+			
+			type2Command.setQueryOdbmTypeDatastore(queryOdbmTypeDatastore);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			
+			return propertiesToCollection(omResultSet);
+
+		} catch (OmCommandGenerationException e) {
+			throw new OmRuntimeException(e);
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(om.getOMConnection().getImsplex());
+			throw e;
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getImsOdbms("+datastoreName+")");
+			
+			this.setOmInteractionContext(omResultSet, methodKey);
+		}
+	}
+	/**
+	 * Command to display the status and activity of IMS Connect. This service
+	 * replicates the OM Type 2 command " CMD(UPDATE ODBM START(CONNECTION) DATASTORE(datastoreName)"
+	 * @return
+	 * @throws OmException
+	 * @throws OmConnectionException 
+	 * @throws OmDatastoreException 
+	 */
+	@Override
+	public Collection<Odbm> startOdbmConnection(String[] datastoreName) throws OmException, OmConnectionException, OmDatastoreException{
+
+		if(logger.isDebugEnabled()) logger.debug(">> startOdbmConnection("+datastoreName+")");
+		
+		//Note the method key to be used for associating the service
+		String methodKey = "startOdbmConnection";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try{
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.resourceVersion.get("latestResourceVersion");
+			
+			String cmd ="CMD(UPDATE ODBM START(CONNECTION) DATASTORE(";
+
+			int nDsName = datastoreName.length;
+			int counter =0;
+
+			while(counter < nDsName){       
+				cmd = cmd+datastoreName[counter];
+				counter = counter +1;
+				
+				if(counter == nDsName){
+					cmd = cmd + "))";
+				}else{
+					cmd = cmd +",";
+				}
+			}
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			return propertiesToCollection(omResultSet);
+			
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< startOdbmConnection("+datastoreName+")");
+
+			this.setOmInteractionContext(omResultSet, methodKey);
+		}
+	}
+	/**
+	 * Command to display the status and activity of IMS Connect. This service
+	 * replicates the OM Type 2 command " CMD(UPDATE ODBM STOP(CONNECTION) DATASTORE(datastoreName)"
+	 * @return
+	 * @throws OmException
+	 * @throws OmConnectionException 
+	 * @throws OmDatastoreException 
+	 */
+	@Override
+	public Collection<Odbm> stopOdbmConnection(String[] datastoreName) throws OmException, OmConnectionException, OmDatastoreException{
+
+		if(logger.isDebugEnabled()) logger.debug(">> stopOdbmConnection("+datastoreName+")");
+		
+		//Note the method key to be used for associating the service
+		String methodKey = "stopOdbmConnection";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try{
+			
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.resourceVersion.get("latestResourceVersion");
+			
+			String cmd ="CMD(UPDATE ODBM STOP(CONNECTION) DATASTORE(";
+
+			int nDsName = datastoreName.length;
+			int counter =0;
+
+			while(counter < nDsName){       
+				cmd = cmd+datastoreName[counter];
+				counter = counter +1;
+			
+				if(counter == nDsName){
+					cmd = cmd + "))";
+				}else{
+					cmd = cmd +",";
+				}
+			}
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			return propertiesToCollection(omResultSet);
+			
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< stopOdbmConnection("+datastoreName+")");
+			
+			this.setOmInteractionContext(omResultSet, methodKey);
+		}
+	}
+	
+    private Collection<Odbm> propertiesToCollection(OmResultSet omResultSet) {
+        Collection<Odbm> tempList = new ArrayList<Odbm>();
+
+            Properties[] properties = omResultSet.getResponseProperties();
+
+            for (Properties p : properties) {
+            	Odbm odbm = new Odbm();
+            	odbm.setMap((Map)p);
+            	odbm.getMap().put(ImsBaseDastoreConstants.SYSPLEX_ID, omResultSet.getEnvironment());
+            	odbm.getMap().put(ImsBaseDastoreConstants.IMSPLX, omResultSet.getImsplex());
+                tempList.add(odbm);
+            }
+
+        return tempList;
+    }
+
+}

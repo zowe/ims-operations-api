@@ -1,0 +1,217 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.db.query;
+
+import java.util.Arrays;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+import com.ibm.ims.ea.om.db.Database.STATUS;
+
+/**
+ * <pre>
+ * Class Builds DB type 2 commands
+ * 
+ * Example Usage
+ * public static void main(String[] args) {
+		DbCommandBuilder dbCommandBuilder = new DbCommandBuilder();
+		CMD(QUERY DB NAME(*) SHOW(ALL))
+		System.out.println(dbCommandBuilder.commandShowAll());
+		CMD(QUERY DB NAME(DB_1,DB_2) SHOW(PGM))
+		System.out.println(dbCommandBuilder.commandShowPgm(new String[]{"DB_1","DB_2"}));
+	}
+ *
+ *	</pre>
+ */
+public class DbQueryCommandBuilder extends Type2CommandBuilder implements DbQueryCommand{
+
+	private static String commandPrefix = "QUERY DB";	
+
+
+	@Override
+	public void setName(String[] values) throws IllegalArgumentException{
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("NAME(");
+
+		for (String name : values) {
+			int name_length = name.trim().length();
+
+			if (name_length == 0 || name_length > 8) {
+				throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(Name = " + name + ", length = " + name_length }));
+			}
+
+			temp.append(name);
+
+			if (length > 1 && count != length) {
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+
+	}
+
+	
+	@Override
+	public void setShow(SHOW_1[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("SHOW(");
+
+		for (SHOW_1 show: values) {
+			temp.append(show);
+
+			if(count > 1 && count != length){
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+
+	
+	@Override
+	public void setShow(SHOW_2[] values) throws IllegalArgumentException{
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("SHOW(");
+
+		//Only one of the SHOW_1 enum types are allowed in the type2 command
+		if (length > 1) {
+			throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(SHOW_1 Values = " + Arrays.toString(values) + ", length = " + length }));
+		}
+
+		for (SHOW_2 show: values) {
+			temp.append(show);
+
+			if(count > 1 && count != length){
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+
+	
+	@Override
+	public void setStatus(STATUS[] values) {
+		int length = values.length;
+		int count = 0;
+		StringBuffer temp = new StringBuffer("STATUS(");
+		for (STATUS status: values) {
+			temp.append(status);
+			count++;
+			if(count > 0 && count != length){
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+
+	
+	@Override
+	public void setType(TYPE[] values) {
+		int length = values.length;
+		int count = 0;
+		StringBuffer temp = new StringBuffer("TYPE(");
+
+		for (TYPE type: values) {
+			temp.append(type);
+
+			if(count > 1 && count != length){
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+
+	/**
+	 * Method creates and returns Syntax for a command 
+	 * <code> "CMD(QUERY DB NAME(*) SHOW(ALL))" </code>
+	 * to show all IMS Databases with all SHOW options enabled.
+	 * @return String representation for the QUERY DB command with SHOW set to ALL
+	 */
+	public String commandShowAll() {
+		setName(new String[]{"*"});
+		setShow(new SHOW_1[]{DbQueryCommand.SHOW_1.ALL});
+		return getCommand();
+	}
+
+	/**
+	 * Method creates and returns Syntax for a command 
+	 * <code> "CMD(QUERY DB NAME(names) SHOW(ALL))" </code>
+	 * to show the IMS Databases with all SHOW options enabled.
+	 * @param names Databases specified
+	 * @return String representation for the QUERY DB command with SHOW set to ALL
+	 */
+	public String commandShowAll(String[] names) {
+		setName(names);
+		setShow(new SHOW_1[]{DbQueryCommand.SHOW_1.ALL});
+		return getCommand();
+	}
+
+	/**
+	 * Method creates and returns syntax for command
+	 * <code>CMD(QUERY DB NAME(*) STATUS(NOTOPEN) SHOW(STATUS))</code> 
+	 * to show the specified database {@link STATUS}
+	 * @param status {@link STATUS}
+	 * @return String representation for QUEURY DB command to show database status
+	 */
+	public String commandShowStatus(STATUS[] status) {
+		setName(new String[]{"*"});
+		setStatus(status);
+		setShow(new SHOW_1[]{DbQueryCommand.SHOW_1.STATUS});
+		return getCommand();
+	}
+
+	
+	@Override
+	public void setRoute(String[] imsName) {
+		int length = imsName.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer(") ROUTE(");
+
+		for (String name: imsName) {
+			temp.append(name);
+
+			if(length > 1 && count !=length ){           
+				temp.append(COMMA);   
+			}
+			count++;
+		}
+        commandArgs.add(temp.toString());
+	}
+
+
+	/**
+	 * Returns this command's command prefix, which in this case is
+	 * "QUERY DB"
+	 */
+	@Override
+	public String getCommandPrefix() {
+		return commandPrefix;
+	}
+
+	/**
+	 * Returns this command's type, which in this case is null
+	 * (nothing)
+	 */
+	@Override
+	public String getCommandSubType() {
+		return null;
+	}
+}

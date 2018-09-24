@@ -1,0 +1,270 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+
+package com.ibm.ims.ea.om.tran.update;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+import com.ibm.ims.ea.om.tran.update.syntax.CLASS;
+import com.ibm.ims.ea.om.tran.update.syntax.OPTION;
+import com.ibm.ims.ea.om.tran.update.syntax.SCOPE;
+import com.ibm.ims.ea.om.tran.update.syntax.SET;
+import com.ibm.ims.ea.om.tran.update.syntax.START._START;
+import com.ibm.ims.ea.om.tran.update.syntax.STOP._STOP;
+
+/**
+ * <pre>
+ * Class implements the TransactionCommand interface to provide a mechanism to build and retrieve TYPE-2 IMSPLEX commands. 
+ * As well as the flexibility to build a command, pre-built commands are available through the members such
+ * as {@link TranUpdateCommandBuilder#commandStartTran(String[])}, {@link TranUpdateCommandBuilder#commandStopTran(String[])}
+ * 
+ * To use the build command function provided:
+ * <code>
+ * Create a instance of the command builder
+ * TransactionCommandBuilder transactionCommandBuilder = new TransactionCommandBuilder();
+ * 
+ * //Instruct the command builder to create a custom command or you can use one of the predefined ones.
+ * String cmd = transactionCommandBuilder.commandStartTran(transactions);
+ * </code>
+ * 
+ * Example Usage:
+ *  public static void main(String args[]) {
+		 TransactionCommandBuilder trans = new TransactionCommandBuilder();
+		 trans.commandStartTran(new String[]{"TEST"}, new _START[]{_START.Q});
+		 trans.setRoute(new String[] {"TEST123"});
+		 System.out.println(trans.getCommand());
+	}
+ * </pre>
+ *
+ */
+public class TranUpdateCommandBuilder extends Type2CommandBuilder implements TranUpdateCommand {
+	
+	private static String commandPrefix = "UPDATE TRAN";
+	
+	@Override
+	public void setName(String[] values) throws IllegalArgumentException {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("NAME(");
+
+		for (String name : values) {
+			int name_length = name.trim().length();
+
+			if (name_length == 0 || name_length > 8) {
+				throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(Name = " + name + ", length = " + name_length }));
+			}
+
+			temp.append(name);
+
+			if (length > 1 && count != length) {
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+		commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects transactions associated with specified class
+	 */
+	@Override
+	public void setClass(CLASS[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("CLASS(");
+        for (CLASS status: values) {
+            temp.append(status);
+            
+             if(length > 1 && count !=length ){
+            	count ++;
+            	temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Set START values
+	 */
+	@Override
+	public void setStart(_START[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("START(");
+        for (_START status: values) {
+        	if(status != null) {
+        		temp.append(status);
+
+        		if(length > 1 && count !=length ){
+        			count ++;
+        			temp.append(COMMA);
+        		}
+        	}
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Set STOP values
+	 */
+	@Override
+	public void setStop(_STOP[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("STOP(");
+        for (_STOP status: values) {
+        	if (status != null) {
+	            temp.append(status);
+	            
+	             if(length > 1 && count !=length ){
+	            	count ++;
+	            	temp.append(COMMA);
+	            }
+        	}
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+		
+	}
+	
+	/**
+	 * Set SET values
+	 */
+	@Override
+	public void setSet(SET[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("SET(");
+        for (SET status: values) {
+            temp.append(status);
+            
+            if(length > 1 && count !=length ){
+            	count ++;
+            	temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Set SCOPE values
+	 */
+	@Override
+	public void setScope(SCOPE[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("SCOPE(");
+        for (SCOPE status: values) {
+            temp.append(status);
+            
+             if(length > 1 && count !=length ){
+            	count ++;
+            	temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	 
+	/**
+	 * Set OPTION values
+	 */
+	@Override
+	public void setOption(OPTION[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("OPTION(");
+        for (OPTION status: values) {
+            temp.append(status);
+            
+             if(length > 1 && count !=length ){
+            	count ++;
+            	temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	 
+	/**
+	 * Method creates and returns Syntax for a command 
+	 * <code> UPDATE TRAN NAME(name) START(Q,SCHD,SUSPEND)  </code>
+	 * to start the transaction(s) defined in the parameter String[] trans
+	 * @param String[] trans , transactions to start
+	 * @return String representation to start a transaction
+	 */
+	 public String commandStartTran(String[] trans, _START[] values) {
+		 	setName(trans);
+			setStart(values); //new _START[]{_START.Q,_START.SCHD,_START.SUSPEND});
+			return getCommand();
+	}
+
+	/**
+	 * Method creates and returns Syntax for a command 
+	 * <code> UPDATE TRAN NAME(name) STOP(Q,SCHD)   </code>
+	 * to stop the transaction(s) defined in the parameter String[] trans
+	 * @param String[] trans , transactions to stop
+	 * @return String representation to stop a transaction
+	 */
+	 public String commandStopTran(String[] trans, _STOP[] values){
+		 setName(trans);
+		 setStop(values); 
+		 return getCommand();
+	 } 
+	 
+	 /**
+	  * Sets route (IMSplex member)
+	  * NOTE: Route must be set last, after other keywords have been set
+	  */
+	 @Override
+	 public void setRoute(String[] imsName) {
+		 int length = imsName.length;
+		 int count = 1;
+		 StringBuffer temp = new StringBuffer(") ROUTE(");
+
+		 for (String name: imsName) {
+			 temp.append(name);
+
+			 if(length > 1 && count !=length ){           
+				 temp.append(COMMA);   
+			 }
+			 count++;
+		 }
+		 commandArgs.add(temp.toString());
+	 }
+
+
+	 /**
+	  * Returns command prefix for this TYPE2 command
+	  * Command prefix for this command is "UPDATE TRAN"
+	  */
+	 @Override
+	 public String getCommandPrefix() {
+		 return commandPrefix;
+	 }
+
+	 /**
+	  * Unavailable for this TYPE2 command
+	  */
+	 @Override @Deprecated
+	 public String getCommandSubType() {
+		 return null;
+	 }
+	 
+}
+
+
+

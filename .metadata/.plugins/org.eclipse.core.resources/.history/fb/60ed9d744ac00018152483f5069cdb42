@@ -1,0 +1,90 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+
+package com.ibm.ims.ea.om.tran.update;
+
+import com.ibm.ims.ea.om.tran.update.syntax.CLASS;
+import com.ibm.ims.ea.om.tran.update.syntax.OPTION;
+import com.ibm.ims.ea.om.tran.update.syntax.SCOPE;
+import com.ibm.ims.ea.om.tran.update.syntax.SET;
+import com.ibm.ims.ea.om.tran.update.syntax.OPTION._OPTION;
+import com.ibm.ims.ea.om.tran.update.syntax.SCOPE._SCOPE;
+import com.ibm.ims.ea.om.tran.update.syntax.START._START;
+import com.ibm.ims.ea.om.tran.update.syntax.STOP._STOP;
+
+public interface TranUpdateCommand {
+	
+	/**
+	 * Specifies the 1-8 character name of the transaction. Wildcards can be specified
+	 * for the tranname. The tranname is a repeatable parameter.
+	 * @param name String
+	 */
+	public void setName(String[] name);
+	
+	/**
+	 * Method will return the type-2 to command as a string. The string command returned will vary
+	 * depending on the arguments and options selected. 
+	 * @see {@link TranUpdateCommand}
+	 * @return String
+	 * @throws Exception
+	 */
+    public String getCommand();
+    
+    /**
+     * Selects the transactions associated with the specified class or classes to be updated.
+     * @param values
+     */
+    public void setClass(CLASS[] values);
+    
+    /**
+     * Specifies the additional functions to be performed. Following is a list of additional functions:
+     * {@link _OPTION#AFFIN}, {@link _OPTION#ALLRSP}
+     * @param values
+     */
+    public void setOption(OPTION[] values);
+    
+    /**
+     * Specifies where IMS should apply the change. The default is ALL.
+     * {@link _SCOPE#ALL},{@link _SCOPE#ACTIVE}
+     * @param values
+     */
+    public void setScope(SCOPE[] values);
+    
+    /**
+     * Specifies the attributes to be started.
+     * {@link _START}
+     * @param values
+     */
+    public void setStart(_START[] values);
+
+    /**
+     * Specifies the attributes to be stopped.
+     * {@link _STOP}
+     * @param values
+     */
+    public void setStop(_STOP[] values);
+    
+    /**
+     * Specifies the attribute values to be changed.
+     * {@link SET}
+     * @param values
+     */
+    public void setSet(SET[] values);
+    
+    /**
+     * IMSPlex IMS name
+     * @param imsName
+     */
+	public void setRoute(String[] imsName);
+    
+    
+	
+}

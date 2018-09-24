@@ -1,0 +1,75 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013, 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services.enterprise;
+
+import java.util.Collection;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.datastore.ImsOmDatastore;
+import com.ibm.ims.ea.om.datastore.ImsRoutingCodeTable;
+import com.ibm.ims.ea.om.rtc.RoutingCode;
+
+public class RoutingCodeServices {
+    
+    private ImsRoutingCodeTable imsRoutingCodeTable = null; 
+
+    protected RoutingCodeServices() throws OmDatastoreException, DatastoreException {
+        imsRoutingCodeTable = ImsOmDatastore.getInstance().getImsRoutingCodeStore();
+    }
+
+    public Collection<RoutingCode> getRoutingCodes(int environmentId) throws OmDatastoreException {
+        return imsRoutingCodeTable.getRoutingCodes(environmentId);
+    }
+
+    public Collection<RoutingCode> getRoutingCodes(int environmentId, String imsplexName) throws OmDatastoreException {
+        return imsRoutingCodeTable.getRoutingCodes(environmentId, imsplexName);
+    }
+
+    public Collection<RoutingCode> getRoutingCodes(int environmentId, String imsplexName, String[] imsSystemName) throws OmDatastoreException {
+        return imsRoutingCodeTable.getRoutingCodes(environmentId, imsplexName, imsSystemName);
+    }
+    
+    /**
+     * Search for routing codes by name in the repository/datastore within a environment
+     * @param environmentId
+     * @param databaseNames
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<RoutingCode> getRoutingCodesByName(int environmentId,String[] routingcodeNames) throws OmDatastoreException{
+        return imsRoutingCodeTable.getRoutingCodesByName(environmentId,routingcodeNames);
+    }
+    
+    /**
+     * Search for routing codes by name in the repository/datastore within an environment and imsplex.
+     * @param environmentId
+     * @param imsplexId
+     * @param databaseNames
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<RoutingCode> getRoutingCodesByName(int environmentId, String imsplexName,String[] routingcodeNames) throws OmDatastoreException{
+        return imsRoutingCodeTable.getRoutingCodesByName(environmentId,imsplexName,routingcodeNames);
+    }
+    
+    /**
+     * Search for routing codes by name in the repository/datastore within an environment, imsplex and system (IMS)
+     * @param systemId
+     * @param environmentId
+     * @param imsplexId
+     * @param databaseNames
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<RoutingCode> getRoutingCodesByName(int environmentId, String imsplexName, String[] imsSystemName, String[] routingcodeNames) throws OmDatastoreException{
+        return imsRoutingCodeTable.getRoutingCodesByName(environmentId,imsplexName,imsSystemName,routingcodeNames);
+    }
+}

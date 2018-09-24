@@ -1,0 +1,97 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.structure;
+
+import java.util.Map;
+
+import com.ibm.ims.ea.om.common.ImsResource;
+
+public class Struct extends ImsResource{
+	
+	/**
+	 * Constructor helpful in creating an empty bean particularly in areas reflection is used. 
+	 * Should be used with ({@link Struct#setMap(Map)}
+	 */
+	public Struct() {
+		resourceType = ResourceType.STRUCT;
+	}
+
+	/**
+	 * Method creates an instance of the bean given a Map representing the resource from an OM interaction
+	 * @param omResourceResponse Map representation for IMS resource such as 
+	 * a transaction or database query.
+	 * @param properties
+	 */
+	public Struct(Map<String, String> properties) {
+		super(properties);
+		resourceType = ResourceType.STRUCT;
+	}
+
+	public String getProperty(StructResponseAttribute key){   //This will replace getInstanceField(....)
+		return this.properties.get(key.toString());
+	}
+
+	/**
+	 * IMS Program Output fields that are returned for this resource type. 
+	 * Depending on the command some fields when queried will return null.
+	 */
+	public enum StructResponseAttribute {
+		STRUCTURE_NAME, TYPE, STATUS, MBR;
+
+		public String value() {
+			return name();
+		}
+
+		public static StructResponseAttribute fromValue(String v) {
+			return valueOf(v);
+		}
+
+		@Override
+		public String toString(){
+			return name();
+		}
+	}
+
+	@Override
+	public void setMap(Map<String, String> resourceMap) {
+		this.properties = resourceMap;
+		this.resourceType = ResourceType.STRUCT;
+
+	}
+	
+	@Override
+	public void setAttribute(String key, String value) {
+		this.properties.put(key, value);
+	}
+
+    public static enum STATUS {
+        AVAILABLE("AVAILABLE"), 
+        CONNECTED("CONNECTED"), 
+        DISCONNECTED("DISCONNECTED"), 
+        INOVERFLOW("IN-OVERFLOW"), 
+        REBLDINPROG("REBLD-INPROG"), 
+        SHUTDOWNSTRCHKPT("SHUTDOWN-STRCHKPT"),
+        STRCHKPTINPROG("STRCHKPT-INPROG"), 
+        UNAVAILABLE("UNAVAILABLE");
+
+        private String value = "";
+
+        private STATUS(String val) {
+            this.value = val;
+        }
+
+        private STATUS() {
+        }
+
+        @Override
+        public String toString() {
+            return this.value;
+        }
+    }
+}

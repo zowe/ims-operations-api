@@ -1,0 +1,850 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.base.version.Version;
+import com.ibm.ims.ea.om.ims.Ims;
+import com.ibm.ims.ea.om.ims.Ims.ImsResponseAttribute;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.cmd.exceptions.OmCommandGenerationException;
+import com.ibm.ims.ea.om.cmd.utilities.Type2CommandSerializable;
+import com.ibm.ims.ea.om.cmd.v14.type2.Type2Command;
+import com.ibm.ims.ea.om.cmd.v14.query.imsplex.QueryImsPlex;
+import com.ibm.ims.ea.om.cmd.v14.query.rtc.QueryRtc;
+import com.ibm.ims.ea.om.common.exception.OmRuntimeException;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.message.OmInteractionContext;
+import com.ibm.ims.ea.om.common.result.OmResultSet;
+import com.ibm.ims.ea.om.common.service.RoutingCodeService;
+import com.ibm.ims.ea.om.datastore.ImsBaseDastoreConstants;
+import com.ibm.ims.ea.om.datastore.ImsOmDatastore;
+import com.ibm.ims.ea.om.datastore.ImsRoutingCodeRepoTable;
+import com.ibm.ims.ea.om.datastore.ImsRoutingCodeTable;
+import com.ibm.ims.ea.om.imsplex.Imsplex;
+import com.ibm.ims.ea.om.imsplex.Imsplex.ImsplexResponseAttribute;
+import com.ibm.ims.ea.om.rtc.RoutingCode;
+import com.ibm.ims.ea.om.rtc.update.RtcUpdateCommandBuilder;
+import com.ibm.ims.ea.om.rtc.update.syntax.RTC_START._RTC_START;
+import com.ibm.ims.ea.om.rtc.update.syntax.RTC_STOP._RTC_STOP;
+import com.ibm.ims.ea.om.tran.Transaction;
+import com.ibm.ims.ea.om.tran.Transaction.TransactionResponseAttribute;
+
+/**
+ * <pre>
+ * Class provides methods to interact with OM for the IMS Routing Code Resource types. 
+ * Return types are generalized for all interactions as a Collection of {@link Rtc} objects. 
+ * 
+ * It should be noted that the Collection only manages the response for the particular 
+ * resource and that OM Messages including Reason Codes, Reason Text, etc are accessible 
+ * from the {@link Om} instance managing the interaction. 
+ * 
+ * See  <code>{@link Om#getOmMessageContexts()} </code> on how to access OM Messages.
+ * </pre>
+ * 
+ */
+public final class RoutingCodeServices extends ServicesHelper implements RoutingCodeService {
+	private static final Logger logger = LoggerFactory.getLogger(RoutingCodeServices.class);
+	
+	//Statically build a mem-cache of all the known discovered meta-data about this service resulting from discovery
+    static{
+    	//Try to get an instance of the com.ibm.im.ac.datastore 
+		ImsOmDatastore imsOMDatastore;
+		try {
+				imsOMDatastore = ImsOmDatastore.getInstance();
+			
+				//Build the meta-data for routing code table
+				ImsRoutingCodeTable imsRoutingCodeTable = imsOMDatastore.getImsRoutingCodeStore();
+				
+				if(imsRoutingCodeTable != null){
+					imsRoutingCodeTable.autoConfigureResourceMetaData();
+				}
+				
+				//Build the meta-data for routing code REPO table
+				ImsRoutingCodeRepoTable imsRoutingCodeRepoTable = imsOMDatastore.getImsRoutingCodeRepoStore();
+				
+				if(imsRoutingCodeRepoTable != null){
+					imsRoutingCodeRepoTable.autoConfigureResourceMetaData();
+				}
+			
+		} catch (DatastoreException e) {
+			//This exception will only happen if dependency "com.ibm.im.ac.datastore" has not been
+			//loaded by OSGI. Moving this logic to Declarative serivces might be a good option. 
+		
+			if(logger.isDebugEnabled()){
+				logger.debug("Appears that the bundle for service com.ibm.im.ac.datastore.AbstractDatastore has not been loaded");
+			}
+		}
+    }
+    
+	//This must remain protected else the Om instance will not be able to aggregate all the Om Messages
+	protected RoutingCodeServices(Om om) {
+		super(om);
+		
+		try {
+			this.resourceVersion = om.getImsplexService().getResourceVersions(new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.IMS});
+		} catch (Exception e) {
+			version = Version.IMS_ZERO_RELEASE;
+		}
+	}
+
+	// ************************************************************************************************************
+	// * Get Routing Codes
+	// ************************************************************************************************************
+	@Override
+	public Collection<RoutingCode> getRoutingCodes() throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getRoutingCodes()");
+		
+		try{
+			return getRoutingCodes(new String[] {ImsCommandAttributes.ASTERISK});
+		}finally{
+			if (logger.isDebugEnabled()) logger.debug("<< getRoutingCodes()");
+		}
+	}
+
+	@Override
+	public Collection<RoutingCode> getRoutingCodes(String[] imsSystemName) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getRoutingCodes(" + Arrays.toString(imsSystemName) + ")");
+		
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+		//This variable will hold the query that is been execute live mode or equivalent type2command query the derby query that is executed in cache mode. 
+        //The value is fetched up to the GUI for showing a hover over the command button
+        //Since this is done as part of a bug fix, a complete dynamic implementation of the value for the variable is not done
+        // Currently its just hardcoded in the services level
+        String cmdExecuted = null;
+
+        
+		//Note the method key to be used for associating the service
+		String methodKey = "getRoutingCodes";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try {
+			imsSystemName = this.routeMemberFormater(imsSystemName);
+			
+			//Hardcoded value which needs to be enhanced to be dynamic eventually
+            cmdExecuted = new String("CMD(QUERY RTC NAME(*) SHOW(ALL)) ROUTE(" + Arrays.toString(imsSystemName) + ")");
+           
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.setVersion(this.resourceVersion , imsSystemName);
+			
+			/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+			if(!this.om.isInteractionModeLive()){
+				
+				//Create a connection to the transaction table (cache) datastore
+				ImsRoutingCodeTable imsRoutingCodeTable = ImsOmDatastore.getInstance().getImsRoutingCodeStore();
+				
+				//Size greater than 0 then transactions have been discovered
+				resourceCacheSize = imsRoutingCodeTable.getCountFromMemoryCache(this.sysplexId, this.imsplexName,imsSystemName);
+				
+				if( resourceCacheSize > 0){
+			        //Set the date the discovery was done
+					date = imsRoutingCodeTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+					
+			        /** Case: interaction mode is DEFAULT or CACHE**/	
+			        return imsRoutingCodeTable.getRoutingCodes(this.sysplexId,this.imsplexName,imsSystemName,this.om);
+				}
+			}
+			
+			/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+			Type2Command type2Command = new Type2Command(); 
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.RTC);
+			type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+			
+			QueryRtc queryRtc= new QueryRtc();
+			queryRtc.getNAME().add(ImsCommandAttributes.ASTERISK);
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.ALL);
+			
+			type2Command.setQueryRtc(queryRtc);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			
+			//Convert the omResultSet to a collection to be returned
+			return propertiesToCollection(omResultSet);
+			
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e){
+			throw convertDatatstoreException(e, this.sysplexId, this.imsplexName);
+		} catch (OmCommandGenerationException e){
+			throw new OmRuntimeException(e);
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getRoutingCodes(" + Arrays.toString(imsSystemName) + ")");
+			
+			this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey, cmdExecuted);
+		}
+	}
+
+	// ************************************************************************************************************
+    // * It initially find which all IMS members have repo enabled and then call for repo info for programs
+	// ************************************************************************************************************ 
+
+	public Collection<RoutingCode> getRoutingCodesWithRepoInfo()throws OmException, OmDatastoreException, OmConnectionException {
+	
+		
+		try{
+			//Getting collection from Ims Service on which has repo
+			Collection<Ims> membersWithRepo = om.getImsService().getRepoInfo(new String[]{"*"});
+			
+			if(!membersWithRepo.isEmpty()){
+				
+				//Getting an IMS member name from the collection
+				String routeMember = membersWithRepo.iterator().next().getProperty(ImsResponseAttribute.MBR);
+				
+				//Calling to get the program Repo info with the identified IMS Member
+				return getRoutingCodesWithRepoInfo(new String[]{routeMember});
+
+			}
+			return new ArrayList<RoutingCode>();
+		
+		
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getProgramsWithRepoInfo()");
+			
+		}
+
+
+	}
+	
+	// ************************************************************************************************************
+    // * Get Repo Info for routingCodes.
+	// * The imsName parameter will be the names of Ims for which repo is enabled.
+	// ************************************************************************************************************ 
+
+	@Override
+	public Collection<RoutingCode> getRoutingCodesWithRepoInfo(String[] imsSystemName) throws OmException, OmDatastoreException, OmConnectionException {
+
+		if(logger.isDebugEnabled()) logger.debug(">> getRoutingCodesWithRepoInfo("+Arrays.toString(imsSystemName)+")");
+		
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+		//This variable will hold the query that is been execute live mode or equivalent type2command query the derby query that is executed in cache mode. 
+        //The value is fetched up to the GUI for showing a hover over the command button
+        //Since this is done as part of a bug fix, a complete dynamic implementation of the value for the variable is not done
+        // Currently its just hardcoded in the services level
+        String cmdExecuted = null;
+        
+		//Note the method key to be used for associating the service
+		String methodKey = "getRoutingCodesWithRepoInfo"; 
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+				
+		try {
+			imsSystemName = this.routeMemberFormater(imsSystemName);
+			
+			//Hardcoded value which needs to be enhanced to be dynamic eventually
+            cmdExecuted = new String("CMD(QUERY RTC NAME(*) SHOW(DEFN,GLOBAL,IMSID)) ROUTE(" + Arrays.toString(imsSystemName) + ")");
+            
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.setVersion(this.resourceVersion , imsSystemName);
+			
+			if(!this.om.isInteractionModeLive()){
+
+				//Create a connection to the routingCode table (cache) datastore
+				ImsRoutingCodeRepoTable imsRoutingCodeRepoTable = ImsOmDatastore.getInstance().getImsRoutingCodeRepoStore();
+
+				//Size greater than 0 then routingCodes have been discovered
+				resourceCacheSize = imsRoutingCodeRepoTable.getCountFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+				
+				if( resourceCacheSize > 0){
+					//Set the date the discovery was done
+					date = imsRoutingCodeRepoTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+			        
+			        /** Case: interaction mode is DEFAULT or CACHE**/
+					return imsRoutingCodeRepoTable.getRoutingCodes(sysplexId,imsplexName,imsSystemName,this.om);
+				}
+			}
+
+			/***************************************************************************************
+			 * Case: No discovery has been run, continue to operate without the cache (live mode)
+			 ***************************************************************************************/
+			
+			//Query rtcs for show all and status
+			Type2Command type2Command = new Type2Command(); 
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.RTC);
+			type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+			
+			QueryRtc queryRtc = new QueryRtc();
+			queryRtc.getNAME().add(ImsCommandAttributes.ASTERISK);
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.DEFN);
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.GLOBAL);
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.IMSID);
+
+			
+			type2Command.setQueryRtc(queryRtc);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			
+			return propertiesToCollection(omResultSet);
+
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e){
+			throw convertDatatstoreException(e, sysplexId, imsplexName);
+		} catch (OmCommandGenerationException e){
+			throw new OmRuntimeException(e);
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getRoutingCodesWithRepoInfo("+Arrays.toString(imsSystemName)+")");
+			
+			this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey, cmdExecuted);
+			// This is specifically for REPO implementation
+			// In repo implementation we never go live for Status, so the message Context is not set.
+			//So we are explicitly setting it
+			if(!this.om.isInteractionModeLive()){
+				if(omResultSet == null)
+					omResultSet = new OmResultSet();
+				this.om.addOmMessageContext(methodKey,omResultSet.getOmMessageContext());
+			}
+		}
+	
+	}
+	// ************************************************************************************************************
+    // * Get RoutingCode by Name for REPO info
+    // ************************************************************************************************************
+    @Override
+    public Collection<RoutingCode> getRoutingCodesByNameWithRepoInfo(String[] routingcodes) throws OmException, OmConnectionException, OmDatastoreException {
+        if (logger.isDebugEnabled())
+            logger.debug(">> getRoutingCodesByNameWithRepoInfo(" + Arrays.toString(routingcodes) + ")");
+
+        try {
+            //Getting collection from Ims Service on which has repo
+            Collection<Ims> membersWithRepo = om.getImsService().getRepoInfo(new String[] {"*"});
+
+            if (!membersWithRepo.isEmpty()) {
+
+                //Getting an IMS member name from the collection
+                String routeMember = membersWithRepo.iterator().next().getProperty(ImsResponseAttribute.MBR);
+
+                return getRoutingCodesByNameWithRepoInfo(routingcodes, new String[] {routeMember});
+            }
+            return new ArrayList<RoutingCode>();
+        } finally {
+            if (logger.isDebugEnabled())
+                logger.debug("<< getRoutingCodesByNameWithRepoInfo(" + Arrays.toString(routingcodes) + ")");
+        }
+    }
+
+    @Override
+    public Collection<RoutingCode> getRoutingCodesByNameWithRepoInfo(String[] routingcodes, String[] imsSystemName) throws OmException, OmConnectionException,
+            OmDatastoreException {
+        if (logger.isDebugEnabled())
+            logger.debug(">> getRoutingCodesByNameWithRepoInfo(" + Arrays.toString(routingcodes) + "," + Arrays.toString(imsSystemName) + ")");
+
+        int resourceCacheSize = 0;
+        Date date = null;
+        ArrayList<String> imsAttributes = null;
+
+        //Note the method key to be used for associating the service
+        String methodKey = "getRoutingCodesByNameWithRepoInfo";
+
+        //Local omresultSet otherwise we risk data corruption of the service is reused. 
+        OmResultSet omResultSet = null;
+
+        try {
+            imsSystemName = this.routeMemberFormater(imsSystemName);
+
+            //Set and configure the version using mapped resource version and the route name
+            this.version = this.setVersion(this.resourceVersion, imsSystemName);
+
+            /** Case: If it is not live then enter this block otherwise drop down to the live code **/
+            if (!this.om.isInteractionModeLive()) {
+
+              //Create a connection to the routingcode table (cache) datastore
+                ImsRoutingCodeRepoTable imsRoutingCodeRepoTable = ImsOmDatastore.getInstance().getImsRoutingCodeRepoStore();
+
+                //Size greater than 0 then routingcodes have been discovered
+                resourceCacheSize = imsRoutingCodeRepoTable.getCountFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+                
+                if( resourceCacheSize > 0){
+                    //Set the date the discovery was done
+                    date = imsRoutingCodeRepoTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+                    
+                    //Set the imsattributes that are in the memcache
+                    imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), "getRoutingCodesWithRepoInfo");
+                    
+                    /** Case: interaction mode is DEFAULT or CACHE **/
+                    return imsRoutingCodeRepoTable.getRoutingCodesByName(sysplexId, imsplexName, imsSystemName, routingcodes, this.om);
+                }
+            }
+            
+            
+         
+            /** Case: No discovery has been run, continue to operate without the cache (live mode) **/
+            //Query rtcs for show all and status
+            Type2Command type2Command = new Type2Command();
+            type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+            type2Command.setResource(Type2Command.ResourceOptions.RTC);
+            type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+
+            QueryRtc queryRtc = new QueryRtc();
+            queryRtc.getNAME().addAll(Arrays.asList(routingcodes));
+            queryRtc.getSHOW().add(QueryRtc.ShowOptions.DEFN);
+            queryRtc.getSHOW().add(QueryRtc.ShowOptions.GLOBAL);
+            queryRtc.getSHOW().add(QueryRtc.ShowOptions.IMSID);
+
+            type2Command.setQueryRtc(queryRtc);
+
+            Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+            String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+            Service service = new Service(this.om, this.version);
+            omResultSet = service.executeCommand(methodKey, cmd);
+
+            return propertiesToCollection(omResultSet);
+
+        } catch (OmDatastoreException e) {
+            e.setImsplexName(this.om.getOMConnection().getImsplex());
+            throw e;
+        } catch (DatastoreException e) {
+            throw convertDatatstoreException(e, sysplexId, imsplexName);
+        } catch (OmCommandGenerationException e) {
+            throw new OmRuntimeException(e);
+        } finally {
+            if (logger.isDebugEnabled())
+                logger.debug("<< getRoutingCodesByNameWithRepoInfo(" + Arrays.toString(routingcodes) + "," + Arrays.toString(imsSystemName) + ")");
+            this.setOmInteractionContext(omResultSet, resourceCacheSize, date, imsAttributes, methodKey);
+
+            // This is specifically for REPO implementation
+            // In repo implementation we never go live for Status, so the message Context is not set.
+            //So we are explicitly setting it
+            if (!this.om.isInteractionModeLive()) {
+                if (omResultSet == null)
+                    omResultSet = new OmResultSet();
+                this.om.addOmMessageContext(methodKey, omResultSet.getOmMessageContext());
+            }
+        }
+    }
+	// ************************************************************************************************************
+	// * Get Routing Codes by Name
+	// ************************************************************************************************************
+	@Override
+	public Collection<RoutingCode> getRoutingCodesByName(String[] routingcodes) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getRoutingCodesByName(" + Arrays.toString(routingcodes) + ")");
+		try{
+			return getRoutingCodesByName(routingcodes, new String[] {ImsCommandAttributes.ASTERISK});
+		}finally{
+			if (logger.isDebugEnabled()) logger.debug("<< getRoutingCodesByName(" + Arrays.toString(routingcodes) + ")");
+		}
+	}
+
+	@Override
+	public Collection<RoutingCode> getRoutingCodesByName(String[] routingcodes, String[] imsSystemName) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getRoutingCodesByName(" + Arrays.toString(routingcodes) + "," + Arrays.toString(imsSystemName) + ")");
+		
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+		//Note the method key to be used for associating the service
+		String methodKey = "getRoutingCodesByName";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try {
+			imsSystemName = this.routeMemberFormater(imsSystemName);
+			
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.setVersion(this.resourceVersion , imsSystemName);
+			
+			/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+			if(!this.om.isInteractionModeLive()){
+				
+				//Create a connection to the transaction table (cache) datastore
+				ImsRoutingCodeTable imsRoutingCodeTable = ImsOmDatastore.getInstance().getImsRoutingCodeStore();
+				
+				//Size greater than 0 then transactions have been discovered
+				resourceCacheSize = imsRoutingCodeTable.getCountFromMemoryCache(this.sysplexId, this.imsplexName,imsSystemName);
+				
+				if( resourceCacheSize > 0){
+			        //Set the date the discovery was done
+					date = imsRoutingCodeTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemName);
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+					
+			        /** Case: interaction mode is DEFAULT or CACHE**/
+			        return imsRoutingCodeTable.getRoutingCodesByName(this.sysplexId, this.imsplexName, imsSystemName, routingcodes, this.om);
+				}
+			}
+			
+			/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+			Type2Command type2Command = new Type2Command();
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+			type2Command.setResource(Type2Command.ResourceOptions.RTC);
+			type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+			
+			QueryRtc queryRtc = new QueryRtc();
+			queryRtc.getNAME().addAll(Arrays.asList(routingcodes));
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.ALL);
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.LOCAL);
+			
+			type2Command.setQueryRtc(queryRtc);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+			
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+
+			//Convert the omResultSet to a collection to be returned
+			return propertiesToCollection(omResultSet);
+			
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e){
+			throw convertDatatstoreException(e, this.sysplexId, this.imsplexName);
+		} catch (OmCommandGenerationException e){
+			throw new OmRuntimeException(e);
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getRoutingCodesByName(" + Arrays.toString(routingcodes) + "," + Arrays.toString(imsSystemName) + ")");
+			
+			this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey);
+		}
+	}
+
+	// ************************************************************************************************************
+	// * Get Routing codes by status
+	// ************************************************************************************************************
+	
+	@Override
+	public Collection<RoutingCode> getRoutingCodesByStatus(QueryRtc.StatusOptions[] queryRtcStatuses) throws OmException, OmConnectionException, OmDatastoreException {
+		if(logger.isDebugEnabled()) logger.debug(">> getTransactionsByStatus("+Arrays.toString(queryRtcStatuses)+")");
+		
+		try{
+			return getRoutingCodesByStatus(queryRtcStatuses,new String[]{ImsCommandAttributes.ASTERISK});
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getTransactionsByStatus("+Arrays.toString(queryRtcStatuses)+")");
+		}
+	}
+	
+	@Override
+	public Collection<RoutingCode> getRoutingCodesByStatus(QueryRtc.StatusOptions[] queryRtcStatuses, String[] imsSystemName) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getRoutingCodesByStatus(" + Arrays.toString(queryRtcStatuses) + ", " + Arrays.toString(imsSystemName) + ")");
+		
+		//Note the method key to be used for associating the service
+		String methodKey = "getRoutingCodesByStatus";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		try{
+			
+			imsSystemName = this.routeMemberFormater(imsSystemName);
+			
+			//Set and configure the version using mapped resource version and the route name
+			this.version = this.setVersion(this.resourceVersion , imsSystemName);
+			
+			Type2Command type2Command = new Type2Command(); 
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.RTC);
+			type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+			
+			QueryRtc queryRtc = new QueryRtc();
+			queryRtc.getSTATUS().addAll(Arrays.asList(queryRtcStatuses));
+			queryRtc.getSHOW().add(QueryRtc.ShowOptions.STATUS);
+			type2Command.setQueryRtc(queryRtc);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+
+			return propertiesToCollection(omResultSet);
+			
+		} catch (OmCommandGenerationException e){
+			throw new OmRuntimeException(e);
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getRoutingCodesByStatus("+ Arrays.toString(queryRtcStatuses)+ ", " + Arrays.toString(imsSystemName)+")");
+		
+			this.setOmInteractionContext(omResultSet, methodKey);
+		}
+	}
+	
+	// ************************************************************************************************************
+	// * Get Routing codes for a given transaction - TODO This still needs to be put into the interface and tested
+	// ************************************************************************************************************
+	@Override
+	public RoutingCode getRoutingcodeForTransaction(Transaction transaction, String[] imsSystemName) throws OmDatastoreException, OmException, OmConnectionException{
+		if(logger.isDebugEnabled()) logger.debug(">> getRoutingcodeForTransaction("+transaction + ","+Arrays.toString(imsSystemName)+")");
+
+       try{
+    	   RoutingCode routingCode = new RoutingCode();
+    	   
+    	   imsSystemName = this.routeMemberFormater(imsSystemName);
+    	   
+    	   //if (transaction.getProperty(TransactionResponseAttribute.FP).equals(ResourceStatus.Tran.TranStatusId.EXCLUSIVE.toString())) { <-- this causes a circular dependency
+	    	if (transaction.getProperty(TransactionResponseAttribute.FP).equals("E")) {
+	    		String[] tranName = {transaction.getProperty(TransactionResponseAttribute.TRAN)};
+	    		routingCode = this.getRoutingCodesByName(tranName, imsSystemName).iterator().next();
+	    	}
+	    	
+	    	return routingCode;
+	    	
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getRoutingcodeForTransaction("+transaction + ","+Arrays.toString(imsSystemName)+")");
+	    }
+	}
+	// ************************************************************************************************************
+	// * Discovery methods
+	// ************************************************************************************************************
+	
+	@Override
+	public int discoverRoutingcodes() throws OmDatastoreException, OmException, OmConnectionException {
+		if(logger.isDebugEnabled()) logger.debug(">> discoverRoutingcodes()");
+		
+		try{
+			Collection<Imsplex> plexResources = om.getImsplexService().getImsResources();
+			int insertionSize = 0;
+			
+			for (Imsplex plexMemberResource : plexResources) {
+	        	String imsMbrName = plexMemberResource.getProperty(ImsplexResponseAttribute.IMSMBR);
+	        	insertionSize += this.discoverRoutingcodes(imsMbrName);
+			}
+			
+			return insertionSize;
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< discoverRoutingcodes()");
+		}
+	}
+	
+	@Override
+	public int discoverRoutingcodes(String imsSystemName) throws OmDatastoreException, OmException, OmConnectionException {
+		if(logger.isDebugEnabled()) logger.debug(">> discoverRoutingcodes("+imsSystemName+")");
+		
+		int insertionSize = 0;
+		
+		try {
+			this.isDiscovering = true;
+			this.om.setInteractionMode(Om.InteractionMode.LIVE);
+			Collection<RoutingCode> routingCodes = this.getRoutingCodes(new String[]{imsSystemName});
+			this.om.setInteractionMode(Om.InteractionMode.DEFAULT);
+
+			ImsRoutingCodeTable imsRoutingCodeTable = ImsOmDatastore.getInstance().getImsRoutingCodeStore();
+			imsRoutingCodeTable.deleteTable(sysplexId,imsplexName,imsSystemName);
+			insertionSize = imsRoutingCodeTable.addImsRoutingCode(routingCodes, sysplexId, imsplexName);
+			imsRoutingCodeTable.autoConfigureResourceMetaData(this.sysplexId,this.imsplexName, imsSystemName);
+			
+			//Since the discovery was run in live mode we need to add to the omInteractionContext the size and date
+			String [] imsSystemNameArray = new String[]{imsSystemName};
+			int resourceCacheSize = imsRoutingCodeTable.getCountFromMemoryCache(sysplexId, imsplexName,imsSystemNameArray);
+			Date date = imsRoutingCodeTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemNameArray);
+				
+			OmInteractionContext omInteractionContext = this.om.getOmInteractionContexts().get("getRoutingCodes");
+			omInteractionContext.setResourceLastUpdated(date);
+			omInteractionContext.setResourceCacheSize(resourceCacheSize);
+			
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e) {
+			throw convertDatatstoreException(e, sysplexId, imsplexName);
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< discoverRoutingcodes("+imsSystemName+")");
+		}
+		
+		return insertionSize;
+	}
+	
+	@Override
+	public int discoverRoutingCodesWithRepoInfo() throws OmDatastoreException, OmException, OmConnectionException {
+		if(logger.isDebugEnabled()) logger.debug(">> discoverRoutingCodesWithRepoInfo()");
+		
+		try{
+			int insertionSize = 0;
+			//Getting collection from Ims Service on which has repo
+			Collection<Ims> membersWithRepo = om.getImsService().getRepoInfo(new String[]{"*"});
+			
+			if(!membersWithRepo.isEmpty()){
+				
+				//Getting an IMS member name from the collection
+				String routeMember = membersWithRepo.iterator().next().getProperty(ImsResponseAttribute.MBR);
+				
+				//Inserting Condition if the IMS resource has Repo= true.Only then try to discover it
+				insertionSize += this.discoverRoutingCodesWithRepoInfo(routeMember);
+
+			}
+			return insertionSize;
+			
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< discoverRoutingCodesWithRepoInfo()");
+		}
+	}
+
+	@Override
+	public int discoverRoutingCodesWithRepoInfo(String imsSystemName) throws OmDatastoreException, OmException, OmConnectionException {
+		if(logger.isDebugEnabled()) logger.debug(">> discoverRoutingCodesWithRepoInfo("+imsSystemName+")");
+		int insertionSize 	= 0;
+
+		try {
+			this.isDiscovering = true;
+			this.om.setInteractionMode(Om.InteractionMode.LIVE);
+			Collection<RoutingCode> routingCodes = this.getRoutingCodesWithRepoInfo(new String[]{imsSystemName});
+			this.om.setInteractionMode(Om.InteractionMode.DEFAULT);
+
+			ImsRoutingCodeRepoTable imsRoutingCodeRepoTable = ImsOmDatastore.getInstance().getImsRoutingCodeRepoStore();
+			imsRoutingCodeRepoTable.deleteTable(this.sysplexId,this.imsplexName,imsSystemName);
+			insertionSize = imsRoutingCodeRepoTable.addImsRoutingCode(routingCodes, this.sysplexId, this.imsplexName);
+			imsRoutingCodeRepoTable.autoConfigureResourceMetaData(this.sysplexId, this.imsplexName, imsSystemName);
+			
+			//Since the discovery was run in live mode we need to add to the omInteractionContext the size and date
+			String [] imsSystemNameArray = new String[]{imsSystemName};
+			int resourceCacheSize = imsRoutingCodeRepoTable.getCountFromMemoryCache(sysplexId, imsplexName,imsSystemNameArray);
+			Date date = imsRoutingCodeRepoTable.getLastestDateFromMemoryCache(sysplexId, imsplexName,imsSystemNameArray);
+				
+			OmInteractionContext omInteractionContext = this.om.getOmInteractionContexts().get("getRoutingCodesWithRepoInfo");
+			omInteractionContext.setResourceLastUpdated(date);
+			omInteractionContext.setResourceCacheSize(resourceCacheSize);
+			
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e) {
+			throw convertDatatstoreException(e, sysplexId,  imsplexName);
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< discoverRoutingCodesWithRepoInfo("+imsSystemName+")");
+		}
+
+		return insertionSize;
+	}
+	
+	// ************************************************************************************************************
+	// * Start Routing Codes
+	// ************************************************************************************************************
+
+	@Override
+	public Collection<RoutingCode> startRoutingCodes(String[] routingcodes, _RTC_START value, String[] imsName) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> startRoutingCodes(" + Arrays.toString(routingcodes) + ", " + value + ", " + ", " + Arrays.toString(imsName) + ")");
+
+		//Note the method key to be used for associating the service
+		String methodKey = "startRoutingCodes";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		//Create a instance of the command builder
+		RtcUpdateCommandBuilder rtcCommandBuilder = new RtcUpdateCommandBuilder();
+
+		//Instruct the command builder to create custom command or you can use one of the predefined ones.
+		rtcCommandBuilder.setName(routingcodes);
+		rtcCommandBuilder.setStart(value);
+		rtcCommandBuilder.setRoute(imsName);
+		String cmd = rtcCommandBuilder.getCommand();
+
+		Service service = new Service(this.om, this.version);
+		omResultSet = service.executeCommand(methodKey,cmd);
+
+		//RTC collection mapped from resultSet 
+		Collection<RoutingCode> routingcodes_temp = this.propertiesToCollection(omResultSet);
+
+		if (logger.isDebugEnabled())
+			logger.debug("<< startRoutingCodes(" + Arrays.toString(routingcodes) + ", " + value + ", " + ", " + Arrays.toString(imsName) + ")");
+		return routingcodes_temp;
+	}
+
+	// ************************************************************************************************************
+	// * Stop Routing Codes
+	// ************************************************************************************************************
+
+	@Override
+	public Collection<RoutingCode> stopRoutingCodes(String[] routingcodes, _RTC_STOP value, String[] imsName) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> stopRoutingCodes(" + Arrays.toString(routingcodes) + ", " + value + ", " + Arrays.toString(imsName) + ")");
+
+		//Note the method key to be used for associating the service
+		String methodKey = "stopRoutingCodes";
+		
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+		//Create a instance of the command builder
+		RtcUpdateCommandBuilder rtcCommandbuilder = new RtcUpdateCommandBuilder();
+
+		// Instruct the command builder to create a custom command or you can use one of the predefined ones.
+		rtcCommandbuilder.setName(routingcodes);
+		rtcCommandbuilder.setStop(value);
+		rtcCommandbuilder.setRoute(imsName);
+		String cmd = rtcCommandbuilder.getCommand();
+
+		Service service = new Service(this.om, this.version);
+		omResultSet = service.executeCommand(methodKey,cmd);
+
+		//Routing Codes Collection mapped from resultSet
+		Collection<RoutingCode> routingcodes_temp =  propertiesToCollection(omResultSet);
+
+		if (logger.isDebugEnabled())
+			logger.debug("<< stopRoutingCodes(" + Arrays.toString(routingcodes) + ", " + value + ", " + Arrays.toString(imsName) + ")");
+		return routingcodes_temp;
+	}
+	
+	
+	// ************************************************************************************************************
+	// * Private members
+	// ************************************************************************************************************
+	/**
+	 * Method will map a omResulset to a collection of routingcode beans. It will also
+	 * append to each bean the sysplex and imsplex name. 
+	 * @param omResultSet
+	 * @return
+	 */
+    private Collection<RoutingCode> propertiesToCollection(OmResultSet omResultSet) {
+        Collection<RoutingCode> tempList = new ArrayList<RoutingCode>();
+
+            Properties[] properties = omResultSet.getResponseProperties();
+
+            for (Properties p : properties) {
+                RoutingCode rtc = new RoutingCode();
+                rtc.setMap((Map)p);
+                rtc.getMap().put(ImsBaseDastoreConstants.SYSPLEX_ID, omResultSet.getEnvironment());
+                rtc.getMap().put(ImsBaseDastoreConstants.IMSPLX, omResultSet.getImsplex());
+                tempList.add(rtc);
+            }
+
+        return tempList;
+    }
+}

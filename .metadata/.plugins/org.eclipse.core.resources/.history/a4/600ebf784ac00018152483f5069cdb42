@@ -1,0 +1,88 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.db.delete;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+
+public class DbDeleteCommandBuilder extends Type2CommandBuilder implements DbDeleteCommand{
+	
+	private static String commandPrefix = "DELETE DB";
+	
+	@Override
+	public void setName(String[] values) {
+		int length = values.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer("NAME(");
+		
+		for (String name : values) {
+			int name_length = name.trim().length();
+
+			if (name_length == 0 || name_length > 8) {
+				throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(Name = " + name + ", length = " + name_length }));
+			}
+
+			temp.append(name);
+
+			if (length > 1 && count != length) {
+				count++;
+				temp.append(COMMA);
+			}
+		}
+		temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+		
+	}
+	
+	@Override
+	 public void setRoute(String[] imsName) {
+		 int length = imsName.length;
+		 int count = 1;
+		 StringBuffer temp = new StringBuffer(") ROUTE(");
+
+		 for (String name: imsName) {
+			 temp.append(name);
+
+			 if(length > 1 && count !=length ){           
+				 temp.append(COMMA);   
+			 }
+			 count++;
+		 }
+		 commandArgs.add(temp.toString());
+	 }
+	
+	@Override
+	public void setOption(OPTION option) {
+		StringBuffer temp = new StringBuffer("OPTION(");
+		temp.append(option.name()).append(CLOSEPARANTH);
+		commandArgs.add(temp.toString());
+	}
+	
+	@Override
+	public String getCommandPrefix() {
+		return commandPrefix;
+	}
+
+	@Override @Deprecated
+	public String getCommandSubType() {
+		return null;
+	}
+	
+	/**
+	 * Testing syntax, removed when finished testing
+	 * @param args
+	 */
+//	public static void main (String args[]) {
+//		DbDeleteCommandBuilder db = new DbDeleteCommandBuilder();
+//		db.setName(new String[]{"AE001122"});
+//		System.out.println(db.getCommand());
+//	}
+	
+}

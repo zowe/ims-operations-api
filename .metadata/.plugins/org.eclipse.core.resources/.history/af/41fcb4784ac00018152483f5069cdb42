@@ -1,0 +1,41 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.pgm.update.syntax;
+
+/** Specifies the dynamic option.  */
+public class DOPT implements SET{
+	
+	private String result = null;
+	private static String NAME = "DOPT";
+	
+	public enum _PGM_DOPT{
+		/** The PSB associated with this program is not located dynamically. */
+		N,
+		
+		/** The PSB associated with this program is located dynamically. */
+		Y;
+	}
+
+	public DOPT(_PGM_DOPT key) {
+    	this.result = key.name();
+	}
+	
+	@Override
+	public String toString(){
+		StringBuilder strBld = new StringBuilder();
+		strBld.append(this.result);
+	    return strBld.toString();
+	}
+	
+	@Override
+	public String getName() {
+		return NAME;
+	}
+}

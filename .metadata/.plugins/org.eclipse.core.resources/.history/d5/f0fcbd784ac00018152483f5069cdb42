@@ -1,0 +1,246 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.db.update;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+import com.ibm.ims.ea.om.db.update.syntax.DB_ACCTYPE._DB_ACCTYPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_AREA._DB_AREA;
+import com.ibm.ims.ea.om.db.update.syntax.DB_LOCK._DB_LOCK;
+import com.ibm.ims.ea.om.db.update.syntax.DB_OPTION._DB_OPTION;
+import com.ibm.ims.ea.om.db.update.syntax.DB_SCOPE._DB_SCOPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_START._DB_START;
+import com.ibm.ims.ea.om.db.update.syntax.DB_STOP._DB_STOP;
+
+
+
+/**
+ * <pre>
+ * Class implements the ProgramCommand interface to provide a mechanism to build and retrieve TYPE-2 IMSPLEX commands. 
+ * As well as the flexibility to build a command, pre-built commands are available through the members such
+ * as {@link DbUpdateCommandBuilder#commandStartTran(String[])}, {@link DbUpdateCommandBuilder#commandStopTran(String[])}
+ * 
+ * To use the build command function provided:
+ * <code>
+ * Create a instance of the command builder
+ * ProgramCommandBuilder programCommandBuilder = new programCommandBuilder();
+ * 
+ * //Instruct the command builder to create a custom command or you can use one of the predefined ones.
+ * String cmd = programCommandBuilder.commandStartPgm(pgm);
+ * </code>
+ * 
+ * Example Usage
+ * 
+ * public static void main(String args[]) {
+		 DatabaseCommandBuilder db = new DatabaseCommandBuilder();
+		 db.setStart(_DB_START.ACCESS);
+		 db.setRoute(new String[] {"TEST123"});
+		 System.out.println(db.getCommand());
+	}
+
+	
+ * 
+ * </pre>
+ *
+ */
+public class DbUpdateCommandBuilder extends Type2CommandBuilder implements DbUpdateCommand {
+	
+	private static String commandPrefix = "UPDATE DB";
+	
+	/**
+	 * Set 1-8 character name for the Database
+	 */
+	@Override
+	public void setName(String[] values) throws IllegalArgumentException {
+		StringBuffer temp = new StringBuffer("NAME(");
+
+		for (String name : values) {
+			int name_length = name.trim().length();
+
+			if (name_length == 0 || name_length > 8) {
+				throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(Name = " + name + ", length = " + name_length }));
+			}
+			temp.append(name);
+			temp.append(COMMA);			
+		}
+		temp.append(") ");
+		commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Set START value
+	 */
+	@Override
+	public void setStart(_DB_START value) {
+		StringBuffer temp = new StringBuffer("START(");
+		temp.append(value);
+		temp.append(") ");
+		commandArgs.add(temp.toString());  
+	}
+	
+	/**
+	 * Specifies access intent for the named database
+	 */
+	@Override
+	public void setAccType (_DB_ACCTYPE accType) {		
+        if(accType != null) {
+        	StringBuffer temp = new StringBuffer("SET(ACCTYPE(" );
+        	temp.append(accType);
+        	temp.append(")) ");
+        	commandArgs.add(temp.toString());
+        }
+    }
+	
+	/**
+	 * Locks and unlocks the specified database
+	 */
+	@Override
+	public void setLock(_DB_LOCK lock) {
+		StringBuffer temp = new StringBuffer("SET(LOCK(");
+		temp.append(lock);
+		temp.append(")) ");
+		commandArgs.add(temp.toString());	
+	}
+	
+	/**
+	 * Specifies additional functions to be performed 
+	 */
+	@Override
+	public void setOptions(_DB_OPTION[] values) throws IllegalArgumentException{
+		boolean hasValues = false;
+		
+		for (_DB_OPTION options: values){
+			if(options != null){
+				hasValues = true;
+				break;
+			}
+		}
+		
+		if(hasValues) {
+			int length = values.length;
+			int count = 1;
+			StringBuffer temp = new StringBuffer("OPTION(");
+			//StringBuffer temp = new StringBuffer("");
+			
+	        for (_DB_OPTION options: values) {
+	        	if(options != null) {
+	        		temp.append(options);
+
+	        		if(length > 1 && count !=length ){
+	        			count ++;
+	        			temp.append(COMMA);
+	        		}
+	        	}
+	        }
+	        temp.append(") ");
+	        commandArgs.add(temp.toString());
+		}
+		
+//        if(temp.length() >0 ){
+//        	prefix.append(temp);
+//        	prefix.append(") ");
+//        }
+        
+	}
+	
+	/**
+	 * Specifies where IMS should apply the change
+	 */
+	@Override
+	public void setScope(_DB_SCOPE scope) {
+		StringBuffer temp = new StringBuffer("SCOPE(");
+		temp.append(scope);
+		temp.append(") ");
+		commandArgs.add(temp.toString());		
+	}
+	
+	/**
+	 * Specifies the AREAS of the database to be processed, or if you
+	 * specify AREA(*), this indicates the command applies to all areas of the 
+	 * Database
+	 */
+	@Override
+	public void setArea(_DB_AREA area) {
+		StringBuffer temp = new StringBuffer();
+        if(area != null) {	
+        	temp.append(area + "(*) ");
+        }
+        commandArgs.add(temp.toString());	
+	}
+	
+	/**
+	 * Set STOP value
+	 */
+	@Override
+	public void setStop(_DB_STOP value) {
+        if(value != null) {
+        	StringBuffer temp = new StringBuffer("STOP(");
+        	temp.append(value);
+        	temp.append(") ");
+        	commandArgs.add(temp.toString());
+        }
+	}
+	
+
+	/**
+	 * Method creates and returns Syntax for a command 
+	 * <code> UPDATE PGM NAME(name) STOP(TRACE,SCHD)   </code>
+	 * to stop the transaction(s) defined in the parameter String[] trans
+	 * @param String[] pgm , programs to stop
+	 * @return String representation to stop a pgm
+	 */
+	 public String commandStopDB(String[] db, _DB_STOP value, _DB_LOCK lock, _DB_OPTION[] options, _DB_SCOPE scope){
+		 setName(db);
+		 setStop(value); //new _STOP[]{_STOP.Q,_STOP.SCHD});
+		 setLock(lock);
+		 setOptions(options);
+		 setScope(scope);
+		 return getCommand();
+	 } 
+	
+	@Override
+	public void setRoute(String[] imsName) {
+		int length = imsName.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer(") ROUTE(");
+		
+        for (String name: imsName) {
+          temp.append(name);
+          
+          if(length > 1 && count !=length ){           
+            temp.append(COMMA);   
+          }
+          count++;
+        }
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Return commandPrefix for this TYPE2 command
+	 * commandPrefix for this command is "UPDATE DB"
+	 */
+	@Override
+	public String getCommandPrefix() {
+		return commandPrefix;
+	}
+	
+	/**
+	 * Unavailable for this TYPE2 command
+	 */
+	@Override @Deprecated
+	public String getCommandSubType() {
+		return null;
+	}
+	
+	
+}
+	
+
+

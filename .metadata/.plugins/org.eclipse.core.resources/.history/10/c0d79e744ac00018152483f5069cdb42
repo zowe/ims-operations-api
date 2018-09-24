@@ -1,0 +1,197 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.rm.list;
+
+import java.util.ArrayList;
+import com.ibm.ims.ea.om.rm.MODIFIER;
+import com.ibm.ims.ea.om.rm.TIMEFMT.FORM;
+import com.ibm.ims.ea.om.rm.TIMEFMT.OFFSET;
+import com.ibm.ims.ea.om.rm.TIMEFMT.OFFSET_DISPLAY;
+import com.ibm.ims.ea.om.rm.TIMEFMT.YEAR_SIZE;
+
+/**
+ * <pre>
+ * Command builder for the RMxxxx RMLIST.RECON. 
+ * RMLIST.RECON takes 4 positional parameters, each are optional, entering null where a parameter is not chosen.
+ * Example use of the ReconCommandBuilder
+ * <code>
+ * 		ReconCommandBuilder rmcmdb = new ReconCommandBuilder();
+		rmcmdb.setReconArg1(RECON_ARG_1.STATUS);
+		rmcmdb.setReconArg2(RECON_ARG_2.STATIC);
+		rmcmdb.setReconArg3(RECON_ARG_3.QUIESCE);
+		rmcmdb.setReconArg4(OFFSET.L, OFFSET_DISPLAY.N, FORM.P, YEAR_SIZE.FOUR);
+		System.out.println(rmcmdb.getCommand());
+		
+		ReconCommandBuilder rmcmdb2 = new ReconCommandBuilder();
+		rmcmdb2.setReconArg1(RECON_ARG_1.STATUS);
+		rmcmdb2.setReconArg2(RECON_ARG_2.CONCURR);
+		rmcmdb2.setReconArg3(null);
+		rmcmdb2.setReconArg4(OFFSET.U, OFFSET_DISPLAY.N, null, YEAR_SIZE.TWO);
+		System.out.println(rmcmdb2.getCommand());
+ * </code>
+ * @author ddimatos
+ * </pre>
+ *
+ */
+public class ReconCommandBuilder implements RmList {
+
+	private ArrayList<String> args 	= new ArrayList<String>(); 	//Maintains the buildig of the command
+	private String commandType 		= null;  					// Maps directly to the modifier to indicate the parser type
+	public static final String COMMA = ",";
+	private  StringBuffer routeString = new StringBuffer();
+	public static final String STAR = "*";
+	
+	/**
+	 * Instantiate a LIST.RECON command builder to generate the command syntax. Instatiation also sets the commandType
+	 * that identifies the supported modifier. 
+	 */
+	public ReconCommandBuilder() {
+		this.commandType = MODIFIER.RECON.name();
+	}
+	
+	// ********************************************************************************************************************
+	// * RMList RECON Type safe positional enum types
+	// ********************************************************************************************************************
+	
+	/**
+	 * LIST.RECON argument 1: ENUM TYPE STATUS
+	 */
+	public enum RECON_ARG_1{STATUS};
+	
+	/**
+	 * LIST.RECON argument 2: STATIC or CONCURR
+	 */
+	public enum RECON_ARG_2{STATIC,CONCURR};
+	
+	/**
+	 * LIST.RECON argument 3: ENUM TYPE QUIESCE
+	 */
+	public enum RECON_ARG_3{QUIESCE};
+    
+	// ********************************************************************************************************************
+	// * RMList RECON positional argument setters. Note: LIST.RECON takes 4 arguments noted as Arg1 - Arg4 where the 4th
+	// * argument are the sublist of TYPES found in TIMEFMT
+	// ********************************************************************************************************************
+	
+	/**
+	 * Set the LIST.RECON first positional argument
+	 * @param {@link RECON_ARG_1} rArg_1
+	 */
+	public void setReconArg1(RECON_ARG_1 rArg_1){
+		args.add(rArg_1 == null ? "" : rArg_1.name());
+	}
+
+	/**
+	 * Set the LIST.RECON first positional argument
+	 * @param {@link RECON_ARG_2} rArg_2
+	 */
+	public void setReconArg2(RECON_ARG_2 rArg_2) {
+		args.add(rArg_2  == null ? "" : " " + rArg_2.name());
+	}
+
+	/**
+	 * Set the LIST.RECON first positional argument
+	 * @param {@link RECON_ARG_3} rArg_3
+	 */
+	public void setReconArg3(RECON_ARG_3 rArg_3) {
+		args.add(rArg_3 == null ? "" : " " + rArg_3.name());
+	}
+
+	/**
+	 * Set the LIST.RECON fourth positional arguments for the TIMEFMT parameter
+	 * The fourth set of TIMEFMT augments are mutually exclusive and if all sublist arguments are 
+	 * omitted, the current values from the RECON header are used. 
+	 * @param {@link OFFSET} offset
+	 * @param {@link OFFSET_DISPLAY} offsetDisplay
+	 * @param {@link FORM} form
+	 * @param {@link YEAR_SIZE} yearSize
+	 */
+	public void setReconArg4(OFFSET offset, OFFSET_DISPLAY offsetDisplay, FORM form, YEAR_SIZE yearSize) {
+		 
+	     StringBuilder temp = new StringBuilder();
+	     temp.append(" TIMEFMT(");
+	     temp.append(offset   		== null ? "" + COMMA : offset + COMMA);
+	     temp.append(offsetDisplay  == null ? "" + COMMA: offsetDisplay + COMMA);
+	     temp.append(form      		== null ? "" + COMMA : form + COMMA);
+	     temp.append(yearSize   	== null ? "" : yearSize);
+	     temp.append(")");
+	     
+	     args.add(temp.toString());
+	}
+	
+    public void setRoute(String[] imsName) {
+        int length = imsName.length;
+        int count = 1;
+        routeString.append(" ROUTE(");
+
+        for (String name: imsName) {
+            routeString.append(name);
+
+            if(length > 1 && count !=length ){           
+                routeString.append(COMMA);   
+            }
+            count++;
+        }
+        routeString.append(")");
+    }	
+    
+    /**
+	 * Returns the appropriate command //"/RMLIST DBRC='RECON STATUS'."
+	 * @return
+	 */
+	public String getCommand() {
+        String result;
+        StringBuilder command = new StringBuilder();
+        command.append("CMD(RMLIST DBRC='RECON "); 
+        for(int i = 0; i < args.size(); i++){
+        	command.append(this.args.get(i) == null ? "" : this.args.get(i));
+        }
+        command.append("')").append(routeString);
+        
+        result = command.toString();
+        clear();
+        return result;
+    }
+	
+	public String getCommandType() {
+		return commandType;
+	}
+	
+    /**
+     * Method clears the variables used to build a command for reuse.
+     * Should be called after each command is built.
+     */
+    private void clear(){
+    	this.args.clear();
+    }
+    
+//    public static void main(String[] args) {
+//		ReconCommandBuilder rmcmdb = new ReconCommandBuilder();
+//		rmcmdb.setReconArg1(RECON_ARG_1.STATUS);
+//		rmcmdb.setReconArg2(RECON_ARG_2.STATIC);
+//		rmcmdb.setReconArg3(RECON_ARG_3.QUIESCE);
+//		rmcmdb.setReconArg4(OFFSET.L, OFFSET_DISPLAY.N, FORM.P, YEAR_SIZE.FOUR);
+//		System.out.println(rmcmdb.getCommand());
+//		
+//		ReconCommandBuilder rmcmdb2 = new ReconCommandBuilder();
+//		rmcmdb2.setReconArg1(RECON_ARG_1.STATUS);
+//		rmcmdb2.setReconArg2(RECON_ARG_2.CONCURR);
+//		rmcmdb2.setReconArg3(null);
+//		rmcmdb2.setReconArg4(OFFSET.U, OFFSET_DISPLAY.N, null, YEAR_SIZE.TWO);
+//		System.out.println(rmcmdb2.getCommand());
+//		
+//		ReconCommandBuilder rmcmdb3 = new ReconCommandBuilder();
+//		rmcmdb3.setReconArg1(RECON_ARG_1.STATUS);
+//		rmcmdb3.setRoute(new String[]{"IMS1","IMS2"});
+//		System.out.println(rmcmdb3.getCommand());
+//	}
+
+	
+}

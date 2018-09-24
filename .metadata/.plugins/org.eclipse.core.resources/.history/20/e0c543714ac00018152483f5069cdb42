@@ -1,0 +1,92 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.datastore;
+
+import java.util.Collection;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.services.Om;
+import com.ibm.ims.ea.om.imsplex.Imsplex;
+import com.ibm.ims.ea.om.imsplex.Imsplex.ImsplexResponseAttribute;
+
+/**
+ * Interface to access IMSOM_IMSPLEX Table that hold Imsplex Members(IMS, ICON, RM, SCI...) details that 
+ * is retrieved from TYPE2 COMMAND: QUERY IMSPLEX NAME(PLEX1) SHOW(ALL)  
+ */
+public interface OmImsplexStore  {
+
+	/**
+	 * Add a single IMSPLEX member to the derby cache(OM_IMSPLEX Table).
+	 * @param imsplex
+	 * @param sysplexId
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	int addImsplex(Imsplex imsplex, int sysplexId) throws DatastoreException;
+	
+	/**
+	 * Add IMSPLEX members to the derby cache(OM_IMSPLEX Table) using a collection of imsplex members.
+	 * @param imsplexes
+	 * @param sysplexId
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int addImsplex(Collection<Imsplex> imsplexes, int sysplexId) throws DatastoreException;
+	
+	/**
+	 * Method returns all the IMSPLEXES for a given IMSPLEX Name. Note that for a OM_IMSPLEX table 
+	 * an IMSPLEX Name can be used more than once in the table given they are not part of the same SYSPLEX.
+	 * @param name of the IMSPLEX
+	 * @return Collection of {@link Imsplex}
+	 * @throws DatastoreException
+	 */
+//	public Collection<Imsplex> getImsplexByName(String name) throws DatastoreException ;
+
+	/**
+	 * Method returns all the IMSPLEX members from the derby cache.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @param systemId
+	 * @param om
+	 * @return Collection of {@link Imsplex}
+	 * @throws OmDatastoreException
+	 * @throws OmException
+	 * @throws OmConnectionException
+	 */
+	public Collection<Imsplex> getImsPlexMembers(int sysplexId, String imsplexName, Om om) throws OmDatastoreException, OmException,
+			OmConnectionException;
+	
+	 /**
+	  * Method returns all the IMSPLEX members from the derby cache.
+	  * @param sysplexId
+	  * @param systemId
+	  * @return Collection of {@link Imsplex}
+	  * @throws OmDatastoreException
+	  */
+	public Collection<Imsplex> getImsPlexMembers(int sysplexId)	throws OmDatastoreException;
+
+	/**
+	 * Method returns all the IMSPLEX members from the derby cache.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @param systemId
+	 * @return Collection of {@link Imsplex}
+	 * @throws OmDatastoreException
+	 */
+	public Collection<Imsplex> getImsPlexMembers(int sysplexId, String imsplexName) throws OmDatastoreException;
+
+	public int updateImsplexColumn(Collection<Imsplex> imsplexs, ImsplexResponseAttribute imsplexResponseAttribute, String value, int sysplexId, String imsplexName) throws OmDatastoreException;
+	
+	public int updateImsplexColumn(ImsplexResponseAttribute imsplexResponseAttribute, String value, String systemId, int sysplexId, String imsplexName) throws OmDatastoreException;
+	
+}

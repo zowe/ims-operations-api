@@ -1,0 +1,50 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.tran.update.syntax;
+
+/**
+ * Specifies the AOI option that you want to change, which indicates whether
+ * the transaction can issue the type-1 AOI CMD call or the type-2 AOI ICMD call.
+ */
+public class AOCMD implements SET{
+	
+	private String result = null;
+	
+	public enum _AOCMD {
+		/** Indicates that the transaction is permitted to issue type-1 AOI CMD calls and type-2 AOI ICMD calls */
+		CMD,
+		
+		/** Indicates that the transaction is not permitted to issue type-1 AOI CMD calls only type-2 AOI ICMD calls.*/
+		N,
+		
+		/** Indicates that the transaction is permitted to issue type-1 AOI CMD calls and type-2 AOI ICMD calls.*/
+		TRAN,
+		
+		/** Indicates that the transaction is permitted to issue type-1 AOI CMD calls and type-2 AOI ICMD calls */
+		Y;
+	}
+
+	/**
+	 * Enum class of AOCMD options.
+	 * @param key
+	 */
+	public AOCMD(_AOCMD key) {
+    	this.result = key.name();
+	}
+	
+	@Override
+	public String toString(){
+		StringBuilder strBld = new StringBuilder();
+		strBld.append(this.result);
+	    return strBld.toString();
+	}
+	
+}

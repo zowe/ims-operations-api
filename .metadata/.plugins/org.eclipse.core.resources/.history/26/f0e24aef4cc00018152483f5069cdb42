@@ -1,0 +1,327 @@
+package com.ibm.ims.ea.om.common.services;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import om.common.version.Version;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.message.OM_MESSAGE;
+import com.ibm.ims.ea.om.common.result.OmResultSet;
+import com.ibm.ims.ea.om.datastore.GridHeaderTable;
+import com.ibm.ims.ea.om.datastore.ImsOmDatastore;
+
+public abstract class ServicesHelper {// extends Service {
+	protected int sysplexId ;
+	protected String imsplexName;
+	protected Version version = null;
+	protected boolean isDiscovering = false;
+	protected Om om = null;
+	protected Map<String, Version> resourceVersion = null;
+	private static final Logger logger = LoggerFactory.getLogger(ServicesHelper.class);
+	
+	//Statically build a mem-cache of all the known discovered meta-data about this service resulting from discovery
+    static{
+    	//Try to get an instance of the com.ibm.im.ac.datastore 
+		ImsOmDatastore imsOMDatastore;
+		try {
+			imsOMDatastore = ImsOmDatastore.getInstance();
+			
+			GridHeaderTable gridHeaderTable = imsOMDatastore.getGridHeaderTable();
+			if (gridHeaderTable != null) {
+				gridHeaderTable.autoConfigureGridMetaData();
+			}			
+		} catch (DatastoreException e) {
+			//This exception will only happen if dependency "com.ibm.im.ac.datastore" has not been
+			//loaded by OSGI. Moving this logic to Declarative serivces might be a good option. 
+			if(logger.isDebugEnabled()){
+				logger.debug("Appears that the bundle for service com.ibm.im.ac.datastore.AbstractDatastore has not been loaded");
+			}
+		}
+    }
+    
+    protected ServicesHelper(Om om){
+    	this.om = om;
+    	this.sysplexId = om.getOMConnection().getEnvironment();
+    	this.imsplexName = om.getOMConnection().getImsplex();
+    }
+
+    /**
+     * Method converts a Datastore Exception often thrown by the abstract datastore dependency and converted into and
+     * OmDatastoreExecption that contains added meta-data such as where it originated from.
+     * @param e
+     * @param sysplexId
+     * @param imsplexId
+     * @param imsplexName
+     * @return
+     */
+    protected OmDatastoreException convertDatatstoreException(DatastoreException e, int sysplexId, String imsplexName) {
+        OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+        omDatastoreException.setEnvironmentId(sysplexId);
+        omDatastoreException.setImsplexName(imsplexName);
+        omDatastoreException.setQuery("No Query Availble");
+        return omDatastoreException;
+    }
+    
+    /**
+     * Method will review the route members passed and if there is at least one route member that is a '*', then a new
+     * array is returned which removes all other members and resets it to an array of only '*'
+     * @param routeMembers
+     * @return
+     */
+    public String[] routeMemberFormater(String[] routeMembers) {
+        /** Case: There is at least one asterisk as a member so reset it to a single asterisk **/
+    	
+    	HashSet<String> routeMemberList = new HashSet<String>(Arrays.asList(routeMembers));
+    	
+        if (routeMemberList.contains(ImsCommandAttributes.ASTERISK)) {
+            return new String[] {ImsCommandAttributes.ASTERISK};
+        }
+        return routeMembers;
+    }
+    
+    /**
+     * Method will clear and then discover headers and add them to derby and the mem-cache, reason we don't call this directly
+     * is because it requires information not available globally like methodkey and omResultSet.
+     * @param version
+     * @param methodKey
+     * @param omResultSet
+     * @throws OmDatastoreException
+     */
+    private void discoverHeaders(Version version, String methodKey, OmResultSet omResultSet) throws OmDatastoreException{
+    	try{
+    		GridHeaderTable gridHeaderTable = ImsOmDatastore.getInstance().getGridHeaderTable();
+    		gridHeaderTable.deleteTable(version.toString(), methodKey);
+    	
+    		//Set the headers in the derby cache
+    		gridHeaderTable.addRowAttributes(omResultSet.getResponsePropertiesHeaders(), version.toString(), methodKey);
+    	
+    		gridHeaderTable.autoConfigureGridMetaData();
+    	} catch (OmDatastoreException e) {
+			e.setImsplexName(omResultSet.getImsplex());
+			throw e;
+		} catch (DatastoreException e){
+			throw convertDatatstoreException(e, Integer.valueOf(omResultSet.getEnvironment()), omResultSet.getImsplex());
+		} 
+    }
+
+    /**
+     * Method 
+     * @param omResultSet
+     * @param resourceCacheSize
+     * @param date
+     * @param imsAttributes
+     * @param methodKey
+     * @throws OmDatastoreException
+     */
+	protected void setOmInteractionContext(OmResultSet omResultSet,int resourceCacheSize, Date date, ArrayList<String> imsAttributes, String methodKey ) throws OmDatastoreException{
+
+		//DEFECT 47619 , this might fix it but need QA to do the system setup
+		if(this.version == null){
+			this.version = Version.IMS_ZERO_RELEASE;;
+		}
+		
+		//If it is null its because the call to this function was done from the cache service path that does not create an omresultset
+		if(omResultSet == null){
+			omResultSet = new OmResultSet();
+		}
+		
+		//Set these global values, these are all thread safe so they can be global per instnace of a service.
+		omResultSet.getOmInteractionContext().setResourceVersion(this.version.toString());
+		omResultSet.getOmInteractionContext().setEnvironment(this.sysplexId);
+		omResultSet.getOmInteractionContext().setImsplexName(this.imsplexName);
+		
+		//Set the method key
+		omResultSet.getOmInteractionContext().setIdentifier(methodKey);
+		
+		//Set the cache size and date, if there is something in the mem-cache
+		if(resourceCacheSize > 0){
+			omResultSet.getOmInteractionContext().setResourceCacheSize(resourceCacheSize);
+			omResultSet.getOmInteractionContext().setResourceLastUpdated(date);
+			//This should never be null if there is something in the resource memcache
+			omResultSet.getOmInteractionContext().setResourceAttributes(imsAttributes);
+		}else{
+			omResultSet.getOmInteractionContext().setResourceAttributes(omResultSet.getResponsePropertiesHeaders());
+		}
+
+		//If we are discovering we don't want the UI to know tell the user they are in LIVE mode so we overide the mode to false
+		//If we are discovering we should also discover the grid handler data and set the memcache for it
+		if(this.isDiscovering){
+			omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+			this.discoverHeaders(this.version, methodKey, omResultSet);
+			
+			//Reset the discovering mode back to false.
+			this.isDiscovering = false;
+		}else{
+			//If we have something in the cache, we know that it was not a LIVE call so set it to false otherwise it was LIVE.
+			//omResultSet.getOmInteractionContext().setLiveModeEnabled(resourceCacheSize > 0?false:true);
+			if(resourceCacheSize > 0){
+				omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+			}else{
+				omResultSet.getOmInteractionContext().setLiveModeEnabled(true);
+				omResultSet.getOmInteractionContext().setInteractionMessage(OM_MESSAGE.OM_LIVE_MODE_MSG.msg());
+			}
+		}
+		
+		//Save the context
+		this.om.addOmInteractionContext(methodKey, omResultSet.getOmInteractionContext());
+	}
+	
+	/**
+     * Method method is specifically used when the query run has to be also propagated through the omInteractionContext
+     * @param omResultSet
+     * @param resourceCacheSize
+     * @param date
+     * @param imsAttributes
+     * @param methodKey
+     * @param queryexecuted
+     * @throws OmDatastoreException
+     */
+    protected void setOmInteractionContext(OmResultSet omResultSet,int resourceCacheSize, Date date, ArrayList<String> imsAttributes, String methodKey ,String queryExecuted) throws OmDatastoreException{
+
+        //If it is null its because the call to this function was done from the cache service path that does not create an omresultset
+        if(omResultSet == null){
+            omResultSet = new OmResultSet();
+        }
+        
+        //Set these global values, these are all thread safe so they can be global per instnace of a service.
+        omResultSet.getOmInteractionContext().setResourceVersion(this.version.toString());
+        omResultSet.getOmInteractionContext().setEnvironment(this.sysplexId);
+        omResultSet.getOmInteractionContext().setImsplexName(this.imsplexName);
+        omResultSet.getOmInteractionContext().setQueryExecuted(queryExecuted);
+        //Set the method key
+        omResultSet.getOmInteractionContext().setIdentifier(methodKey);
+        
+        //Set the cache size and date, if there is something in the mem-cache
+        if(resourceCacheSize > 0){
+            omResultSet.getOmInteractionContext().setResourceCacheSize(resourceCacheSize);
+            omResultSet.getOmInteractionContext().setResourceLastUpdated(date);
+            //This should never be null if there is something in the resource memcache
+            omResultSet.getOmInteractionContext().setResourceAttributes(imsAttributes);
+        }else{
+            omResultSet.getOmInteractionContext().setResourceAttributes(omResultSet.getResponsePropertiesHeaders());
+        }
+
+        //If we are discovering we don't want the UI to know tell the user they are in LIVE mode so we overide the mode to false
+        //If we are discovering we should also discover the grid handler data and set the memcache for it
+        if(this.isDiscovering){
+            omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+            this.discoverHeaders(this.version, methodKey, omResultSet);
+            
+            //Reset the discovering mode back to false.
+            this.isDiscovering = false;
+        }else{
+            //If we have something in the cache, we know that it was not a LIVE call so set it to false otherwise it was LIVE.
+            //omResultSet.getOmInteractionContext().setLiveModeEnabled(resourceCacheSize > 0?false:true);
+            if(resourceCacheSize > 0){
+                omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+            }else{
+                omResultSet.getOmInteractionContext().setLiveModeEnabled(true);
+                omResultSet.getOmInteractionContext().setInteractionMessage(OM_MESSAGE.OM_LIVE_MODE_MSG.msg());
+            }
+        }
+        
+        //Save the context
+        this.om.addOmInteractionContext(methodKey, omResultSet.getOmInteractionContext());
+    }
+	
+	/**
+	 *  Method will set the omResultset's interaction context with values from the service, if the interactionContext is null it will
+	 * create one and then attach it to the OM instance. This method is best used when its a live call and there is no cache
+	 * available for the service. 
+	 * @param omResultSet
+	 * @param methodKey
+	 * @throws OmDatastoreException
+	 */
+	public void setOmInteractionContext(OmResultSet omResultSet,String methodKey ) throws OmDatastoreException{
+
+		//If it is null its because the call to this function was done from the cache service path that does not create an omresultset
+		if(omResultSet == null){
+			omResultSet = new OmResultSet();
+		}
+		
+		//DEFECT 47619 , this might fix it but need QA to do the system setup
+		if(this.version == null){
+			this.version = Version.IMS_ZERO_RELEASE;;
+		}
+		
+		//Set these global values, these are all thread safe so they can be global per instnace of a service.
+		omResultSet.getOmInteractionContext().setResourceVersion(this.version.toString());
+		omResultSet.getOmInteractionContext().setEnvironment(this.sysplexId);
+		omResultSet.getOmInteractionContext().setImsplexName(this.imsplexName);
+		
+		//Set the method key
+		omResultSet.getOmInteractionContext().setIdentifier(methodKey);
+		
+		//Set the headers because it is a live call
+		if(omResultSet.getOmInteractionContext().getResourceAttributes().size() == 0){
+			omResultSet.getOmInteractionContext().setResourceAttributes(omResultSet.getResponsePropertiesHeaders());
+		}
+
+		//Force the LiveMode to false beause we know this method is a live call and don't want the UI to notify its live
+		omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+		
+		//Save the context
+		this.om.addOmInteractionContext(methodKey, omResultSet.getOmInteractionContext());
+	}
+	
+	/**
+	 * Method will set the omResultset's interaction context with values from the service, if the interactionContext is null it will
+	 * create one and then attach it to the OM instance. This method is best used when you have static headers and are strictly a
+	 * live call, for example type1 command services. 
+	 * @param omResultSet
+	 * @param methodKey
+	 * @param headers
+	 * @throws OmDatastoreException
+	 */
+	public void setOmInteractionContext(OmResultSet omResultSet,String methodKey, ArrayList<String> headers) throws OmDatastoreException{
+
+		//If it is null its because the call to this function was done from the cache service path that does not create an omresultset
+		if(omResultSet == null){
+			omResultSet = new OmResultSet();
+		}
+		
+		//DEFECT 47619 , this might fix it but need QA to do the system setup
+		if(this.version == null){
+			this.version = Version.IMS_ZERO_RELEASE;;
+		}
+		
+		//Set these global values, these are all thread safe so they can be global per instnace of a service.
+		omResultSet.getOmInteractionContext().setResourceVersion(this.version.toString());
+		omResultSet.getOmInteractionContext().setEnvironment(this.sysplexId);
+		omResultSet.getOmInteractionContext().setImsplexName(this.imsplexName);
+		
+		//Set the method key
+		omResultSet.getOmInteractionContext().setIdentifier(methodKey);
+		
+		omResultSet.getOmInteractionContext().setResourceAttributes(headers);
+
+		//Force the LiveMode to false because we know this method is a live call and don't want the UI to notify its live
+		omResultSet.getOmInteractionContext().setLiveModeEnabled(false);
+		
+		//Save the context
+		this.om.addOmInteractionContext(methodKey, omResultSet.getOmInteractionContext());
+	}
+	
+	public Version setVersion(Map<String, Version> versions, String [] routeMembers){
+		HashSet<String> routeMemberList = new HashSet<String>(Arrays.asList(routeMembers));
+		
+		if(routeMemberList.contains(ImsCommandAttributes.ASTERISK) || routeMemberList.size() > 1){
+			return versions.get("latestResourceVersion");
+		}else if(routeMembers[0] != null){
+			return versions.get(routeMembers[0]);
+		}
+		
+		return Version.IMS_ZERO_RELEASE;
+	}
+	
+	public Version getVersion(){
+		return this.version;
+	}
+}

@@ -1,0 +1,93 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.rm;
+
+public interface TIMEFMT {
+	
+	//	protected String result = null;
+	
+	/**
+	 * OFFSET
+	 */
+	public enum OFFSET{
+		U,O,L;
+	}
+	
+	/**
+	 * OFFSET_DISPLAY
+	 */
+	public enum OFFSET_DISPLAY{
+		L,O,N;
+	}
+	
+	/**
+	 * FORM
+	 */
+	public enum FORM{
+		P,C;
+	}
+	
+	/**
+	 * YEAR SIZE
+	 */
+	public enum YEAR_SIZE{
+		TWO(2),
+		FOUR(4);
+		
+		private int size;
+		
+		private YEAR_SIZE(int size) {
+			this.size = size;
+		}
+		
+		public int getSize(){
+			return this.size;
+		}
+		
+		@Override
+		public String toString(){
+			StringBuilder strBld = new StringBuilder();
+			strBld.append(this.getSize());
+		    return strBld.toString();
+		}
+	}
+	
+	//    duration can be set only on the CHANGE.RECON command.
+	public enum DURATION{
+		PERM,TEMP;
+	}
+	
+	//  precision is only valid on the %SET statement.
+	public enum PRECISION {
+		ONE(1),
+		TWO(2),
+		THREE(3),
+		FOUR(4),
+		FIVE(5),
+		SIX(6);
+		
+		private int precision;
+		
+		private PRECISION(int precision) {
+			this.precision = precision;
+		}
+		
+		public int getPrecision(){
+			return this.precision;
+		}
+	}
+	
+//	@Override
+//	public String toString(){
+//		StringBuilder strBld = new StringBuilder();
+//		strBld.append(this.result);
+//	    return strBld.toString();
+//	}
+}

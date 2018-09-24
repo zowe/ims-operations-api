@@ -1,0 +1,52 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.icon.query.rmtimscon;
+
+public interface IconRmtImsConQueryCommand {
+	
+	public enum SHOW {
+		ALL,   
+        APPL,        
+        AUTOCONN,       
+        HOSTNAME,       
+        IDLETO,       
+        IPADDR,         
+        NUMSOC,       
+        PERSISTENT,       
+        PORT,        
+        RESVSOC,        
+        SENDCLNT,       
+        STATUS,         
+        SUMMARY,         
+        USERID; 
+	}
+	
+	public enum SCSTATUS {
+		CONN,
+		RECV;
+		
+	}
+	
+	public enum STATUS {
+		ACTIVE,
+		STOPPED,
+		NOTACTIVE;
+	}
+	
+	public void setName(String[] names);
+	public void setRoute(String[] routeName);
+	public void setSendClnt(String[] sendClnt);
+	public void setShow(SHOW[] shows);
+	public void setSCStatus(SCSTATUS[] states);
+	public void setStatus(STATUS[] status);
+	
+	
+}

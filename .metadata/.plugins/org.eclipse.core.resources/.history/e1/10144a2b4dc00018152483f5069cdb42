@@ -1,0 +1,7 @@
+package com.ibm.ims.ea.om.cmd.constants;
+
+public class ImsCommandAttributes {
+    public static final String ASTERISK = "*";
+    
+    public static final String PERCENT  = "%";
+}

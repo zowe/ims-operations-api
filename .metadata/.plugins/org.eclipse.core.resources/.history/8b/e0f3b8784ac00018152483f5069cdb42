@@ -1,0 +1,44 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.icon.query.odbm;
+
+public interface IconOdbmQueryCommand {
+	
+	public enum SHOW {
+		ALL,
+		ALIAS,
+		RRS,
+		STATUS;
+		
+	}
+	
+	
+	
+	public enum STATUS {
+		REGISTERED,  
+        NOTACTIVE;
+	}
+	public enum ASTATUS {
+		ACTIVE,  
+        NOTACTIVE;
+	}
+	
+	public void setName(String[] names);
+	public void setAlias(String[] names);
+	
+	public void setShow(SHOW[] shows);
+	
+	public void setAStatus(ASTATUS[] astatus);
+	
+	public void setStatus(STATUS[] status);
+	
+	public void setRoute(String[] routeName);	
+}

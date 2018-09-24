@@ -1,0 +1,26 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.datastore;
+
+public interface ImsBaseDastoreConstants {
+    /**
+     * Constant used by the database cache to identify the name of the IMSPLEX
+     */
+    public static final String IMSPLX       = "IMSPLX";
+    
+    /**
+     * Constant used by the database cache to identify the environment ID (sysplex id)
+     */
+    public static final String SYSPLEX_ID   = "SYSPLEX_ID";
+    
+    /**
+     * Constant used for OS dependent return carriages.
+     */
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+}

@@ -1,0 +1,172 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.service;
+
+import java.util.Collection;
+
+import com.ibm.ims.ea.om.cmd.v14.query.db.QueryDb.StatusOptions;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.db.Database;
+import com.ibm.ims.ea.om.db.update.syntax.DB_ACCTYPE._DB_ACCTYPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_AREA._DB_AREA;
+import com.ibm.ims.ea.om.db.update.syntax.DB_LOCK._DB_LOCK;
+import com.ibm.ims.ea.om.db.update.syntax.DB_OPTION._DB_OPTION;
+import com.ibm.ims.ea.om.db.update.syntax.DB_SCOPE._DB_SCOPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_START._DB_START;
+import com.ibm.ims.ea.om.db.update.syntax.DB_STOP._DB_STOP;
+import com.ibm.ims.ea.om.pgm.Program;
+import com.ibm.ims.ea.om.tran.Transaction;
+
+public interface DatabaseService {
+
+	public Collection<Database> getDatabases() throws OmException,OmDatastoreException, OmConnectionException;
+
+	public Collection<Database> getDatabases(String[] imsSystemName) throws OmException, OmDatastoreException, OmConnectionException;
+
+	public Collection<Database> getDatabasesByName(String[] databases) throws OmException, OmConnectionException, OmDatastoreException;
+	
+	public Collection<Database> getDatabasesByName(String[] databases,String[] imsSystemName) throws OmException, OmConnectionException,OmDatastoreException;
+	
+	public Collection<Database> getDatabasePrograms() throws OmException,OmConnectionException, OmDatastoreException;
+
+	public Collection<Database> getDatabasePrograms(String[] databases) throws OmException, OmConnectionException, OmDatastoreException;
+	
+	public Collection<Database> getDatabasePrograms(String[] databases, String[] systemId) throws OmException, OmConnectionException, OmDatastoreException;
+	
+	public Collection<Database> getDatabaseByStatus(StatusOptions[] status) throws OmException, OmConnectionException, OmDatastoreException;
+
+	public Collection<Database> getDatabaseByStatus(StatusOptions[] status, String[] systemId) throws OmException, OmConnectionException, OmDatastoreException;
+
+	public Collection<Database> getDatabasesForTransaction(Transaction transaction,String[] imsSystemName) throws OmDatastoreException, OmException, OmConnectionException;
+
+	public int discoverDatabases() throws OmDatastoreException, OmException, OmConnectionException;
+
+	public int discoverDatabases(String imsSystemName) throws OmDatastoreException, OmException, OmConnectionException;
+	
+	@Deprecated
+	public Collection<Database> stopDatabases(String[] databases, _DB_STOP value, _DB_OPTION[] options, _DB_SCOPE scope, String[] systemId) throws OmException, OmConnectionException, OmDatastoreException;
+
+	@Deprecated
+	public Collection<Database> startDatabases(String[] databases, _DB_START value,_DB_ACCTYPE accType, _DB_AREA area, _DB_OPTION[] options,_DB_SCOPE scope, String[] systemId) throws OmException,OmConnectionException, OmDatastoreException;
+
+	@Deprecated
+	public Collection<Database> updateDatabasesLock(String[] databases, _DB_LOCK lock,_DB_SCOPE scope, String[] systemId) throws OmException,OmConnectionException, OmDatastoreException;
+
+public Collection<Database> getDatabasesForProgram(Program program,String[] imsSystemName) throws OmDatastoreException, OmException,OmConnectionException;
+
+     /* Returns repo info for the databases in the IMSplex. 
+     * The query is sent to the IMS (imsName) within the IMSplex that is configured for repo.This info can be got thru the IMSPlex node.
+     * This service will interact with a local cache, when there is an interaction with a local cache the behavior 
+     * can be overridden to behave differently. To do so, you can set the interaction mode with 
+     * {@link Om#setInteractionMode(InteractionMode.)}. There modes are: {@link InteractionMode#LIVE}, 
+     * {@link InteractionMode#CACHE}, {@link InteractionMode#DEFAULT}.
+     * 
+     * @param imsName
+     * @return
+     * @throws OmException
+     * @throws OmDatastoreException 
+     */
+	 public Collection<Database> getDatabasesWithRepoInfo(String[] imsSystemName)
+			throws OmException, OmDatastoreException, OmConnectionException;
+	 
+	 /**
+	     * Returns repo info for the databases in the IMSplex. 
+	     * THIs service will call the Ims Service and understand which  are the IMS that that repository configured and use one of them 
+	     * as route to get the database information on Repo
+	     * The query is sent to the IMS (imsName) within the IMSplex that is configured for repo.This info can be got thru the IMSPlex node.
+	     * This service will interact with a local cache, when there is an interaction with a local cache the behavior 
+	     * can be overridden to behave differently. To do so, you can set the interaction mode with 
+	     * {@link Om#setInteractionMode(InteractionMode.)}. There modes are: {@link InteractionMode#LIVE}, 
+	     * {@link InteractionMode#CACHE}, {@link InteractionMode#DEFAULT}.
+	     
+	     * @return
+	     * @throws OmException
+	     * @throws OmDatastoreException 
+	     */
+		 public Collection<Database> getDatabasesWithRepoInfo()
+				throws OmException, OmDatastoreException, OmConnectionException;
+		 
+	 /**
+	   * This method will discover all databases with Repo enabled and exported for an IMS System and cache them in our local database. After discovery
+	   * has been invoked, the services that support {@link InteractionMode) will interact with the local cache when answering
+	   * queries. This improves performance and reduces the overall cost to run queries. 
+	   * 
+	   * Once discovery has been invoked you can re-discover changes in the IMS System by running the method again as many
+	   * times as needed.
+	   * 
+	   * @param imsName
+	   * @return
+	   * @throws OmDatastoreException
+	   * @throws OmException
+	   * @throws OmConnectionException
+	   */
+	  public int discoverDatabasesWithRepoInfo(String imsName) throws OmDatastoreException, OmException, OmConnectionException;
+
+	  /**
+	   * This method will discover all databases with Repo enabled and exported for an IMSplex and cache them in our local database. After discovery
+	   * has been invoked, the services that support {@link InteractionMode) will interact with the local cache when answering
+	   * queries. This improves performance and reduces the overall cost to run queries. 
+	   * 
+	   * Once discovery has been invoked you can re-discover changes in the IMS System by running the method again as many
+	   * times as needed.
+	   * @return
+	   * @throws OmDatastoreException
+	   * @throws OmException
+	   * @throws OmConnectionException
+	   */
+	  public int discoverDatabasesWithRepoInfo() throws OmDatastoreException, OmException,OmConnectionException;
+		
+
+	  /**
+	     * <pre>
+	     * Returns databases matching that match the provided names for all IMS Systems in the PLEX with REPO. 
+	     * 
+	     * The query is sent to the IMS (imsName) within the IMSplex that is configured in the {@link OMConnection}
+	     * which will act as master and retrieve data for all the IMSs with REPO.
+	     * For example: if the omConnection is configured with IMSPLEX1 which has registered IMSA and IMSB and the 
+	     * imsName is set to IMSA, then the result include responses for IMSA only.
+	     * 
+	     * This service will interact with a local cache, when there is an interaction with a local cache the behavior 
+	     * can be overridden to behave differently. To do so, you can set the interaction mode with 
+	     * {@link Om#setInteractionMode(InteractionMode.)}. There modes are: {@link InteractionMode#LIVE}, 
+	     * {@link InteractionMode#CACHE}, {@link InteractionMode#DEFAULT}.
+	     * 
+	     * @param databaseNames
+	     * @param imsName
+	     * @return
+	     * @throws OmException
+	     * @throws OmConnectionException 
+	     * @throws OmDatastoreException
+	     * </pre>
+	     */
+	    public Collection<Database> getDatabasesByNameWithRepoInfo(String[] databases, String[] imsName) throws OmException, OmConnectionException,
+	            OmDatastoreException;
+
+	    /**
+	     * <pre>
+	     * Returns databases matching that match the provided names for all IMS Systems in the PLEX with REPO. 
+	     * 
+	     * This service will interact with a local cache, when there is an interaction with a local cache the behavior 
+	     * can be overridden to behave differently. To do so, you can set the interaction mode with 
+	     * {@link Om#setInteractionMode(InteractionMode.)}. There modes are: {@link InteractionMode#LIVE}, 
+	     * {@link InteractionMode#CACHE}, {@link InteractionMode#DEFAULT}.
+	     * 
+	     * @param databaseNames
+	     * @return
+	     * @throws OmException
+	     * @throws OmConnectionException 
+	     * @throws OmDatastoreException
+	     * </pre>
+	     */
+	    public Collection<Database> getDatabasesByNameWithRepoInfo(String[] databases) throws OmException, OmConnectionException, OmDatastoreException;
+
+}

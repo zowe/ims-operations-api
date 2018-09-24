@@ -1,0 +1,87 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.db.update;
+
+import com.ibm.ims.ea.om.db.update.syntax.DB_ACCTYPE._DB_ACCTYPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_AREA._DB_AREA;
+import com.ibm.ims.ea.om.db.update.syntax.DB_LOCK._DB_LOCK;
+import com.ibm.ims.ea.om.db.update.syntax.DB_OPTION._DB_OPTION;
+import com.ibm.ims.ea.om.db.update.syntax.DB_SCOPE._DB_SCOPE;
+import com.ibm.ims.ea.om.db.update.syntax.DB_START._DB_START;
+import com.ibm.ims.ea.om.db.update.syntax.DB_STOP._DB_STOP;
+
+
+public interface DbUpdateCommand {
+	
+	/**
+	 * Specifies the 1-8 character name for the database. Wildcards can be specified
+	 * for the db name. The db name is a repeatable parameter.
+	 * @param name String
+	 */
+	public void setName(String[] name);
+	
+	/**
+	 * Method will return the type-2 to command as a string. The string command returned will vary
+	 * depending on the arguments and options selected. 
+	 * @see {@link DbUpdateCommand}
+	 * @return String
+	 * @throws Exception
+	 */
+    public String getCommand();
+    
+    /** Specifies the attribute to be started
+     *  we are only allowing option START(ACCESS) 
+     */
+    public void setStart(_DB_START value);
+
+     /**
+     * Specifies the attributes to be stopped.
+     * {@link _DB_STOP}
+     * @param values
+     */
+    public void setStop(_DB_STOP values);
+    
+    /**
+     * Specifies the attributes to be lock/unlock
+     * {@link _DB_LOCK}
+     * @params lock
+     */ 
+    public void setLock (_DB_LOCK lock);
+    
+    /**
+     * Sets OPTION
+     * @param options
+     */
+    public void setOptions (_DB_OPTION[] options);
+    
+    /**
+     * Sets SCOPE
+     * @param scope
+     */
+    public void setScope (_DB_SCOPE scope);
+    
+    /**
+     * Sets AREA
+     * @param area
+     */
+    public void setArea (_DB_AREA area);
+    
+    /**
+     * Sets ACCTYPE
+     * @param accType
+     */
+    public void setAccType (_DB_ACCTYPE accType);
+    
+    /**
+     * Sets IMSPlex
+     * @param systemId
+     */
+	public void setRoute(String[] systemId);
+}

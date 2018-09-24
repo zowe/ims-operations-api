@@ -1,0 +1,1104 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.datastore;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.im.ac.datastore.AbstractTable;
+import com.ibm.im.ac.datastore.Datastore;
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.imsplex.Imsplex.ImsplexResponseAttribute;
+
+/**
+ * Class provides a number of helpers that assist in managing meta-data for a subclass as well as some 
+ * methods that are common across all  implementers
+ * @author ddimatos
+ *
+ */
+public abstract class AbstractImsBaseDatastore extends AbstractTable  implements ImsBaseDastoreConstants{
+
+	private static final Logger logger = LoggerFactory.getLogger(AbstractImsBaseDatastore.class);
+
+	//Map entry should look like this: {"env:imsplex":{"ims1":{TransactionMetaData},"ims2":{DatastoreMetaData},"ims3":{DatastoreMetaData}}
+	protected ConcurrentHashMap<String, ConcurrentHashMap<String, DatastoreMetaData>> imsOmMetaData = new ConcurrentHashMap<String, ConcurrentHashMap<String,DatastoreMetaData>>();
+
+	//This is the member name used as the key to identify the various metatData implementers. This is usually the MBR attribute for a resource which 
+	//identifies the Member Name such as IMS1, IMS2, HWS1, HWS2....etc. This key is also used to assist with the memory map repesented as:
+	//{"env:imsplex":{mbrnameColumn:{values}}, {"1:plex1":{IMS1:{....}}, {"1:plex1":{OM10M:{....}}
+	private String mbrNameColumn = "";
+	private static final String COLON=":";
+	/**
+	 * Abstract class of helpers to provide implementers common methods used by all derby cache tables. As well it provides 
+	 * a runtime cache that represents the meta-data about what is stored in the derby tables.
+	 * @param datastore
+	 * @param tableName
+	 * @param version
+	 * @param responseAttributeMbr
+	 * @throws DatastoreException
+	 */
+	protected AbstractImsBaseDatastore(Datastore datastore, String tableName,String version, String responseAttributeMbr) throws DatastoreException {
+		super(datastore, tableName, version);
+		this.mbrNameColumn = responseAttributeMbr;
+	}
+
+	//***************************************************************************************************
+	// MemCache helpers for extender's of this abstract class. Recall that the memcache provides basic 
+	// information about the size and date of when the cache was last updated to avoid derby scans.
+	//***************************************************************************************************
+	
+	/**
+	 * Print the memory cache contents
+	 */
+	public void printMetaDataCache(){
+		
+		String NEW_LINE = System.getProperty("line.separator");
+		
+		for (Map.Entry<String, ConcurrentHashMap<String, DatastoreMetaData>> entry : this.imsOmMetaData.entrySet()) {
+		    String key = entry.getKey();  //should be something like env:imsplex
+		    Map <String, DatastoreMetaData> value = (Map <String, DatastoreMetaData>) entry.getValue(); //A hashmap of DatastoreMetaData objects
+		    
+		    System.out.println(NEW_LINE+ "Meta-Data key = ["+key +" with values{");
+		    
+		    for(Map.Entry<String, DatastoreMetaData> data: value.entrySet()){
+		    	String dataKey = data.getKey();
+		    	DatastoreMetaData metaData = data.getValue();
+		    	System.out.println("Member Key = [" + dataKey +"]");
+		    	System.out.println("Member Value = {");
+		    	System.out.println(metaData);
+		    	System.out.println("Value = }");
+		    }
+		    System.out.println("}");
+		}
+	}
+	
+	/**
+	 * Class represents minimal meta-data needed to query the status of the transactions cached to our local database.
+	 */
+	public class DatastoreMetaData{
+		int sysplexId 	= -1;
+		int imsplexId 	= -1;
+		String imsplex 	= null;
+		String tableName	= null;
+		String mbrName 	= null;
+		Date date 		= null;
+		Date headerDate = null;
+		int size 			= 0;
+		ArrayList<String> headers = null;
+
+		@Override
+		public String toString(){
+			StringBuilder result = new StringBuilder();
+			String NEW_LINE = System.getProperty("line.separator");
+
+			String format = "| %1$-25s| %2$-50s|" + NEW_LINE;
+			String line = "+------------------------------------------------------------------------------+" + NEW_LINE;
+
+			result.append(line);
+			result.append(String.format(format, "Object", this.getClass().getSimpleName() ));  
+			result.append(line);
+			result.append(String.format(format, "Sysplex ID", this.sysplexId)); 
+			result.append(line);
+			result.append(String.format(format, "Imsplex Name", this.imsplex)); 
+			result.append(line);
+			result.append(String.format(format, "Table Name", this.tableName)); 
+			result.append(line);
+			result.append(String.format(format, "Member Name", this.mbrName)); 
+			result.append(line);
+			result.append(String.format(format, "Date", this.date)); 
+			result.append(line);
+			result.append(String.format(format, "Header Date", this.headerDate)); 
+			result.append(line);
+			result.append(String.format(format, "Size", "Value")); 
+			result.append(line);
+			result.append(String.format(format, "Headers", this.headers)); 
+			result.append("+------------------------------------------------------------------------------+");
+
+			return result.toString();
+		}
+	}
+
+
+
+	/**
+	 * Query the meta-data runtime cache table size for an IMSPLex in a given Environment, note this is a cumulative number.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int getCountFromMemoryCache(int sysplexId, String imsplexName) throws OmDatastoreException{
+		return getCountFromMemoryCache(sysplexId,imsplexName,new String[]{ImsCommandAttributes.ASTERISK});
+	}
+
+	/**
+	 * Query the meta-data runtime cache table size for an IMS given an IMSPlex and Environment, note this is a cumulative number.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @param systemId
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int getCountFromMemoryCache(int sysplexId, String imsplexName, String[] systemId) throws OmDatastoreException{
+		int size = 0;
+		String key = Integer.toString(sysplexId).concat(COLON).concat(imsplexName.trim()).concat(COLON).concat(tableName);
+
+		//If there is any * then it will override the rest of the route members and we should get a list of all the members.
+		for(String system: systemId){
+			if(system.equals(ImsCommandAttributes.ASTERISK)){
+				Collection<String> imsMembers = getDistinctColumn(sysplexId, imsplexName.trim(), mbrNameColumn);
+				systemId = (String[]) imsMembers.toArray(new String[imsMembers.size()]); 
+
+				for(String imsSystem: systemId){
+					Map<String, DatastoreMetaData> imsplexMetaDataMapTemp = this.imsOmMetaData.get(key);
+					if(imsplexMetaDataMapTemp != null){
+						DatastoreMetaData imsplexMetaDataTemp = imsplexMetaDataMapTemp.get(imsSystem.trim());
+						if(imsplexMetaDataTemp != null){
+							size += imsplexMetaDataTemp.size;
+						}
+					}
+				}
+				return size;
+
+			}else{
+				Map<String, DatastoreMetaData> imsplexMetaDataMapTemp = this.imsOmMetaData.get(key);
+
+				if(imsplexMetaDataMapTemp != null){
+					DatastoreMetaData imsplexMetaDataTemp = imsplexMetaDataMapTemp.get(system.trim());
+
+					if(imsplexMetaDataTemp != null){
+						size += imsplexMetaDataTemp.size;
+					}
+				}
+			}
+		}
+
+		return size;
+	}
+
+	/**
+	 * Returns the last date the transaction database cache was updated with transactions an IMS given 
+	 * the Sysplex ID , IMSPLex ID and the IMS Name. 
+	 * @param sysplexId
+	 * @param imsplexId
+	 * @param systemId
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public Date getLastestDateFromMemoryCache(int sysplexId, String imsplexName, String[] systemId) throws OmDatastoreException{
+		String key = Integer.toString(sysplexId).concat(COLON).concat(imsplexName.trim()).concat(COLON).concat(tableName);
+		Date date = null;
+
+		//If there is a request for more than on member for the cache, we should compare each members date and if they are 
+		//different we send back the latest one (instead of null). ie Plex level we have 3 ims's , maybe one of them was refreshed so a different date will appear.
+		if(Arrays.asList(systemId).contains(ImsCommandAttributes.ASTERISK)){
+			//TODO: I think we might be able to not go to derby for this and just search the cache, use the entry set
+			Collection<String> distinctColumns = getDistinctColumn(sysplexId, imsplexName, mbrNameColumn);
+			systemId = distinctColumns.toArray(new String[distinctColumns.size()]);
+		}
+
+		for(String imsMember: systemId){
+			if(date == null){
+				date = this.imsOmMetaData.get(key).get(imsMember).date;
+			}else{
+				Date otherDate = this.imsOmMetaData.get(key).get(imsMember).date;
+				
+				if(date.compareTo(otherDate) < 0){
+					return otherDate;
+				} 
+				
+				//Note: We encountered and IMS who's date is different to another one, return null;
+				//Note: we are going to return for a multi-ims environment the date of the latest discovery.
+				//Note: TODO: Even if a discovery is done for two IMS in the same discovery, because derby time stamp could only be milliseconds apart
+				//that will yield a delta. Maybe we should override compare and only look at the hour the update occurred.
+				//else >= 0 so return date
+				return date;
+			}
+		}
+
+		return date;
+	}
+
+	/**
+	 * Method will set new meta-data and in the case there is meta-data, the older one is overwritten.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @param tableName
+	 * @param mbrName
+	 * @param timeStamp
+	 * @param size
+	 */
+	private void setMetaDataMemoryCache(int sysplexId, String imsplexName ,String tableName, String mbrName, Timestamp timeStamp, int size){
+		//We don't want to build a memcache on anything with no date or size 0. 
+		//if(timeStamp == null || size == 0){
+		//	return;
+		//}
+		
+		String key = Integer.toString(sysplexId).concat(COLON).concat(imsplexName.trim()).concat(COLON).concat(tableName);
+
+		if(this.imsOmMetaData.containsKey(key)){
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+
+			if(map.containsKey(mbrName)){ //update the existing map
+				DatastoreMetaData imsplexMetaData =  map.get(mbrName);
+				imsplexMetaData.date = timeStamp;
+				imsplexMetaData.size = size;
+
+			}else{ //There is a key for this but no member matches, add the member
+				DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+				imsplexMetaData.sysplexId 	= sysplexId;
+				imsplexMetaData.imsplex 		= imsplexName;
+				imsplexMetaData.tableName 	= tableName;
+				imsplexMetaData.mbrName 		= mbrName;
+				imsplexMetaData.date 		= timeStamp;
+				imsplexMetaData.size 		= size;
+				map.put(mbrName, imsplexMetaData);
+			}
+
+		}else{ //new entry
+			ConcurrentHashMap<String, DatastoreMetaData> temp = new ConcurrentHashMap<String,DatastoreMetaData>();
+			DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+			imsplexMetaData.sysplexId = sysplexId;
+			imsplexMetaData.imsplex = imsplexName;
+			imsplexMetaData.tableName = tableName;
+			imsplexMetaData.mbrName 	= mbrName;
+			imsplexMetaData.date 		= timeStamp;
+			imsplexMetaData.size 		= size;
+			temp.put(mbrName, imsplexMetaData);
+			this.imsOmMetaData.put(key,temp);
+		}	
+	}    
+	
+	/**
+	 * Method perform proper clean up of the memory cache when a delete has been requested. 
+	 * Usage: omImsplexTable.clearMetaDataMemoryCache(1, "CSLPLEX2", "OM3OM");
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @param mbrName
+	 */
+	private void clearMetaDataMemoryCache(int sysplexId, String imsplexName ,String mbrName){
+		String key = Integer.toString(sysplexId).concat(COLON).concat(imsplexName.trim()).concat(COLON).concat(this.tableName);
+
+		if(this.imsOmMetaData.containsKey(key)){
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+
+			if(map.containsKey(mbrName)){ //update the existing map
+				map.remove(mbrName);
+			}
+			//Case user passes in * but our discovery code does not allow this 
+			//else{ //There is a key for this but no member matches, add the member
+			//	this.imsOmMetaData.remove(key);
+			//}
+		}
+	}    
+
+	private void clearMetaDataMemoryCache(int sysplexId, String imsplexName){
+		String key = Integer.toString(sysplexId).concat(COLON).concat(imsplexName.trim()).concat(COLON).concat(this.tableName);
+
+		if(this.imsOmMetaData.containsKey(key)){
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+			this.imsOmMetaData.remove(key);
+		}
+	}    
+
+
+	/**
+	 * Convert sql timestamp into java.util.timestamp
+	 * @param timestamp
+	 * @return
+	 */
+	private java.util.Date toDate(java.sql.Timestamp timestamp) {
+		long milliseconds = timestamp.getTime() + (timestamp.getNanos() / 1000000);
+		return new java.util.Date(milliseconds);
+	}
+
+	/**
+	 * Returns the number of environments (Sysplexes) that have been entered into the cache as part of the resource discovery.
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Collection<Integer> getEnvironmentsFromFileSystem() throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Collection<Integer> environments = new ArrayList<Integer>();
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT DISTINCT ")
+			.append(SYSPLEX_ID).append(" FROM ").append(this.tableName);
+
+			ps = connection.prepareStatement(sb.toString());
+
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				environments.add(results.getInt(SYSPLEX_ID));
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return environments;
+	}
+
+	/**
+	 * Returns the number of MSPlexes that have been entered into the cache as part of the resource discovery.
+	 * @param sysplexId
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Collection<String> getImsplexesFromFileSystem(int sysplexId) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Collection<String> imsplexes = new ArrayList<String>();
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT DISTINCT ")
+			.append(IMSPLX).append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" =  ?");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setInt(1, sysplexId);
+
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				imsplexes.add(results.getString(IMSPLX));//getInt(IMSPLEX_ID));
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return imsplexes;
+	}
+
+
+
+	/**
+	 * Returns the names of the IMS Members that have been entered into the cache as part of the resource discovery.
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Collection<String> getMemberNamesFromFileSystem(int sysplexId, String imsplexName) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Collection<String> imsMembers = new ArrayList<String>();
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT DISTINCT ")
+			.append(mbrNameColumn)
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" =  ?")
+			.append(" AND ").append(IMSPLX).append(" =  ?");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setInt(1, sysplexId);
+			ps.setString(2, imsplexName);
+
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				imsMembers.add(results.getString(mbrNameColumn));
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return imsMembers;
+	}
+
+	private Integer getCountFromFileSystem(int sysplexId, String imsplexName, String member) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Integer count = new Integer(0);
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT COUNT(*)")
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" =  ?")
+			.append(" AND ").append(ImsplexResponseAttribute.IMSPLX).append(" =  ?")
+			.append(" AND ").append(mbrNameColumn).append(" =  ?");
+
+			//prepare the statement to be reround so we can access the row and getInt(..)
+			ps = connection.prepareStatement(sb.toString(),ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			ps.setInt(1, sysplexId);
+			ps.setString(2, imsplexName);
+			ps.setString(3, member);
+
+			results = ps.executeQuery();
+
+			results.last();
+			count = results.getInt(1);
+			results.beforeFirst();
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return count;
+	}
+
+
+	private Timestamp getLastestDateFromFileSystem(int sysplexId, String imsplexName, String member) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		java.sql.Timestamp currentTimestamp = null; //new java.sql.Timestamp(System.currentTimeMillis());
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT MAX(UPDATED)")
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" =  ?")
+			.append(" AND ").append(ImsplexResponseAttribute.IMSPLX).append(" =  ?")
+			.append(" AND ").append(mbrNameColumn).append(" =  ?");
+
+			//prepare the statement to be reround so we can access the row and getInt(..)
+			ps = connection.prepareStatement(sb.toString(),ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			ps.setInt(1, sysplexId);
+			ps.setString(2, imsplexName);
+			ps.setString(3, member);
+
+			results = ps.executeQuery();
+
+			results.last();
+			currentTimestamp = results.getTimestamp(1);
+			results.beforeFirst();
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+
+		return currentTimestamp;
+	}
+	
+	public void autoConfigureResourceMetaData() throws OmDatastoreException, DatastoreException{
+		Collection<Integer> sysplexes = null;
+		Collection<String> imsplexes = null;
+		Collection<String> imsMembers = null;
+
+		//Get all sysplexId's in the discovered table
+		sysplexes = this.getEnvironmentsFromFileSystem();
+		String msg = null;
+
+		if(sysplexes.size() > 0){
+			msg = "Building resource meta-data for table " + this.tableName ;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+		}
+
+
+		for(Integer sysplex : sysplexes){
+			msg = "\tDetected SYSPLEX ID: " + sysplex;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+			
+			//Get all IMSPlexId's in the discovered table
+			imsplexes = this.getImsplexesFromFileSystem(sysplex);
+
+			for(String imsplex: imsplexes){
+				msg = "\tDetected IMSPLEX ID: " + imsplex;
+
+				if(logger.isDebugEnabled()){
+					logger.debug(msg);
+				}
+				
+				//Get all Distinct IMS Members in the discovered table
+				imsMembers = this.getMemberNamesFromFileSystem(sysplex, imsplex);
+
+				for(String member: imsMembers){
+					msg = "\tDetected IMS Member Name: " + member+ LINE_SEPARATOR;
+
+					if(logger.isDebugEnabled()){
+						logger.debug(msg);
+					}
+
+					//Note: All key values for setting meta-data have been discovered (sysplex,imsplex,memberName) so set query for detals
+
+					//Get the size for a given member belong to a specific sysplex and imsplex
+					Integer count = this.getCountFromFileSystem(sysplex, imsplex, member);
+					if(count == 0){
+						msg = "\tDetermined "+ this.tableName + " has not been discovered, thier is no cache size for sysplex ID "+ sysplex + " , IMSPlex ID: " + imsplex + " , Table Name: " + this.tableName + " , Member Name: "+member + " = " + count;
+					}else{
+						msg = "\tDetermined "+ this.tableName + " cache size for sysplex ID "+ sysplex + " , IMSPlex ID: " + imsplex + " , Table Name: " + this.tableName + " , Member Name: "+member + " = " + count;
+					}
+
+					if(logger.isDebugEnabled()){
+						logger.debug(msg);
+					}
+					
+					//Get the latest date for a given member belonging to a specific sysplex and imsplex
+					Timestamp date = this.getLastestDateFromFileSystem(sysplex, imsplex,member);
+					if(date == null){
+						msg = "\tDetermined "+ this.tableName + " has not been discovered, there is no date entry for sysplex ID:"+ sysplex + " , IMSPlex ID: "+ imsplex + " , Table Name: " + this.tableName +" , Member Name: "+member + LINE_SEPARATOR;
+					}else{
+						msg = "\tDetermined "+ this.tableName + "  last updated cache date for sysplex ID:"+ sysplex + " , IMSPlex ID: "+ imsplex + " , Table Name: " + this.tableName +" , Member Name: "+member + " = " + date+ LINE_SEPARATOR;
+					}
+					
+					if(logger.isDebugEnabled()){
+						logger.debug(msg);
+					}
+					
+					
+					if(imsplex!= null && member != null) // To avoid null pointer exception when calling following methods
+					{
+						//Set the memory meta data
+					    this.setMetaDataMemoryCache(sysplex, imsplex.trim(),tableName,member.trim(), date, count);
+					    msg = "\tConfiguring "+ this.tableName + "  meta-data."+ LINE_SEPARATOR;
+
+					    if(logger.isDebugEnabled()){
+						 logger.debug(msg);
+					    }
+										
+						//Access the memory cache for size
+						int size = this.getCountFromMemoryCache(sysplex, imsplex.trim(),new String[]{member.trim()});
+						msg = "\tMemory cache Size for sysplex ID  "+ sysplex + " , IMSPlex ID: " + imsplex + " , Table Name: " + this.tableName +" , Member Name: "+member + " = " + size;
+	
+						if(logger.isDebugEnabled()){
+							logger.debug(msg);
+						}
+						
+						//Access the memory cache for date
+						Date updated = this.getLastestDateFromMemoryCache(sysplex, imsplex.trim(),new String[]{member.trim()});
+						msg = "\tMemory cache Date for sysplex ID: "+ sysplex + " , IMSPlex ID: "+ imsplex+" , Table Name: " + this.tableName +" , Member Name: "+member + " = " + updated+ LINE_SEPARATOR;
+	
+						if(logger.isDebugEnabled()){
+							logger.debug(msg);
+						}
+					
+					}
+				}
+			}
+		}
+	}	
+
+	public void autoConfigureResourceMetaData(int sysplex, String imsplex) throws OmDatastoreException{
+		Collection<String> imsMembers = null;
+		String msg = "";
+
+		//Get all Distinct IMS Members in the discovered table
+		imsMembers = this.getMemberNamesFromFileSystem(sysplex, imsplex);
+
+		for(String member: imsMembers){
+			msg = "Detected IMS Member Name: " + member;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+
+			//Note: All key values for setting meta-data have been discovered (sysplex,imsplex,memberName) so set query for detals
+
+			//Get the size for a given member belong to a specific sysplex and imsplex
+			Integer count = this.getCountFromFileSystem(sysplex, imsplex, member);
+			if(count == 0){
+				msg = "\tDetermined "+ this.tableName + " has not been discovered, thier is no cache size for sysplex ID "+ sysplex + " , IMSPlex ID: " + imsplex + " , Table Name: " + this.tableName + " , Member Name: "+member + " = " + count;
+			}else{
+				msg = "\tDetermined "+ this.tableName + " cache size for sysplex ID "+ sysplex + " , IMSPlex ID: " + imsplex + " , Table Name: " + this.tableName + " , Member Name: "+member + " = " + count;
+			}
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+			
+			//Get the latest date for a given member belonging to a specific sysplex and imsplex
+			Timestamp date = this.getLastestDateFromFileSystem(sysplex, imsplex,member);
+			if(date == null){
+				msg = "\tDetermined "+ this.tableName + " has not been discovered, there is no date entry for sysplex ID:"+ sysplex + " , IMSPlex ID: "+ imsplex + " , Table Name: " + this.tableName +" , Member Name: "+member + LINE_SEPARATOR;
+			}else{
+				msg = "\tDetermined "+ this.tableName + "  last updated cache date for sysplex ID:"+ sysplex + " , IMSPlex ID: "+ imsplex + " , Table Name: " + this.tableName +" , Member Name: "+member + " = " + date+ LINE_SEPARATOR;
+			}
+			
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+			
+			//Set the memory meta data
+			this.setMetaDataMemoryCache(sysplex, imsplex.trim(),tableName,member.trim(), date, count);
+			msg = "Configuring "+ this.tableName + "  meta-data.";
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+			
+			//Access the memory cache for size
+			int size = this.getCountFromMemoryCache(sysplex, imsplex.trim(),new String[]{member.trim()});
+			msg = "Memory cache Size for sysplex ID  "+ sysplex + " , IMSPlex ID: " + imsplex.trim() + " , Table Name: " + this.tableName +" , Member Name: "+member + " = " + size;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+			
+			//Access the memory cache for date
+			Date updated = this.getLastestDateFromMemoryCache(sysplex, imsplex.trim(),new String[]{member.trim()});
+			msg = "Memory cache Date for sysplex ID: "+ sysplex + " , IMSPlex ID: "+ imsplex.trim()+" , Table Name: " + this.tableName +" , Member Name: "+member + " = " + updated;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+		}
+	}
+
+	public void autoConfigureResourceMetaData(int sysplex, String imsplexName, String mbrName) throws OmDatastoreException {
+		String msg = "";
+		msg = "Detected IMSPLEX: " + imsplexName;
+
+		// Get the size for the given mbrName belong to sysplex and member
+		Integer count = this.getCountFromFileSystem(sysplex, imsplexName, mbrName);
+		msg = "Determined Imsplex cache size for sysplex ID " + sysplex + " , IMSPLEX: " + imsplexName + " , Table Name: " + this.tableName + " , Member Name: " + mbrName + " = " + count;
+		if(logger.isDebugEnabled()){
+			logger.debug(msg);
+		}
+		
+		// Get the latest date for a given member belonging to a specific sysplex, plex  and member
+		Timestamp date = this.getLastestDateFromFileSystem(sysplex, imsplexName, mbrName);
+		msg = "Determined Imsplex last updated cache date for sysplex ID: " + sysplex + " , IMSPLEX: " +imsplexName+" , Table Name: " + this.tableName +" , Member Name: " + mbrName + " = " + date;
+		if(logger.isDebugEnabled()){
+			logger.debug(msg);
+		}
+		
+		//Set the memory meta data
+		this.setMetaDataMemoryCache(sysplex, imsplexName, tableName, mbrName.trim(), date, count);
+		msg = "Configuring Imsplex meta-data.";
+		if(logger.isDebugEnabled()){
+			logger.debug(msg);
+		}
+		
+		//Access the memory cache for size
+		int size = this.getCountFromMemoryCache(sysplex, imsplexName, new String[]{mbrName.trim()});
+		msg = "Memory cache size for sysplex ID: " + sysplex + " , IMSPLEX: " + imsplexName +" , Table Name: " + this.tableName +" , Member Name: " + mbrName + " = " + size;
+		if(logger.isDebugEnabled()){
+			logger.debug(msg);
+		}
+		
+		//Access the memory cache for date
+		Date updated = this.getLastestDateFromMemoryCache(sysplex, imsplexName, new String[]{mbrName.trim()});
+		msg = "Memory cache Date for sysplex ID: " + sysplex + " , IMSPlex: " + imsplexName+" , Table Name: " + this.tableName + " , Member Name: "+ mbrName + " = " + updated;
+		if(logger.isDebugEnabled()){
+			logger.debug(msg);
+		}
+	}
+
+
+	//***************************************************************************************************
+	// Generic SQL helpers for extenders of this abstract class
+	//***************************************************************************************************
+
+
+	/**
+	 * Delete the contents of the table
+	 */
+	public void deleteTable() throws OmDatastoreException{
+		try {
+			execute("DELETE FROM " + this.tableName);
+		} catch (DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery("DELETE FROM " + this.tableName);
+			throw omDatastoreException;
+		}
+	}
+
+	/**
+	 * Delete the contents of the table
+	 */
+	public void deleteTable(int sysplexId, String imsplexName,String memberName) throws OmDatastoreException{
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		StringBuffer sb = null;
+
+		try {
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("DELETE FROM ")
+			.append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+			.append(" AND ").append(ImsplexResponseAttribute.IMSPLX).append(" = ? ")
+			.append(" AND ").append(mbrNameColumn).append(" = ? ");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setInt(1, sysplexId);
+			ps.setString(2, imsplexName);
+			ps.setString(3, memberName);
+
+			ps.execute();
+			
+			//Clear out the memory cache to be in synch with a delete
+			this.clearMetaDataMemoryCache(sysplexId, imsplexName, memberName);
+			
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results); 
+			close(ps);       
+			close(connection); 
+		}
+	}
+
+	public void deleteTable(int sysplexId, String imsplexName) throws OmDatastoreException{
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		StringBuffer sb = null;
+
+		try {
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("DELETE FROM ")
+			.append(this.tableName)
+			.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+			.append(" AND ").append(ImsplexResponseAttribute.IMSPLX).append(" = ? ");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setInt(1, sysplexId);
+			ps.setString(2, imsplexName);
+
+			ps.execute();
+			
+			//Clear out the memory cache to be in synch with a delete
+			this.clearMetaDataMemoryCache(sysplexId, imsplexName);
+			
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results); 
+			close(ps);       
+			close(connection); 
+		}
+	}
+
+	/**
+	 * Method will drop the {@link ImsTransactionTable}, otherwise delte the table from the database
+	 */
+	@Override
+	public void dropTables() throws OmDatastoreException {
+		try {
+			execute("DROP TABLE " + this.tableName);
+			//set this to null so the init method thinks its a new table
+			this.parentDatastore.setProperty(this.tableName + ".version", null);
+			System.out.println("property " + this.parentDatastore.getProperty(this.tableName + ".version"));
+			this.currentVersion = null;
+		} catch (DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery("DROP TABLE " + this.tableName);
+			throw omDatastoreException;
+		}
+	}
+
+	/**
+	 * Method will format a String value representing a IMS Resource name and if the name ends in a Asterisk ('*')
+	 * it will be replaced with a Percent symbol ('%'). This formating is used when query is made that is destined
+	 * for a database cache because databases do not support Asterisk's. 
+	 * @param resoureName
+	 * @return
+	 */
+	public String[] formatNames(String[] resoureName){ 
+		if(resoureName != null){
+			int resourceLength = resoureName.length;
+			if(resourceLength > 0){
+				for(int i = 0;i<resourceLength;i++){
+					if(resoureName[i].endsWith(ImsCommandAttributes.ASTERISK)){
+						resoureName[i] = resoureName[i].substring(0, resoureName[i].length()-1).concat("%");
+					}
+				}
+			}
+		}
+		return resoureName;
+	}
+
+	//Generates an IN clause prefixed by AND ////SELECT * FROM IMSOM_ROUTING_CODE WHERE SYSPLEX_ID = 1  AND IMSPLX = 'PLEX1' AND MBR IN ('IMS2','IMS1') AND RTC IN ('EMHTX2','EMHTX3')
+	public String sqlInGenerator(String columnName ,String[] imsSystemNames){
+		ArrayList<String> inArgs = new ArrayList<String>();
+		StringBuffer result = new StringBuffer();
+		//Collection<String> s = new ArrayList<String>(Arrays.asList(imsSystemNames));
+
+		for(String imsSystem: imsSystemNames){
+			if(imsSystem.equals(ImsCommandAttributes.ASTERISK)){
+				return ""; //We don't need to do anything, we could use the "AND MBR LIKE '%'" but I see no point. 
+			}
+			inArgs.add(imsSystem);
+		}
+
+		int inArgsLength = inArgs.size();
+
+		if(inArgsLength > 0){
+			result.append(" AND ").append(columnName).append(" IN (");
+			for(int i =0; i < inArgsLength ; i++){
+				if(i+1 == inArgsLength){
+					result.append("'").append(inArgs.get(i)).append("'");
+				}else{
+					result.append("'").append(inArgs.get(i)).append("',");
+				}
+			}
+			result.append(")");
+		}
+
+		return result.toString();
+	}
+
+	public String sqlResourceGenerator(String columnName , String[] resoureName){ 
+		ArrayList<String> likeArgs = new ArrayList<String>();
+		ArrayList<String> inArgs = new ArrayList<String>();
+		boolean hasLikeArgs = false;
+		boolean hasInArgs 	= false;
+		StringBuffer result = new StringBuffer();;
+
+		if(resoureName != null){
+			int resourceLength = resoureName.length;
+
+			if(resourceLength > 0){
+				for(int i = 0;i<resourceLength;i++){
+
+					if(resoureName[i].endsWith(ImsCommandAttributes.ASTERISK)){			//Case: Ends in *, we need to convert it to % and add it to a LIKE clause
+						likeArgs.add(resoureName[i].substring(0, resoureName[i].length()-1).concat(ImsCommandAttributes.PERCENT));
+						hasLikeArgs = true;
+					}else if (resoureName[i].endsWith(ImsCommandAttributes.PERCENT)){  	//Case: Ends in % so just add it
+						likeArgs.add(resoureName[i]);
+						hasLikeArgs = true;
+					}else{ 										//Case: Does not have a regex
+						inArgs.add(resoureName[i]);
+						hasInArgs = true;
+					}
+				}
+
+				if(hasInArgs && hasLikeArgs){ //AND (TRAN IN ('IVTNO','BHE2') OR TRAN LIKE 'EMH%' OR TRAN LIKE 'CDE%')
+					int inArgsLength = inArgs.size();
+
+					result.append(" AND (").append(columnName).append(" IN (");
+					for(int i =0; i < inArgsLength ; i++){
+						if(i+1 == inArgsLength){
+							result.append("'").append(inArgs.get(i)).append("'");
+						}else{
+							result.append("'").append(inArgs.get(i)).append("',");
+						}
+					}
+					result.append(")");
+
+					for(String str: likeArgs){
+						result.append(" OR ").append(columnName).append(" LIKE '").append(str).append("'");
+					}
+					result.append(")");
+
+				}else if(hasInArgs){				//AND TRAN IN ('IVTNO','BHE2')
+					int inArgsLength = inArgs.size();
+
+					result.append(" AND ").append(columnName).append(" IN (");
+					for(int i =0; i < inArgsLength ; i++){
+						if(i == inArgsLength-1){
+							result.append("'").append(inArgs.get(i)).append("'");
+						}else{
+							result.append("'").append(inArgs.get(i)).append("',");
+						}
+					}
+					result.append(")");
+
+				}else if(hasLikeArgs){		//AND (TRAN LIKE 'EMH%' OR TRAN LIKE 'CDE%')
+					int likeArgsSize = likeArgs.size();
+					result.append(" AND (").append(columnName).append(" LIKE '").append(likeArgs.get(0)).append("'");
+
+					for(int i = 1; i < likeArgsSize ; i++){
+						result.append(" OR ").append(columnName).append(" LIKE '").append(likeArgs.get(i)).append("'");
+					}
+					result.append(")");
+				}
+			}
+		}
+		return result.toString();
+	}
+
+	protected Collection<String> getDistinctColumn(int sysplexId,String responseAttribute) throws OmDatastoreException{
+		return getDistinctColumn(sysplexId, null, responseAttribute);
+	}
+
+	protected Collection<String> getDistinctColumn(int sysplexId,String imsplex,String responseAttribute) throws OmDatastoreException{
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		ArrayList<String> columnResults = new ArrayList<String>();
+		StringBuffer sb = null;
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			//Case: Return every distinct responseAttribute in the table
+			if(sysplexId == -1 && imsplex == null){
+				sb = new StringBuffer("SELECT DISTINCT ")
+				.append(responseAttribute).append(" FROM ")
+				.append(this.tableName)
+				.append(" ORDER BY ").append(responseAttribute);
+
+				ps = connection.prepareStatement(sb.toString());
+				
+			//Case: Return every distinct responseAttribute for given sysplexId in the table
+			}else if(imsplex == null){
+				sb = new StringBuffer("SELECT DISTINCT ")
+				.append(responseAttribute).append(" FROM ")
+				.append(this.tableName)
+				.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+				.append(" ORDER BY ").append(responseAttribute);   
+
+				ps = connection.prepareStatement(sb.toString());
+				ps.setInt(1, sysplexId);
+				
+			//Case: Return every distinct responseAttribute for given IMSPLX name and SysplexId
+			} else {
+				sb = new StringBuffer("SELECT DISTINCT ")
+				.append(responseAttribute).append(" FROM ")
+				.append(this.tableName)
+				.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+				.append(" AND ").append(ImsplexResponseAttribute.IMSPLX).append(" = ? ")
+				.append(" ORDER BY ").append(responseAttribute);   
+
+				ps = connection.prepareStatement(sb.toString());
+				ps.setInt(1, sysplexId);
+				ps.setString(2, imsplex);
+			}
+
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				columnResults.add(results.getString(responseAttribute));
+			}
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    // ResultSet
+			close(ps);         // PreparedStatement
+			close(connection); // Connection
+		}   
+		return columnResults;
+	}
+
+	@Override
+	protected void upgrade(BigDecimal current) throws DatastoreException {
+
+		if (current != null) {
+			//drop the tables since our om tables can be simply rediscovered
+			this.dropTables();
+			if(logger.isInfoEnabled()){
+				logger.info("Migrating "+ this.tableName + "table to version " + current);
+			}
+
+			//Create the tables since we deleted them so our meta-data code does not error
+			this.initialize();
+
+			if(logger.isInfoEnabled()){
+				logger.info("Migration initialization for "+ this.tableName + "table to version " + current);
+			}
+		}
+
+		//TODO: We just erased all their discovered content, how do we discover it for them again? Can we send a message?
+		//Idea: use the isUpgraded value and do this for them.
+
+	}
+}

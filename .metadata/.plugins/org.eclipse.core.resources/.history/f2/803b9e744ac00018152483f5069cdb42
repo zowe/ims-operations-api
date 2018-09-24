@@ -1,0 +1,56 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.rtc.update;
+
+import com.ibm.ims.ea.om.rtc.update.syntax.RTC_START._RTC_START;
+import com.ibm.ims.ea.om.rtc.update.syntax.RTC_STOP._RTC_STOP;
+
+public interface RtcUpdateCommand {
+
+	/**
+	 * Specifies the 1-8 character name of the rotuing code.  Wildcards can be specified
+	 * for the rtc name. The rtc name is a repeatable parameter.
+	 * @param name String
+	 */
+	public void setName(String[] name);
+
+	/**
+	 * Method will return the type-2 command as a string. The string command returned will vary
+	 * depending on the arguments and options selected. 
+	 * @see {@link RtcUpdateCommand}
+	 * @return String
+	 * @throws Exception
+	 */
+	public String getCommand();
+	
+	/**
+     * Specifies the attributes to be started.
+     * {@link _RTC_START}
+     * @param values
+     */
+	public void setStart(_RTC_START values);
+	
+    /**
+     * Specifies the attributes to be stopped.
+     * {@link _RTC_STOP}
+     * @param values
+     */
+	public void setStop(_RTC_STOP values);
+
+	void setRoute(String[] imsName);
+
+    /**
+     * Specifies the attribute values to be changed.
+     * {@link SET}
+     * @param values
+     */
+//	public void setSet(RTC_SET[] values);
+}

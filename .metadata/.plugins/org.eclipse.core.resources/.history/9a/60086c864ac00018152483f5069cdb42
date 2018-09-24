@@ -1,0 +1,893 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.base.version.Version;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.cmd.exceptions.OmCommandGenerationException;
+import com.ibm.ims.ea.om.cmd.utilities.Type2CommandSerializable;
+import com.ibm.ims.ea.om.cmd.v14.query.imsplex.QueryImsPlex;
+import com.ibm.ims.ea.om.cmd.v14.type2.Type2Command;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.exception.OmRuntimeException;
+import com.ibm.ims.ea.om.common.message.OmInteractionContext;
+import com.ibm.ims.ea.om.common.result.OmResultSet;
+import com.ibm.ims.ea.om.common.service.ImsplexService;
+import com.ibm.ims.ea.om.datastore.ImsBaseDastoreConstants;
+import com.ibm.ims.ea.om.datastore.ImsOmDatastore;
+import com.ibm.ims.ea.om.datastore.OmImsplexTable;
+import com.ibm.ims.ea.om.imsplex.Imsplex;
+import com.ibm.ims.ea.om.imsplex.Imsplex.ImsplexResponseAttribute;
+
+/**
+ * <pre>
+ * Class provides methods to interact with OM for the IMPlex Resource types. 
+ * Return types are generalized for all interactions as a Collection of {@link Imsplex} objects. 
+ * 
+ * It should be noted that the Collection only manages the response for the particular 
+ * resource and that OM Messages including Reason Codes, Reason Text, etc are accessible 
+ * from the {@link Om} instance managing the interaction. 
+ * 
+ * See  <code>{@link Om#getOmMessageContexts()} </code> on how to access OM Messages.
+ * </pre>
+ * 
+ * @author ddimatos
+ *
+ */
+public final class ImsplexServices extends ServicesHelper implements ImsplexService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImsplexServices.class);
+    private static final String CSL = "CSL"; //Prefix used for IMSPLEXnames 
+    
+    //Statically build a mem-cache of all the known discovered meta-data about this service resulting from discovery
+    static{
+    	//Try to get an instance of the com.ibm.im.ac.datastore 
+		ImsOmDatastore imsOMDatastore;
+		try {
+			imsOMDatastore = ImsOmDatastore.getInstance();
+			
+			//Build the meta-data for imsplex table
+			OmImsplexTable omImsplexTable = imsOMDatastore.getOmImsplexStore();
+			
+			if(omImsplexTable != null){
+				omImsplexTable.autoConfigureResourceMetaData();
+			}
+			
+		} catch (DatastoreException e) {
+			//This exception will only happen if dependency "com.ibm.im.ac.datastore" has not been
+			//loaded by OSGI. Moving this logic to Declarative serivces might be a good option. 
+		
+			if(logger.isDebugEnabled()){
+				logger.debug("Appears that the bundle for service com.ibm.im.ac.datastore.AbstractDatastore has not been loaded");
+			}
+		}
+    }
+    
+    //This must remain protected else the Om instance will not be able to aggregate all the Om Messages
+    protected ImsplexServices(Om om) {
+    	super(om);
+    	
+		try {
+			this.resourceVersion = this.getResourceVersions(new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.IMS});
+			
+			//Routing is ignored in imsplex, we still want the latest version of any given imsplex situation so return latest
+			version = this.resourceVersion.get("latestResourceVersion");
+		
+		} catch (Exception e) {
+			version = Version.IMS_ZERO_RELEASE;
+		}
+    }
+    
+// ************************************************************************************************************
+// * Get Imsplex members
+// ************************************************************************************************************
+//    @Override
+//    public Collection<Imsplex> getImsPlexMembers() throws OmException, OmConnectionException, OmDatastoreException {
+//    	if(logger.isDebugEnabled()) logger.debug(">> getImsPlexMembers()");
+//    	
+//    	try{
+//    		return getImsPlexMembers(new String[]{ImsCommandAttributes.ASTERISK});
+//    	}finally{
+//    		if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMembers()");
+//    	}
+//    }
+
+    @Override
+    public Collection<Imsplex> getImsPlexMembers() throws OmException, OmConnectionException, OmDatastoreException {
+        if (logger.isDebugEnabled()) logger.debug(">> getImsPlexMembers()"); 
+        
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+        //Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMembers";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+        String imsplexNameTemp = CSL.concat(this.imsplexName);
+        
+        try {
+        	//imsSystemName = this.routeMemberFormater(imsSystemName);
+
+        	/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+        	if(!this.om.isInteractionModeLive()){
+
+        		//Create a connection to OmImsplex table (cache) datastore 
+        		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+
+				//Size greater than 0 then imsplex members have been discovered
+				resourceCacheSize = omImsplexTable.getCountFromMemoryCache(sysplexId, imsplexNameTemp);
+				
+				if( resourceCacheSize > 0){
+					//Set the date the discovery was done
+					date = omImsplexTable.getLastestDateFromMemoryCache(sysplexId, imsplexNameTemp,new String[]{ImsCommandAttributes.ASTERISK});
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+			        
+			        /** Case: interaction mode is DEFAULT or CACHE**/
+			        return omImsplexTable.getImsPlexMembers(sysplexId, imsplexNameTemp, this.om);
+				}
+        	}
+        	
+        	/**Case: No discovery has been run, continue to operate without the cache (live mode)*/
+        	//Query Imsplex for SHOW(ALL) and status
+        	Type2Command type2Command = new Type2Command();
+        	type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+        	type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+        	//type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+        	
+        	QueryImsPlex queryImsPlex = new QueryImsPlex();
+        	queryImsPlex.getNAME().add(ImsCommandAttributes.ASTERISK);
+        	queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.ALL);
+        	
+        	type2Command.setQueryImsPlex(queryImsPlex);
+        	
+        	Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+        	String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+        	
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+            
+            return propertiesToCollection(omResultSet);
+   		 
+        } catch (OmDatastoreException e) {
+        	e.setImsplexName(imsplexNameTemp);
+        	throw e;
+        } catch (DatastoreException e) {
+        	throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+        } catch (OmCommandGenerationException e) {
+        	throw new OmRuntimeException(e);
+        } finally {
+            if (logger.isDebugEnabled()) logger.debug("<< getImsPlexMembers()");
+            
+            this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey);
+        }
+    }
+
+ // ************************************************************************************************************
+ // * Get ImsPlexMembers by Type
+ // ************************************************************************************************************    
+//    @Override
+//    public Collection<Imsplex> getImsPlexMember(QueryImsPlex.TypeOptions[] types) throws OmException, OmConnectionException, OmDatastoreException {
+//    	if (logger.isDebugEnabled()) logger.debug(">> getImsPlexMember("+Arrays.toString(types)+")");
+//    	try{
+//    		return getImsPlexMember(types, new String[]{ImsCommandAttributes.ASTERISK});
+//    	}finally{
+//    		 if (logger.isDebugEnabled()) logger.debug("<< getImsPlexMember("+Arrays.toString(types)+")");
+//    	}
+//    }
+    
+    @Override
+    public Collection<Imsplex> getImsPlexMember(QueryImsPlex.TypeOptions[] types) throws OmException, OmConnectionException, OmDatastoreException {
+    	if(logger.isDebugEnabled()) logger.debug(">> getImsPlexMember()");
+    	
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+    	//Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMember";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+        
+    	String imsplexNameTemp = CSL.concat(this.imsplexName);
+    	
+    	try { 		
+    		/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+			if(!this.om.isInteractionModeLive()){
+				
+				//Create a connection to OmImsplex table (cache) datastore 
+	    		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+	    		
+				//Size greater than 0 then imsplex members have been discovered
+				resourceCacheSize = omImsplexTable.getCountFromMemoryCache(sysplexId, imsplexNameTemp);
+				
+				if( resourceCacheSize > 0){
+					//Set the date the discovery was done
+					date = omImsplexTable.getLastestDateFromMemoryCache(sysplexId, imsplexNameTemp,new String[]{ImsCommandAttributes.ASTERISK});
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+			        
+					//Special case because discovery has populated the om table, so use the discovered headers and set it here
+					if(imsAttributes == null){
+						imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), "getImsPlexMembers");
+					}
+					
+			        /** Case: interaction mode is DEFAULT **/
+					return omImsplexTable.getImsPlexMember(sysplexId, imsplexNameTemp, types, this.om); 
+				}
+			}
+	    		
+    		/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+    		//Query implex members for show all and status
+			Type2Command type2Command = new Type2Command();
+    		type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+    		type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+
+    		QueryImsPlex queryImsPlex = new QueryImsPlex();
+    		queryImsPlex.getNAME().addAll(Arrays.asList(imsplexNameTemp));
+    		queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.ALL);
+   			queryImsPlex.getTYPE().addAll(Arrays.asList(types));	
+  
+    		type2Command.setQueryImsPlex(queryImsPlex);
+    		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+    		String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+
+    		return propertiesToCollection(omResultSet);
+
+    	} catch (OmDatastoreException e) {
+    		e.setImsplexName(imsplexNameTemp);
+    		throw e;
+    	} catch (DatastoreException e) {
+    		throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+    	} catch (OmCommandGenerationException e) {
+    		throw new OmRuntimeException(e);
+    	} finally{
+    		if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMember()");
+    		
+    		this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey);
+    	}
+    }
+     
+    
+    @Override
+    public Collection<Imsplex> getImsPlexMember(QueryImsPlex.TypeOptions[] types, String[] memberName) throws OmException, OmConnectionException, OmDatastoreException {
+    	if(logger.isDebugEnabled()) logger.debug(">> getImsPlexMember()");
+    	
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+    	//Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMember";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		Collection<Imsplex> imsplexMembers;
+        ArrayList<Imsplex> plexMember= new ArrayList<Imsplex>();
+    	String imsplexNameTemp = CSL.concat(this.imsplexName);
+    	
+    	try {
+    		/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+			if(!this.om.isInteractionModeLive()){
+				
+				//Create a connection to OmImsplex table (cache) datastore 
+	    		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+	    		
+				//Size greater than 0 then imsplex members have been discovered
+				resourceCacheSize = omImsplexTable.getCountFromMemoryCache(sysplexId, imsplexNameTemp); //, memberName
+				
+				if( resourceCacheSize > 0){
+					//Set the date the discovery was done
+					date = omImsplexTable.getLastestDateFromMemoryCache(sysplexId, imsplexNameTemp, new String[]{ImsCommandAttributes.ASTERISK}); //,memberName
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+			        
+					//Special case because discovery has populated the om table, so use the discovered headers and set it here
+					if(imsAttributes == null){
+						imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), "getImsPlexMembers");
+					}
+					
+					/** Case: interaction mode is DEFAULT **/
+					imsplexMembers = omImsplexTable.getImsPlexMember(sysplexId, imsplexNameTemp, types, this.om); //memberName,;
+					for(Imsplex imsplexMember: imsplexMembers){
+						for(String member: memberName){
+							if(imsplexMember.getProperty(ImsplexResponseAttribute.IMSMBR).equals(member)){
+								plexMember.add(imsplexMember);
+								return plexMember;
+							}	
+						}
+					}
+				}
+			}
+	    		
+    		/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+    		//Query implex members for show all and status
+			Type2Command type2Command = new Type2Command();
+    		type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+    		type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+
+    		QueryImsPlex queryImsPlex = new QueryImsPlex();
+    		queryImsPlex.getNAME().addAll(Arrays.asList(imsplexNameTemp));
+    		queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.ALL);
+   			queryImsPlex.getTYPE().addAll(Arrays.asList(types));	
+  
+    		type2Command.setQueryImsPlex(queryImsPlex);
+    		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+    		String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			imsplexMembers = propertiesToCollection(omResultSet);
+			for(Imsplex imsplexMember: imsplexMembers){
+				for(String member: memberName){
+					if(imsplexMember.getProperty(ImsplexResponseAttribute.IMSMBR).equals(member)){
+						plexMember.add(imsplexMember);
+						return plexMember;		
+					}
+				}
+			}
+			return imsplexMembers;
+    	} catch (OmDatastoreException e) {
+    		e.setImsplexName(imsplexNameTemp);
+    		throw e;
+    	} catch (DatastoreException e) {
+    		throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+    	} catch (OmCommandGenerationException e) {
+    		throw new OmRuntimeException(e);
+    	} finally{
+    		if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMember()");
+    		
+    		this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey);
+    	}
+    }
+    
+ // ************************************************************************************************************
+ // * Get IMS Resources 
+ // ************************************************************************************************************    
+    @Override
+    public Collection<Imsplex> getImsResources() throws OmException, OmConnectionException, OmDatastoreException {
+        if (logger.isDebugEnabled()) logger.debug(">> getImsResources()");
+        try{
+        	return getImsResources(new String[] {ImsCommandAttributes.ASTERISK});
+        }finally{
+        	if (logger.isDebugEnabled()) logger.debug("<< getImsResources()");
+        }
+    }
+    
+    @Override 
+    public Collection<Imsplex> getImsResources(String[] imsSystemName) throws OmException, OmConnectionException, OmDatastoreException {
+    	if (logger.isDebugEnabled()) logger.debug(">> getImsResources("+Arrays.toString(imsSystemName)+")");
+
+		int resourceCacheSize = 0;
+		Date date = null;
+		ArrayList<String> imsAttributes = null;
+		
+    	//Note the method key to be used for associating the service
+        String methodKey = "getImsResources";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+    	String imsplexNameTemp = CSL.concat(this.imsplexName);
+    	
+    	try {
+    		imsSystemName = this.routeMemberFormater(imsSystemName);
+    		
+      			/** Case: There is at least one asterisk as a member so reset it to a single asterisk **/
+
+    		/** Case: If it is not live then enter this block otherwise drop down to the live code **/
+			if(!this.om.isInteractionModeLive()){
+				
+				// Create a connection to the OmImsplex table (cache) datastore
+	    		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+	    		
+				//Size greater than 0 then imsplex members have been discovered
+				resourceCacheSize = omImsplexTable.getCountFromMemoryCache(sysplexId, imsplexNameTemp, imsSystemName);
+				
+				if( resourceCacheSize > 0){
+					//Set the date the discovery was done
+					date = omImsplexTable.getLastestDateFromMemoryCache(sysplexId, imsplexNameTemp,imsSystemName);
+					
+					//Set the imsattributes that are in the memcache
+					imsAttributes = ImsOmDatastore.getInstance().getGridHeaderTable().getGridHeadersMemCache(version.toString(), methodKey);
+			        
+			        /** Case: interaction mode is DEFAULT or CACHE**/
+			        return omImsplexTable.getImsResources(sysplexId, imsplexNameTemp, imsSystemName, null);
+				}
+			}
+   				
+    		/** Case: no discovery had been run, continue to operate without the cache (live mode)**/
+    		//Query imsplex type(IMS) show(SUBTYPE)
+			Type2Command type2Command = new Type2Command();
+    		type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+    		type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+    		type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+
+    		QueryImsPlex queryImsPlex = new QueryImsPlex();
+    		queryImsPlex.getNAME().add(imsplexNameTemp);
+    		queryImsPlex.getTYPE().add(QueryImsPlex.TypeOptions.IMS);
+    		queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.SUBTYPE);
+
+    		type2Command.setQueryImsPlex(queryImsPlex);
+
+    		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+    		String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+
+    		//Convert the omResponse to a collection to be returned
+    		return propertiesToCollection(omResultSet);
+    		 
+    	} catch (OmDatastoreException e) {
+    		e.setImsplexName(imsplexNameTemp);
+    		throw e;
+    	} catch (DatastoreException e) {
+    		throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+    	} catch(OmCommandGenerationException e) {
+    		throw new OmRuntimeException(e);
+    	} finally {
+    		if(logger.isDebugEnabled()) logger.debug("<< getImsresources("+Arrays.toString(imsSystemName)+")");
+    		
+    		this.setOmInteractionContext(omResultSet,resourceCacheSize, date, imsAttributes, methodKey);
+    	}
+    }
+
+  // ************************************************************************************************************
+  // * Get ImsPlexMember's Version WITH NEW VERSION OBJECT
+  // ************************************************************************************************************
+
+    @Override
+    public Version getImsPlexMemberVersion(QueryImsPlex.TypeOptions type,String memberName) throws OmException, OmConnectionException, OmDatastoreException {
+        if(logger.isDebugEnabled()) logger.debug(">> getImsPlexMemberVersion("+type+ ","+memberName +")");
+        
+        //Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMemberVersion";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+        Version result = Version.IMS_ZERO_RELEASE;
+        
+        try{
+       
+        	Collection<Imsplex> imsplexMembers = om.getImsplexService().getImsPlexMember(new QueryImsPlex.TypeOptions[]{type});
+        	 
+        	if(memberName.equals(ImsCommandAttributes.ASTERISK)){
+	        	
+	        	for(Imsplex member: imsplexMembers){
+	        		String version = member.getProperty(ImsplexResponseAttribute.VER);
+	        		
+	        		if(version != null){
+	        			Version imsVersion = new Version(version);
+	            		if (imsVersion.greater(result)) {
+	            			result = imsVersion;
+	            		}
+	        		}
+	        	}
+	        }else{
+	            for(Imsplex member: imsplexMembers){
+	            	if(member.getProperty(ImsplexResponseAttribute.IMSMBR).equalsIgnoreCase(memberName.trim())){
+	            		String version = member.getProperty(ImsplexResponseAttribute.VER);
+	            		if(version != null){
+	            			if(logger.isDebugEnabled()) logger.debug(type+ " in "+memberName +" version: " + version);
+	            			return new Version(version);
+	            		}
+	            	}
+	            }
+	        }
+        	if(logger.isDebugEnabled()) logger.debug(type+ " in "+memberName +" version: " + result.toString());
+	        return result;
+        
+        }finally{
+        	if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMemberVersion("+type+ ","+memberName +")");
+        	
+			this.setOmInteractionContext(omResultSet, methodKey);
+        }
+    }
+    
+    @Override
+    public Map<String, Version> getImsPlexMemberVersion(QueryImsPlex.TypeOptions[] types,String[] memberName) throws OmException, OmConnectionException, OmDatastoreException {
+        if(logger.isDebugEnabled()) logger.debug(">> getImsPlexMemberVersion("+Arrays.toString(types)+ ","+memberName +")");
+        
+        //Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMemberVersion";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+		
+        Map<String, Version> result = null;
+        try{
+        	result = new HashMap<String, Version>();
+        	List<String> members = Arrays.asList(memberName);
+        
+        	Collection<Imsplex> imsplexMembers = om.getImsplexService().getImsPlexMember(types);
+            
+    		if(Arrays.asList(memberName).contains(ImsCommandAttributes.ASTERISK)) {
+    			for(Imsplex member: imsplexMembers){
+            		String version = member.getProperty(ImsplexResponseAttribute.VER);
+                	result.put(member.getProperty(ImsplexResponseAttribute.IMSMBR), new Version(version));
+            	}
+    		}else{
+    			for(Imsplex member: imsplexMembers){
+            		if(members.contains(member.getProperty(ImsplexResponseAttribute.IMSMBR).trim())){
+            			String version = member.getProperty(ImsplexResponseAttribute.VER);
+                		result.put(member.getProperty(ImsplexResponseAttribute.IMSMBR), new Version(version));
+            		}
+            	}
+    		}
+    		return result;
+        }finally{
+        	if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMemberVersion("+Arrays.toString(types)+ ","+memberName +")");
+        	
+        	this.setOmInteractionContext(omResultSet,methodKey);
+        }
+    }
+    
+    @Override
+    public Version getImsLatestVersion() throws OmException, OmConnectionException, OmDatastoreException {
+    	String[] imsSystemName = new String[]{ImsCommandAttributes.ASTERISK};
+    	QueryImsPlex.TypeOptions[] types = new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.IMS} ;
+    	
+    	if(logger.isDebugEnabled()) logger.debug(">> getImsLatestVersion("+Arrays.toString(imsSystemName)+")");
+    	
+    	Collection<Imsplex> imsplexMembers = null;
+    	
+    	//Note the method key to be used for associating the service
+        String methodKey = "getImsLatestVersion";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+        
+    	String imsplexNameTemp = CSL.concat(this.imsplexName);
+    	  
+    	Version result = Version.IMS_ZERO_RELEASE;
+    	try {
+				//Create a connection to OmImsplex table (cache) datastore 
+	    		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+	    		
+				//Size greater than 0
+				if( omImsplexTable.getCountFromMemoryCache(sysplexId, imsplexNameTemp, imsSystemName) > 0){
+			        
+			        /** Case: interaction mode is DEFAULT **/
+			        imsplexMembers = omImsplexTable.getImsPlexMember(sysplexId, imsplexNameTemp, types,null); //imsSystemName, 
+			        
+				}else{
+					/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+		    		//Query implex members for show all and status
+					Type2Command type2Command = new Type2Command();
+		    		type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+		    		type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+		    		type2Command.getRoute().addAll(Arrays.asList(imsSystemName));
+		
+		    		QueryImsPlex queryImsPlex = new QueryImsPlex();
+		    		queryImsPlex.getNAME().addAll(Arrays.asList(imsplexNameTemp));
+		    		queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.VERSION);
+		   			queryImsPlex.getTYPE().addAll(Arrays.asList(types));	
+		  
+		    		type2Command.setQueryImsPlex(queryImsPlex);
+		    		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+		    		String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+		
+					Service service = new Service(this.om, this.version);
+					omResultSet = service.executeCommand(methodKey,cmd);
+		
+		    		imsplexMembers = propertiesToCollection(omResultSet);
+				}
+	    		
+		        for(Imsplex member: imsplexMembers){
+		        	String version = member.getProperty(ImsplexResponseAttribute.VER);
+		        		
+		        	if(version != null){
+		        		Version imsVersion = new Version(version);
+		            	if (imsVersion.greater(result)) {
+		            		result = imsVersion;
+		            	}
+		        	}
+	        }
+		    if(logger.isDebugEnabled()) logger.debug("Latest IMS version: " + result.toString());      
+	        return result;
+
+    	} catch (OmDatastoreException e) {
+    		e.setImsplexName(imsplexNameTemp);
+    		throw e;
+    	} catch (DatastoreException e) {
+    		throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+    	} catch (OmCommandGenerationException e) {
+    		throw new OmRuntimeException(e);
+    	} finally{
+    		if(logger.isDebugEnabled()) logger.debug("<< getImsLatestVersion("+Arrays.toString(imsSystemName)+")");
+    	}
+    }
+    
+    @Override
+    public Map<String, Version> getResourceVersions(QueryImsPlex.TypeOptions[] types) throws OmException, OmConnectionException, OmDatastoreException {
+    	//Set route to be a route all using asterisk
+    	String[] route = new String[]{ImsCommandAttributes.ASTERISK};
+    	
+    	Map<String, Version> results = new HashMap<String, Version>();
+    	
+    	//QueryImsPlex.TypeOptions[] types = new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.IMS} ;
+    	
+    	if(logger.isDebugEnabled()) logger.debug(">> getResourceVersions("+Arrays.toString(types)+")");
+    	
+    	Collection<Imsplex> imsplexMembers = null;
+    	
+    	//Note the method key to be used for associating the service
+        String methodKey = "getResourceVersions";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+        
+    	String imsplexNameTemp = CSL.concat(this.imsplexName);
+    	  
+    	Version latestResourceVersion = Version.IMS_ZERO_RELEASE;
+    	
+    	try {
+				//Create a connection to OmImsplex table (cache) datastore 
+	    		OmImsplexTable omImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+	    		
+				//Size greater than 0
+				if(omImsplexTable.getCountFromMemoryCache(this.sysplexId, imsplexNameTemp, route) > 0){
+			        
+			        /** Case: interaction mode is DEFAULT **/
+			        imsplexMembers = omImsplexTable.getImsPlexMember(this.sysplexId, imsplexNameTemp, types,null); //route, 
+			        
+				}else{
+					/** Case: No discovery has been run, continue to operate without the cache (live mode)**/
+		    		//Query implex members for show all and status
+					Type2Command type2Command = new Type2Command();
+		    		type2Command.setVerb(Type2Command.VerbOptions.QUERY);
+		    		type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+		    		type2Command.getRoute().addAll(Arrays.asList(route));
+		
+		    		QueryImsPlex queryImsPlex = new QueryImsPlex();
+		    		queryImsPlex.getNAME().addAll(Arrays.asList(imsplexNameTemp));
+		    		queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.VERSION);
+		   			queryImsPlex.getTYPE().addAll(Arrays.asList(types));	
+		  
+		    		type2Command.setQueryImsPlex(queryImsPlex);
+		    		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+		    		String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+		
+					Service service = new Service(this.om, this.version);
+					omResultSet = service.executeCommand(methodKey,cmd);
+		
+		    		imsplexMembers = propertiesToCollection(omResultSet);
+				}
+	    		
+		        for(Imsplex member: imsplexMembers){
+		        	if(logger.isDebugEnabled()) logger.debug("Discovering member: \n" + member.toString());
+		        	String memberVersion = member.getProperty(ImsplexResponseAttribute.VER);
+		        	String resourceName = member.getProperty(ImsplexResponseAttribute.IMSMBR);
+		        	
+		        	if(memberVersion != null){
+		        		Version tempVersion = new Version(memberVersion);
+		        		if(logger.isDebugEnabled()) logger.debug(resourceName+ " version: " + memberVersion);
+		        		results.put(resourceName, tempVersion);
+		        		
+		            	if (tempVersion.greater(latestResourceVersion)) {
+		            		latestResourceVersion = tempVersion;
+		            	}
+		        	}
+		        }
+		        
+		        results.put("latestResourceVersion", latestResourceVersion);
+	        
+	        return results;
+
+    	} catch (OmDatastoreException e) {
+    		e.setImsplexName(imsplexNameTemp);
+    		throw e;
+    	} catch (DatastoreException e) {
+    		throw convertDatatstoreException(e, sysplexId, imsplexNameTemp);
+    	} catch (OmCommandGenerationException e) {
+    		throw new OmRuntimeException(e);
+    	} finally{
+    		if(logger.isDebugEnabled()) logger.debug("<< getImsLatestVersion("+Arrays.toString(route)+")");
+    	}
+    }
+    
+    @Override
+    public Version getVersion(){
+    	return this.version;
+    }
+// ************************************************************************************************************
+// * Get ImsPlexMember by Status
+// ************************************************************************************************************    
+	@Override
+	public Collection<Imsplex> getImsPlexMembersByStatus(QueryImsPlex.StatusOptions[] queryImsPlexMemberStatuses) throws OmException, OmConnectionException, OmDatastoreException {
+		if(logger.isDebugEnabled()) logger.debug(">> getImsPlexsactionsByStatus("+Arrays.toString(queryImsPlexMemberStatuses)+")");
+		try{
+			return getImsPlexMembersByStatus(queryImsPlexMemberStatuses,new String[]{ImsCommandAttributes.ASTERISK});
+		} finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getImsPlexsactionsByStatus("+Arrays.toString(queryImsPlexMemberStatuses)+")");
+		}
+	}
+
+	@Override
+	public Collection<Imsplex> getImsPlexMembersByStatus(QueryImsPlex.StatusOptions[] queryImsPlexMemberStatuses, String[] systemId) throws OmException, OmConnectionException, OmDatastoreException {
+		if (logger.isDebugEnabled()) logger.debug(">> getImsPlexMembersByStatus(" + Arrays.toString(queryImsPlexMemberStatuses) + ", " + Arrays.toString(systemId) + ")");
+
+		//Note the method key to be used for associating the service
+        String methodKey = "getImsPlexMembersByStatus";
+        
+		//Local omresultSet otherwise we risk data corruption of the service is reused. 
+		OmResultSet omResultSet = null;
+        
+		try{
+			Type2Command type2Command = new Type2Command(); 
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.IMSPLEX);
+			type2Command.getRoute().addAll(Arrays.asList(systemId));
+			
+			QueryImsPlex queryImsPlex = new QueryImsPlex();
+			queryImsPlex.getSTATUS().addAll(Arrays.asList(queryImsPlexMemberStatuses));
+			queryImsPlex.getSHOW().add(QueryImsPlex.ShowOptions.ALL);
+			type2Command.setQueryImsPlex(queryImsPlex);
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+
+			Service service = new Service(this.om, this.version);
+			omResultSet = service.executeCommand(methodKey,cmd);
+			
+			//ImsPlexResponse collection mapped from resultset
+			return propertiesToCollection(omResultSet);
+
+		} catch (OmCommandGenerationException e){
+			throw new OmRuntimeException(e);
+		}finally{
+			if(logger.isDebugEnabled()) logger.debug("<< getImsPlexMembersStatus("+ Arrays.toString(queryImsPlexMemberStatuses)+ ", " + Arrays.toString(systemId)+")");
+			
+			this.setOmInteractionContext(omResultSet,methodKey);
+		}
+	}
+
+// ************************************************************************************************************
+// * Discovery Members
+// ************************************************************************************************************
+	
+//	@Override
+//	public int discoverImsplexMembers() throws OmDatastoreException, OmException, OmConnectionException{
+//		if (logger.isDebugEnabled()) logger.debug(">> discoverImsplexMembers()");
+//		
+//		try{
+//			Collection<Imsplex> imsplexMembers = om.getImsplexService().getImsPlexMember(new QueryImsPlex.TypeOptions[]{QueryImsPlex.TypeOptions.OM});
+//			int insertionSize = 0;
+//			
+//			for(Imsplex imsplex: imsplexMembers){
+//				String mbrName = imsplex.getProperty(ImsplexResponseAttribute.MBR);
+//				insertionSize += this.discoverImsplexMembers(mbrName);
+//			}
+//			
+//			return insertionSize;
+//		}finally{
+//			if (logger.isDebugEnabled()) logger.debug("<< discoverImsplexMembers()");
+//		}
+//	}
+	    
+	@Override
+	public int discoverImsplexMembers() throws OmDatastoreException, OmException, OmConnectionException {
+		if (logger.isDebugEnabled()) logger.debug(">> discoverImsplexMembers()");
+		
+		String imsplexNameTemp 	= CSL.concat(this.imsplexName);
+		int insertionSize 	= 0;
+		
+		//TODO: IMSPLEX's do not require ROUTE, the om name is not passed around in the resource node, this is a 
+		//temporary hack in order to allow work to  continue, we need to remove route from all imsplex commands
+		//which impacts the memcache and the derby cache. What did was to use the deleteTable that does not make use of omSystemName
+		//in order to keep developing and later come  back to fix this all throught the code
+		try {
+			this.isDiscovering = true;
+			this.om.setInteractionMode(Om.InteractionMode.LIVE);
+			Collection<Imsplex> imsplexMembers = this.getImsPlexMembers();
+			this.om.setInteractionMode(Om.InteractionMode.DEFAULT);
+
+			OmImsplexTable imsImsplexTable = ImsOmDatastore.getInstance().getOmImsplexStore();
+			imsImsplexTable.deleteTable(this.sysplexId,imsplexNameTemp);
+			insertionSize = imsImsplexTable.addImsplex(imsplexMembers,this.sysplexId);
+			imsImsplexTable.autoConfigureResourceMetaData(this.sysplexId, imsplexNameTemp);
+			
+			int resourceCacheSize = imsImsplexTable.getCountFromMemoryCache(sysplexId, imsplexName);
+			Date date = imsImsplexTable.getLastestDateFromMemoryCache(sysplexId, imsplexName, new String[]{ImsCommandAttributes.ASTERISK});
+			
+			OmInteractionContext omInteractionContext = this.om.getOmInteractionContexts().get("getImsPlexMembers");
+			omInteractionContext.setResourceLastUpdated(date);
+			omInteractionContext.setResourceCacheSize(resourceCacheSize);
+			return insertionSize;
+		} catch (OmDatastoreException e) {
+			e.setImsplexName(this.om.getOMConnection().getImsplex());
+			throw e;
+		} catch (DatastoreException e) {
+			throw convertDatatstoreException(e, sysplexId, imsplexName);
+		} finally{
+	    	if (logger.isDebugEnabled()) logger.debug("<< discoverImsplexMembers()");
+	    }
+	}
+	
+// ************************************************************************************************************
+// * PRIVATE MEMBER HELPERS
+// ************************************************************************************************************
+	 	/**
+		 * Method will map a omResulset to a collection of imsplex beans. It will also
+		 * append to each bean the sysplex and imsplex name. 
+		 * @param omResultSet
+		 * @return
+		 */
+	    private Collection<Imsplex> propertiesToCollection(OmResultSet omResultSet) {
+	        Collection<Imsplex> tempList = new ArrayList<Imsplex>();
+
+	            Properties[] properties = omResultSet.getResponseProperties();
+
+	            for (Properties p : properties) {
+	            	Imsplex imsplex = new Imsplex();
+	            	imsplex.setMap((Map)p);
+	            	imsplex.getMap().put(ImsBaseDastoreConstants.SYSPLEX_ID, omResultSet.getEnvironment());
+	            	
+	            	if(p.getProperty(ImsBaseDastoreConstants.IMSPLX.toString()) == null){
+	            		imsplex.getMap().put(ImsBaseDastoreConstants.IMSPLX, omResultSet.getImsplex());
+	            	}
+	            	
+	                tempList.add(imsplex);
+	            }
+
+	        return tempList;
+	    }
+	    
+	    
+//	    private Version getImsVersion(Collection<Imsplex> imsplexMembers){
+//	    	Version versionCurrent = new Version("0.0.0");
+//		
+//	        	for(Imsplex member: imsplexMembers){
+//	        		if(member.getProperty(ImsplexResponseAttribute.TYP).equals("IMS")){
+//	        			String versionString = member.getProperty(ImsplexResponseAttribute.VER);
+//		        		
+//		        		if(versionString != null){
+//		        			Version versionTemp = new Version(versionString);
+//		            		if (versionTemp.greater(versionCurrent)) {
+//		            			versionCurrent = versionTemp;
+//		            		}
+//		        		}
+//	        		}
+//	        	}
+//	        	
+//	        	if(versionCurrent.equals(Version.IMS_ZERO_RELEASE)){
+//	        		versionCurrent = Version.IMS_LATEST_RELEASE;
+//				}
+//	        	
+//	        	return versionCurrent;
+//	    }
+}

@@ -1,0 +1,30 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.tran.update.syntax;
+
+/** Specifies the attributes to be started. */
+public class START {
+	
+	/** Specifies the attributes to be started. */
+	public enum _START {
+		/** Updates local and global status to start queuing transactions */
+		Q,
+		
+		/** Updates local and global status to start transactions from being scheduled */
+		SCHD,
+		
+		/** If the transaction has messages on the suspend queue, that suspend queue is automatically transferred to the ready queue. */
+		SUSPEND,
+
+		/** Starts the transaction trace, which captures the DL/I portion of Data Communications (DC) for the specified transaction */
+		TRACE,
+	}
+}

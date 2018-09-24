@@ -1,0 +1,307 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon.query.port;
+
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+import com.ibm.ims.ea.om.icon.query.IconQueryCommandBuilder.ICON_COMMAND_SUBTYPE;
+import com.ibm.ims.ea.om.icon.query.port.IconPortQueryCommand.ICON_PORT_CSTATUS;
+import com.ibm.ims.ea.om.icon.query.port.IconPortQueryCommand.ICON_PORT_NAME;
+import com.ibm.ims.ea.om.icon.query.port.IconPortQueryCommand.ICON_PORT_SHOW;
+import com.ibm.ims.ea.om.icon.query.port.IconPortQueryCommand.ICON_PORT_STATUS;
+
+/**
+ * <pre>
+ * Type 2 Command builder for Port type IMSCON TYPE2 commands.
+ * 
+ * Exmaple usage:
+ * 		public static void main(String[] args) {
+			IconPortCommandBuilder iconPortCommand = new IconPortCommandBuilder();
+			ICON_PORT_NAME.NAME.addName(new String[]{"7777","8888"});
+			iconPortCommand.setName(new ICON_PORT_NAME[]{ICON_PORT_NAME.NAME,ICON_PORT_NAME.LOCAL});
+			iconPortCommand.setShow(new ICON_PORT_SHOW[]{ICON_PORT_SHOW.ALL});
+			String cmd = iconPortCommand.getCommand();
+			System.out.println(cmd);
+		}
+ *</pre>
+ */
+public class IconPortQueryCommandBuilder extends Type2CommandBuilder{
+	
+	private static String commandPrefix = "QUERY IMSCON TYPE";
+	private static String commandIdSubType = ICON_COMMAND_SUBTYPE.PORT.name();
+	
+	
+	// ******************************************************************************
+	// * ICON PORT COMMAND SETTERS
+	// ******************************************************************************
+	
+	/**
+	 * Specifies one or more ports to be displayed. You can specify a single port
+	 * number or a list of port numbers separated by commas. Wildcards can be used
+	 * in the port numbers.
+	 * @param values
+	 */
+	public void setName(ICON_PORT_NAME[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("NAME(");
+        
+        for (ICON_PORT_NAME show: values) {
+        	
+        	String str = show.getName();
+        	if(str != null){
+        		temp.append(str);
+                
+                if(length > 1 && count != length){
+                    count++;
+                    temp.append(COMMA);
+                }
+        	}else{
+        		length = length -1;
+        	}
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	
+	public void setRoute(String[] routeName) {
+		int length = routeName.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer(") ROUTE(");
+
+		for (String name: routeName) {
+			temp.append(name);
+
+			if(length > 1 && count !=length ){           
+				temp.append(COMMA);   
+			}
+			count++;
+		}
+        commandArgs.add(temp.toString());
+	}
+	/**
+	 * Selects ports for display that have one of the specified clients active on the
+	 * port. You can specify a single client name or a list of client names separated by
+	 * commas. Wildcards can be used in the names.
+	 * @param values
+	 */
+	public void setClient(String[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("CLIENT(");
+
+        for (String val : values) {
+            int val_length = val.trim().length();
+
+            if (val_length == 0 || val_length > 8) {
+                throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(value = " + val + ", length = " + val_length }));
+            }
+
+            temp.append(val);
+
+            if (length > 1 && count != length) {
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects ports for display that have at least one active client that is in one of the
+	 * specified states. You can specify a single client status, or a list of client statuses
+	 * separated by commas.
+	 * @param values
+	 */
+	public void setCstatus(ICON_PORT_CSTATUS[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("CSTATUS(");
+        
+        for (ICON_PORT_CSTATUS show: values) {
+            temp.append(show);
+            
+            if(count > 1 && count != length){
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects ports for display that have at least one active client with a transaction
+	 * submitted to the specified data store. You can specify a single data store name
+	 * or a list of data store names separated by commas. Wildcards can be used in the names.
+	 * @param values
+	 */
+	public void setDatastore(String[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("DATASTORE(");
+
+        for (String val : values) {
+            int val_length = val.trim().length();
+
+            if (val_length == 0 || val_length > 8) {
+                throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(value = " + val + ", length = " + val_length }));
+            }
+
+            temp.append(val);
+
+            if (length > 1 && count != length) {
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**Specifies the optional output fields to be displayed. Output fields that are
+	 * always displayed, regardless of whether SHOW is specified, include the port
+	 * number, the name of the IMS Connect that processes the command, and the completion code.
+	 * @param values
+	 */
+	public void setShow(ICON_PORT_SHOW[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("SHOW(");
+        
+        for (ICON_PORT_SHOW show: values) {
+            temp.append(show);
+            
+            if(length > 1 && count != length){
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects ports for display that possess at least one of the specified statuses.
+	 * When the STATUS keyword is specified, status information is displayed even if
+	 * SHOW(STATUS) is not specified.
+	 * @param values
+	 */
+	public void setStatus(ICON_PORT_STATUS[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("STATUS(");
+        
+        for (ICON_PORT_STATUS show: values) {
+            temp.append(show);
+            
+            if(length > 1 && count != length){
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects ports for display that have at least one active client with a specified
+	 * transaction submitted to a data store. You can specify a single transaction name
+	 * or a list of transaction names separated by commas. Wildcards can be used in the names.
+	 * @param values
+	 */
+	public void setTran(String[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("TRAN(");
+
+        for (String val : values) {
+            int val_length = val.trim().length();
+
+            if (val_length == 0 || val_length > 8) {
+                throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(value = " + val + ", length = " + val_length }));
+            }
+
+            temp.append(val);
+
+            if (length > 1 && count != length) {
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	/**Selects ports for display that have one of the specified user IDs active on the
+	 * port. You can specify a single userid name or a list of userid names separated by
+	 * commas. Wildcards can be used in the user IDs.
+	 * @param values
+	 */
+	public void setUserid(String[] values){
+		int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("USERID(");
+
+        for (String val : values) {
+            int val_length = val.trim().length();
+
+            if (val_length == 0 || val_length > 8) {
+                throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(value = " + val + ", length = " + val_length }));
+            }
+
+            temp.append(val);
+
+            if (length > 1 && count != length) {
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+	
+	
+	/**
+	 * CMD(QUERY IMSCON TYPE(PORT) SHOW(ALL)
+	 * @return
+	 */
+    public String commandShowAll() {
+    	setShow(new ICON_PORT_SHOW[]{ICON_PORT_SHOW.SUMMARY});
+        return getCommand();
+    }
+    
+    public String commandShowSummaryStatus() {
+    	setShow(new ICON_PORT_SHOW[]{ICON_PORT_SHOW.SUMMARY,ICON_PORT_SHOW.STATUS});
+        return getCommand();
+    }
+	
+	 /**
+     * Returns the command prefix for this command, which is:
+     * "QUERY IMSCON TYPE"
+     */
+	@Override
+	public String getCommandPrefix() {
+		return  commandPrefix;
+	}
+	
+	/**
+	 * Returns the command type for this command which is:
+	 * "PORT"
+	 */
+	@Override
+	public String getCommandSubType() {
+		return commandIdSubType;
+	}
+	
+}

@@ -1,0 +1,32 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+
+package com.ibm.ims.ea.om.tran.update.syntax;
+
+
+public class MSGTYPE implements SET{
+	
+	private String result = null;
+	
+	public enum _MSGTYPE{
+		/** */
+		MULTSEG,
+		
+		/** */
+		SNGLSEG
+;
+	}
+
+	public MSGTYPE(_MSGTYPE key) {
+    	this.result = key.name();
+	}
+	
+}

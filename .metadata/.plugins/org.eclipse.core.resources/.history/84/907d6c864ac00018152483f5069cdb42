@@ -1,0 +1,188 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
+
+/**
+ * Class provides a parser and handler call to extract the command executed by OM 
+ * that is noted in the inputStream. Basically this parser is able to read an OM
+ * inputstream and extract the command.
+ * @author ddimatos
+ *
+ */
+public class CommandParser {
+
+	private String command = null;
+	
+    public CommandParser(InputStream inputStream) throws ParserConfigurationException, SAXException, IOException {
+        SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+        saxFactory.setValidating(false);
+        saxFactory.setNamespaceAware(true);
+
+        SAXParser saxParser = saxFactory.newSAXParser();
+
+        //Parse with handler to find the command
+        CommandHandler commandHandler = new CommandHandler();
+
+        InputSource inputSource = new InputSource(inputStream);
+        inputSource.setSystemId(this.getClass().getClassLoader().getResource("imsout.dtd").toString()); //Get DTD from connect API Jar 
+        
+        try {
+			saxParser.parse(inputSource, commandHandler); //saxParser.parse(inputStream, commandFound);
+		} catch (SAXException e) {
+			if(e.getMessage().equals("EXIT_PARSE_REQUESTED")){
+				//Do nothing let it pass , it was requested to shorten the parsing.
+				//Is this really cheaper than the exception to exit the parser this way.
+			}else{
+				throw e;
+			}
+		}
+
+        //Set the command for access
+        this.command = commandHandler.getInput();
+
+        //System.out.println(commandFound.toString());
+        //saxParser.parse(new InputSource(new InputStreamReader(new FileInputStream(""),"UTF-8")), new ConnectionHandler());
+    }
+	
+	/**
+	 * Get the command from the OM payload that was executed
+	 * @return
+	 */
+	public String getCommand(){
+		return this.command;
+	}
+	
+
+	/**
+	 * Handler to process an OM payload that can extract the command executed and noted in the inputstream.
+	 * @author ddimatos
+	 */
+	class CommandHandler extends DefaultHandler{
+		boolean BOOL_XML_INPUT = false;
+		/* ******************************************************
+		 * XML Tags used for the connection exit
+		 ********************************************************/
+		private static final String XML_INPUT 			= "input";
+			
+		/* *****************************************************
+		 * Variable mappings
+		 * *****************************************************/
+		private String input 		= null;
+		private String val 			= null;
+		
+		/**
+		 * Return the command from a response inputstream from OM
+		 * @return Command as a String otherwise null
+		 */
+		public String getInput(){
+			return this.input;
+		}
+		
+		@Override
+		public void startDocument() throws SAXException {
+			super.startDocument();
+		}
+		
+		@Override 
+		public void startElement(String uri, String localName, String qname, Attributes attr) throws SAXException {
+			if(localName.equalsIgnoreCase(XML_INPUT)){
+				BOOL_XML_INPUT = true;
+			}
+		}
+		
+		@Override
+		public void characters(char[] ch, int start, int length){
+			if(BOOL_XML_INPUT){
+				if(this.val == null){
+					this.val = new String(ch,start,length).trim();
+				}else{
+					this.val+= new String(ch,start,length).trim();
+				}
+			}
+				
+		}
+
+		@Override
+		public void endElement(String uri, String localName, String qname) throws SAXException {
+				if(localName.equalsIgnoreCase(XML_INPUT)){
+					this.input = this.val;
+					throw new SAXParseException("EXIT_PARSE_REQUESTED", null);
+				}
+		}
+		
+		@Override
+		public void endDocument() throws SAXException {
+			super.endDocument();
+		}
+
+		@Override
+		public void error(SAXParseException e) throws SAXException {
+			throw new SAXException(Arrays.toString(getParseExceptionInfo(e)));
+		}
+		
+		@Override
+		public void warning(SAXParseException e) throws SAXException {
+			throw new SAXException(Arrays.toString(getParseExceptionInfo(e)));
+		}
+		
+		@Override
+		public void fatalError(SAXParseException e) throws SAXException {
+			throw new SAXException(Arrays.toString(getParseExceptionInfo(e)));
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder result = new StringBuilder();
+		    String NEW_LINE = System.getProperty("line.separator");
+		    String format = "| %1$-30s| %2$-30s|" + NEW_LINE;
+		    String line = "+---------------------------------------------------------------+" + NEW_LINE;
+		    result.append(line);
+		    result.append(String.format(format, "Object", this.getClass().getSimpleName() ));  
+		    result.append(line);
+		    result.append(String.format(format, "Variable Description", "Value")); 
+		    result.append(line);
+		    
+		    if(this.input != null) result.append(String.format(format, 		"Value input"	, this.input)); 
+		    
+		    result.append(line);
+			return result.toString();
+		}
+		
+		/**
+		 * Get,parse and format a SAX Exception to extract the systemId, line number, and message
+		 * @param saxParseEx - SAXParseException 
+		 * @return - Object[] {systemID,lineNumber,message} in this order.
+		 */
+		private Object[] getParseExceptionInfo(SAXParseException saxParseEx) {
+			Object[] errMsg = null;
+	        String systemId = saxParseEx.getSystemId();
+	        if (systemId == null) {
+	        	errMsg= new Object[]{"",saxParseEx.getLineNumber(),saxParseEx.getMessage()};
+	        }else{
+	        	errMsg = new Object[]{systemId,saxParseEx.getLineNumber(),saxParseEx.getMessage()};
+	        }
+	        return errMsg;
+	    }
+	}
+}

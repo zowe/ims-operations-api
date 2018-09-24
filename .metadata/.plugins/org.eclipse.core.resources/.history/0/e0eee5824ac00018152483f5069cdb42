@@ -1,0 +1,38 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013, 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services.enterprise;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+
+public class OmEnterprise {
+    
+      public OmEnterprise() {/** keep me empty **/}
+      
+      public TransactionServices getTransactionService() throws OmDatastoreException, DatastoreException{
+          return new TransactionServices();
+      }
+      
+      public DatabaseServices getDatabaseService() throws OmDatastoreException, DatastoreException{
+          return new DatabaseServices();
+      }
+      
+      public RoutingCodeServices getRoutingCodeService() throws OmDatastoreException, DatastoreException{
+          return new RoutingCodeServices();
+      }
+      
+      public ProgramServices getProgramService() throws OmDatastoreException, DatastoreException{
+          return new ProgramServices();
+      }
+      
+      public ImsplexServices getImsplexService() throws OmDatastoreException, DatastoreException{
+    	  return new ImsplexServices();
+      }
+}

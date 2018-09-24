@@ -1,0 +1,160 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon.query.imsplex;
+
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.Type2CommandBuilder;
+import com.ibm.ims.ea.om.icon.query.IconQueryCommandBuilder.ICON_COMMAND_SUBTYPE;
+
+/**
+ * <pre>
+ * Type 2 Command Builder for IMSPLEX type IMSCON type 2 commands
+ * 
+ * Example usage:
+ *  public static void main(String[] args) {
+ 		IconImsplexCommandBuilder iconImsplexCommand = new IconImsplexCommandBuilder();
+ 		iconImsplexCommand.setShow(new SHOW[]{SHOW.ALL});
+ 		iconImsplexCommand.setStatus(new STATUS[]{STATUS.ACTIVE});
+ 		iconImsplexCommand.setName(new String[]{"TEST123"});
+ 		String cmd = iconImsplexCommand.getCommand();
+ 		System.out.println(cmd);
+ 	}
+    
+ *</pre>
+ */
+public class IconImsplexQueryCommandBuilder extends Type2CommandBuilder implements IconImsplexQueryCommand{
+
+	private static String commandPrefix = "QUERY IMSCON TYPE";
+	private static String commandIdSubType = ICON_COMMAND_SUBTYPE.IMSPLEX.name();
+    
+
+	/**
+	 * Sets the 1-8 character NAME of the IMSPLEX by appending the 
+	 * "NAME(" prefix and name strings
+	 * Example: NAME(TEST)
+	 */
+    @Override
+    public void setName(String[] values) throws IllegalArgumentException{
+        int length = values.length;
+        int count = 1;
+        StringBuffer temp = new StringBuffer("NAME(");
+
+        for (String name : values) {
+            int name_length = name.trim().length();
+
+            if (name_length == 0 || name_length > 8) {
+                throw new IllegalArgumentException(IQEO.IQEO0009E.msg(new Object[] { "(Name = " + name + ", length = " + name_length }));
+            }
+
+            temp.append(name);
+
+            if (length > 1 && count != length) {
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+    }
+    
+    /**Specifies the optional output fields to be displayed. Output fields that are
+	 * always displayed, regardless of whether SHOW is specified, include the IMSPLEX
+	 * name, the name of the IMSPLEX that processes the command, and the completion code.
+	 * @param values
+	 */
+	@Override
+	public void setShow(SHOW[] values) {
+		 int length = values.length;
+	        int count = 1;
+	        StringBuffer temp = new StringBuffer("SHOW(");
+	        
+	        for (SHOW show: values) {
+	            temp.append(show);
+	            
+	            if(length > 1 && count != length){
+	                count++;
+	                temp.append(COMMA);
+	            }
+	        }
+	        temp.append(CLOSEPARANTH);
+	        commandArgs.add(temp.toString());
+	}
+	
+	/**
+	 * Selects IMSplex resources for display that possess at least one of the specified
+	 * statuses
+	 * @param values
+	 */
+	@Override
+	public void setStatus(STATUS[] values) {
+        int length = values.length;
+        int count = 0;
+        StringBuffer temp = new StringBuffer("STATUS(");
+        for (STATUS status: values) {
+            temp.append(status);
+            
+            if(length > 1 && count != length){
+                count++;
+                temp.append(COMMA);
+            }
+        }
+        temp.append(CLOSEPARANTH);
+        commandArgs.add(temp.toString());
+	}
+
+	@Override
+	public void setRoute(String[] routeName) {
+		int length = routeName.length;
+		int count = 1;
+		StringBuffer temp = new StringBuffer(") ROUTE(");
+
+		for (String name: routeName) {
+			temp.append(name);
+
+			if(length > 1 && count !=length ){           
+				temp.append(COMMA);   
+			}
+			count++;
+		}
+        commandArgs.add(temp.toString());
+	}
+	
+	 /**
+     * Method creates and returns Syntax for a command 
+     * <code> "QUERY IMSCON TYPE(IMSPLEX) SHOW(ALL)" </code>
+     * @return String representation for the QUERY IMSCON TYPE(IMSPLEX) SHOW(ALL)
+     */
+    public String commandShowAll() {
+    	setShow(new SHOW[]{SHOW.ALL});
+        return getCommand();
+    }
+
+    
+   /**
+    * Returns the command prefix for this command, which is:
+    * "QUERY IMSCON TYPE"
+    */
+	@Override
+	public String getCommandPrefix() {
+		return commandPrefix;
+	}
+	
+	/**
+	 * Returns the command type for this command which is:
+	 * "IMSPLEX"
+	 */
+	@Override
+	public String getCommandSubType() {
+		return commandIdSubType;
+	}
+	
+	
+}

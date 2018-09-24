@@ -1,0 +1,24 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.pgm.update.syntax;
+
+/** Specifies the attributes to be started. */
+public class START {
+	
+	/** Specifies the attributes to be started. */
+	public enum _PGM_START {
+		
+		/** Starts Scheduling of the program */
+		SCHD,
+		
+		/** Starts the tracing of the DL/I portion of Data Communications (DC) for the application program. */
+		TRACE,
+	}
+}

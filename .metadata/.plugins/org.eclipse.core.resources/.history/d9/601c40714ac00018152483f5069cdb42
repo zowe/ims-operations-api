@@ -1,0 +1,35 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon;
+
+public class ImsconnectConfig {
+
+    /**
+     * Statuses returned from IMSConnect(CONFIG) Attribute RSTT
+     */
+    public static enum STATUS {
+        ACTIVE("ACTIVE"),
+        NOTACTIVE("NOTACTIVE"),
+        REGISTERED("REGISTERED");
+        
+        private String value = "";
+
+        private STATUS(String val){
+            this.value = val;
+        }
+
+        private STATUS(){}
+
+        @Override
+        public String toString(){
+            return this.value;
+        }
+    }
+}

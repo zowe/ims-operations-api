@@ -1,0 +1,59 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon.query;
+
+import com.ibm.ims.ea.om.icon.query.config.IconConfigQueryCommandBuilder;
+import com.ibm.ims.ea.om.icon.query.imsplex.IconImsplexQueryCommandBuilder;
+import com.ibm.ims.ea.om.icon.query.port.IconPortQueryCommandBuilder;
+
+/**
+ * <pre>
+ * Class provides access to TYPE2 Command builders based on the IMSCON TYPE Keyword.
+ * 
+ * The @{link {@link ICON_COMMAND_SUBTYPE} keyword specifies the type of IMS Connect resource to display. The
+ * default is TYPE(CONFIG), which displays general IMS Connect information.
+ * 
+ * EXAMPLE USAGE:
+   public static void main(String[] args) {
+		IconCommandBuilder iconCommandBuilder = new IconCommandBuilder();
+		IconConfigCommandBuilder iconConfigCommandBuilder = iconCommandBuilder.getIconConfigCommandBuilder();
+	    iconConfigCommandBuilder.setShow(new  com.ibm.ims.ea.om.icon.query.IconConfigCommand.SHOW[]{ com.ibm.ims.ea.om.icon.query.IconConfigCommand.SHOW.ALL});
+		System.out.println(iconConfigCommandBuilder.getCommand());
+		System.out.println(iconConfigCommandBuilder.commandShowAll());
+		
+		IconImsplexCommandBuilder iconImsplexCommandBuilder = iconCommandBuilder.getIconImsplexCommandBuilder();
+		iconImsplexCommandBuilder.setShow(new com.ibm.ims.ea.om.icon.query.IconImsplexCommand.SHOW[]{com.ibm.ims.ea.om.icon.query.IconImsplexCommand.SHOW.ALL});
+		System.out.println(iconImsplexCommandBuilder.getCommand());
+		System.out.println(iconImsplexCommandBuilder.commandShowAll());
+	}
+ * @author ddimatos
+ * </pre>
+ *
+ */
+public class IconQueryCommandBuilder {
+
+	/**
+	 * Command types allowed for IMS Connect Type 2 command:
+	 *  ALIAS,CLIENT,CONFIG,DATASTORE,IMSPLEX,LINK,MSC,ODBM,PORT,RMTIMSCON,SENDCLNT,UOR       
+	 */
+	public enum ICON_COMMAND_SUBTYPE {ALIAS,CLIENT,CONFIG,DATASTORE,IMSPLEX,LINK,MSC,ODBM,PORT,RMTIMSCON,SENDCLNT,UOR};
+	
+	public IconConfigQueryCommandBuilder getIconConfigCommandBuilder(){
+		return new IconConfigQueryCommandBuilder();
+	}
+	
+	public IconImsplexQueryCommandBuilder getIconImsplexCommandBuilder(){
+		return new IconImsplexQueryCommandBuilder();
+	}
+	
+	public IconPortQueryCommandBuilder getIconPortCommandBuilder(){
+		return new IconPortQueryCommandBuilder();
+	}
+}

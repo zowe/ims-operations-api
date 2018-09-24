@@ -1,0 +1,21 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.rm.list;
+
+import java.util.EnumSet;
+
+import com.ibm.ims.ea.om.rm.MODIFIER;
+
+
+public interface RmList {
+	//Supported RMLIST Modifiers: BKOUT,CAGRP,DB,DBDS,DBDSGRP,GSG,HISTORY,LOG,RECON,SUBSYS
+	public static final EnumSet<MODIFIER> LIST_MODIFIERS = EnumSet.of(MODIFIER.BKOUT,MODIFIER.CAGRP,MODIFIER.DB,MODIFIER.DBDS,MODIFIER.DBDSGRP,MODIFIER.GSG,MODIFIER.HISTORY,MODIFIER.LOG,MODIFIER.RECON,MODIFIER.SUBSYS);
+	
+}

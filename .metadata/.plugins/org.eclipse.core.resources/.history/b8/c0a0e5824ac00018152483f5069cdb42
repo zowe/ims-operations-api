@@ -1,0 +1,92 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013, 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.services.enterprise;
+
+import java.util.Collection;
+
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.datastore.ImsDatabaseTable;
+import com.ibm.ims.ea.om.datastore.ImsOmDatastore;
+import com.ibm.ims.ea.om.db.Database;
+
+public class DatabaseServices {
+
+    private ImsDatabaseTable imsDatabaseTable = null; 
+
+    /**
+     * This class provides database services designed to access the OM enterprise meta data. These queries 
+     * resort in querying data that has been discovered with no other connections or interactions made with 
+     * the enterprise. Note that data returned by these enterprise services could be stale and not reflect
+     * the the actual live enterprise.
+     * @throws OmDatastoreException
+     * @throws DatastoreException
+     */
+    protected DatabaseServices() throws OmDatastoreException, DatastoreException {
+        imsDatabaseTable = ImsOmDatastore.getInstance().getImsDatabaseStore();
+    }
+
+    /**
+     * Search for databases in the repository/datastore within am environment
+     * @param environmentId
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<Database> getDatabases(int environmentId) throws OmDatastoreException {
+        return imsDatabaseTable.getDatabases(environmentId,new String[] {ImsCommandAttributes.ASTERISK});
+    }
+
+    /**
+     * Search for databases in the repository/datastore within am environment and imsplex
+     * @param environmentId
+     * @param imsplexId
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<Database> getDatabases(int environmentId, String imsplexName) throws OmDatastoreException {
+        return imsDatabaseTable.getDatabases(environmentId, imsplexName,new String[] {ImsCommandAttributes.ASTERISK});
+    }
+
+    /**
+     * Search for databases in the repository/datastore within am environment, imsplex and system (IMS)
+     * @param systemId
+     * @param environmentId
+     * @param imsplexId
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<Database> getDatabases(String[] systemId, int environmentId, String imsplexName) throws OmDatastoreException {
+        return imsDatabaseTable.getDatabases(environmentId, imsplexName,systemId);
+    }
+    
+    /**
+     * Search for databases by name in the repository/datastore within a environment
+     * @param environmentId
+     * @param databaseNames
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<Database> getDatabasesByName(int environmentId,String[] databaseNames) throws OmDatastoreException{
+        return imsDatabaseTable.getDatabasesByName(environmentId,databaseNames);
+    }
+    
+    /**
+     * Search for databases by name in the repository/datastore within an environment and imsplex.
+     * @param environmentId
+     * @param imsplexId
+     * @param databaseNames
+     * @return
+     * @throws OmDatastoreException
+     */
+    public Collection<Database> getDatabasesByName(int environmentId, String imsplexName,String[] databaseNames) throws OmDatastoreException{
+        return imsDatabaseTable.getDatabasesByName(environmentId,imsplexName,databaseNames);
+    }
+}

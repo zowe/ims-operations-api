@@ -1,0 +1,749 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.datastore;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.im.ac.datastore.Datastore;
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.ims.ea.base.version.Version;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.tran.Transaction.TransactionResponseAttribute;
+
+/**
+ * Cache that holds Resource UI Grid metadata. 
+ * 
+ * EX: 
+ * 
+ * VERSION_ID	SLBL	
+ * 13.1			AREA,FP,TRAN....	
+ * 13.1			PART,PGM...	
+ * 14.0	    	AREA,CONV,TRAN...	
+ * 14.0			AFIN,PGM,DB-NOTAVL...	
+ * 
+ * @author Jerry Li
+ *
+ */
+public class GridHeaderTable extends AbstractImsBaseDatastore {
+
+	private static final Logger logger = LoggerFactory.getLogger(GridHeaderTable.class);
+
+	public static final String TABLE_NAME = "GRID_HEADERS";
+	public static final String VERSION = "1.0";
+	public static final String VERSION_ID = "VERSION_ID";
+	public static final String IMSPLX = "IMSPLX";
+	public static final String MBR = "MBR";
+	public static final String SLBL = "SLBL";
+	public static final String KEY_ID = "KEY_ID";
+	public static final String INDEX_NAME = "KEYID_MBR_SYSPLEX_IMPSPLX";
+	public static final String METHOD = "METHOD";
+	public static final String UPDATED = "UPDATED";
+
+
+	protected GridHeaderTable(Datastore parentDatastore) throws DatastoreException {
+		super(parentDatastore, TABLE_NAME, VERSION, TransactionResponseAttribute.MBR.toString());
+	}
+
+
+	/**
+	 * Create derby table for column headers
+	 */
+	@Override
+	public void createTables() throws DatastoreException {
+		StringBuffer createSQL = new StringBuffer("CREATE TABLE ").append(this.tableName).append(" (");
+		createSQL.append(SLBL).append(" VARCHAR(255), ")
+		.append(VERSION_ID).append(" VARCHAR(255), ")
+		.append(UPDATED).append(" TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ")
+		.append(METHOD).append(" VARCHAR(255)").append(", ")
+		.append("PRIMARY KEY(").append(VERSION_ID).append(", ").append(METHOD).append("))");
+
+
+		//Do I need a foreign key??????
+
+		StringBuffer index = new StringBuffer("CREATE INDEX ").append(INDEX_NAME).append(" ON ").append(this.tableName).append(" (")
+				.append(VERSION_ID).append(",")
+				.append(METHOD).append(")");
+
+		try {
+			execute(createSQL.toString());
+		}   catch (DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery(createSQL.toString());
+			throw omDatastoreException;
+		}
+		try {
+			execute(index.toString()); 
+		} catch (DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery(createSQL.toString());
+			throw omDatastoreException;
+		}
+	}
+	
+	
+	public void updateRowAttributes(String columnNamesCsv, String version, String method) throws OmDatastoreException {
+		Connection connection = null;
+		ResultSet results = null;
+		StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append("SLBL").append(" = '").append(columnNamesCsv).append("'")
+        .append(" WHERE ").append(VERSION_ID).append(" = ").append(version)
+        .append(" AND ").append(METHOD).append(" = '").append(method).append("'");
+
+		try {
+			connection = parentDatastore.getConnection();
+			connection.setAutoCommit(false);
+			execute(sb.toString());
+			connection.commit();
+			close(results);
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} 
+		catch (DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery(sb.toString());
+			throw omDatastoreException;
+		}finally {
+			close(connection); 
+		}
+
+		
+	}
+	
+
+	private String responsePropertyHeadersToCsv(Properties[] headers){
+        StringBuffer headerCsv = new StringBuffer();
+        
+        for (int i = 0; i < headers.length; i++) {
+            headerCsv.append(headers[i].getProperty("SLBL")).append(",");
+        }
+        
+        return headerCsv.toString();
+	}
+	
+	public void addRowAttributes(Properties[] headers, String version, String method) throws OmDatastoreException {
+		this.addRowAttributes(responsePropertyHeadersToCsv(headers), version, method);
+	}
+	
+	/**
+	 * Adds column headers (as csv values) into derby
+	 * @param columnNamesCsv
+	 * @param version
+	 * @param method
+	 * @throws OmDatastoreException
+	 */
+	public void addRowAttributes(String columnNamesCsv, String version, String method) throws OmDatastoreException {
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		StringBuffer sb = new StringBuffer("INSERT INTO ")
+		.append(this.tableName).append(" (" + SLBL + "," + VERSION_ID + ","  + METHOD + ")")
+		.append(" VALUES('" + columnNamesCsv +"','" + version + "'," + "'"+ method + "'" + ")");
+
+		try {
+			connection = parentDatastore.getConnection();
+			ps = connection.prepareStatement(sb.toString());
+			connection.setAutoCommit(false);
+			ps.execute();
+			connection.commit();
+			close(results);
+
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		}finally {
+			close(ps);
+			close(connection); 
+		}
+
+	}
+
+	/**
+	 * Retrieves grid columns, returns csv value string
+	 * @param versionId
+	 * @param methodKey
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public String getGridColumns(String version, String methodKey) throws OmDatastoreException {
+		StringBuffer gridColumns = new StringBuffer();
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		Connection connection = null;
+		StringBuffer sb = null;
+		sb = new StringBuffer("SELECT * FROM ").append(this.tableName);
+		sb.append(" WHERE ").append(VERSION_ID).append(" = ").append("'"+version+"'")
+		.append(" AND ").append(METHOD).append(" = ").append("'"+methodKey+"'");
+		try {
+			connection = parentDatastore.getConnection();
+			ps = connection.prepareStatement(sb.toString());
+			results = ps.executeQuery();
+			connection.setAutoCommit(false);
+			while(results.next()) {
+				gridColumns.append(results.getString("SLBL")).append(",");
+			}
+			connection.commit();
+			close(results);    
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(ps);
+			close(connection); 
+		}
+
+		return gridColumns.toString();
+	}
+
+	/**
+	 * Delete the row specified by the versionId and methodKey passed in
+	 */
+	public void deleteTable(String version, String methodKey) throws OmDatastoreException{
+		Connection connection = null;
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		StringBuffer sb = null;
+
+		try {
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("DELETE FROM ")
+			.append(this.tableName)
+			.append(" WHERE ").append(VERSION_ID).append(" = ? ")
+			.append(" AND ").append(METHOD).append(" = ? ");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setString(1, version);
+			ps.setString(2, methodKey);
+
+			ps.execute();
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results); 
+			close(ps);       
+			close(connection); 
+		}
+	}
+	
+	
+
+	/**
+	 * This method returns the size of the GridHeaderTable.
+	 * @param version
+	 * @param methodKey
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int getGridCountFromMemoryCache(String version, String methodKey) {
+		int size = 0;
+		String key = version.concat(":").concat(tableName);
+
+		//If there is any * then it will override the rest of the route members and we should get a list of all the members.
+		Map<String, DatastoreMetaData> imsplexMetaDataMapTemp = this.imsOmMetaData.get(key);
+		if(imsplexMetaDataMapTemp != null){
+			if (imsplexMetaDataMapTemp.get(methodKey)!=null) {
+				DatastoreMetaData imsplexMetaDataTemp = imsplexMetaDataMapTemp.get(methodKey);
+
+				if(imsplexMetaDataTemp != null){
+					size += imsplexMetaDataTemp.size;
+				}
+			}
+		}
+
+		return size;
+	}
+
+	/**
+	 * This returns the latest date for the grid header derby table
+	 * @param version
+	 * @param method
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public Date getGridLastestDateFromMemoryCache(Double version, String method) {
+		String key = Double.toString(version).concat(":").concat(tableName);
+		Date date = null;
+
+		if(date == null){
+			if (this.imsOmMetaData.get(key) !=null) {
+				if (this.imsOmMetaData.get(key).get(method) !=null) {
+					date = this.imsOmMetaData.get(key).get(method).date;
+				}
+			}
+
+		}
+		return date;
+	}
+	
+	/**
+	 * If there headers in derby auto populate the memcache with those headers. 
+	 * @param version
+	 * @param methodKey
+	 */
+	public void configureHeadersMemCache(String version, String methodKey) throws OmDatastoreException {
+		StringBuffer gridColumns = new StringBuffer();
+		PreparedStatement ps = null;
+		ResultSet results = null;
+		Connection connection = null;
+		StringBuffer sb = null;
+		sb = new StringBuffer("SELECT * FROM ").append(this.tableName);
+		sb.append(" WHERE ").append(VERSION_ID).append(" = ").append("'"+version+"'")
+		.append(" AND ").append(METHOD).append(" = ").append("'"+methodKey+"'");
+		try {
+			connection = parentDatastore.getConnection();
+			ps = connection.prepareStatement(sb.toString());
+			results = ps.executeQuery();
+			connection.setAutoCommit(false);
+			while(results.next()) {
+				gridColumns.append(results.getString("SLBL"));
+			}
+			ArrayList<String> headers = new ArrayList<String>(Arrays.asList(gridColumns.toString().split(",")));
+			
+			
+			Date date = new Date();
+			setGridHeadersMemCache(version, methodKey, headers, new Timestamp(date.getTime()), headers.size());
+			
+			connection.commit();
+			close(results);    
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(ps);
+			close(connection); 
+		}
+	}
+	
+	
+
+	/**
+	 * Sets column headers in memCache. Overrides if they already exist. 
+	 * @param tableName
+	 * @param version
+	 * @param methodKey
+	 * @param headers
+	 * @param timestamp
+	 */
+	public void setGridHeadersMemCache(String version, String methodKey, ArrayList<String> headers, Timestamp timestamp, int size) { //TODO: Size not needed
+		String key = version.concat(":").concat(this.getTableName());
+
+		if (this.imsOmMetaData.containsKey(key)) {
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+			if(map.containsKey(methodKey)) {
+				DatastoreMetaData imsplexMetaData =  map.get(methodKey);
+				imsplexMetaData.headerDate = timestamp;
+				imsplexMetaData.headers = headers;
+				imsplexMetaData.size = size;
+			} else {
+				DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+				imsplexMetaData.headerDate = timestamp;
+				imsplexMetaData.headers = headers;
+				imsplexMetaData.size = size;
+				map.put(methodKey, imsplexMetaData);
+			}
+		} else {
+			ConcurrentHashMap<String, DatastoreMetaData> temp = new ConcurrentHashMap<String,DatastoreMetaData>();
+			DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+			imsplexMetaData.headerDate = timestamp;
+			imsplexMetaData.headers = headers;
+			imsplexMetaData.size = size;
+			temp.put(methodKey, imsplexMetaData);
+			this.imsOmMetaData.put(key,temp);
+		}
+	}
+
+	/**
+	 * Sets memCache metadata. Overrides if they already exist. 
+	 * @param tableName
+	 * @param version
+	 * @param methodKey
+	 * @param timestamp
+	 */
+	public void setGridMetaDataMemCache(String version, String methodKey, Timestamp timestamp) {
+		String key = version.concat(":").concat(this.getTableName());
+
+		if (this.imsOmMetaData.containsKey(key)) {
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+			if(map.containsKey(methodKey)) {
+				DatastoreMetaData imsplexMetaData =  map.get(methodKey);
+				imsplexMetaData.headerDate = timestamp;
+			} else {
+				DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+				imsplexMetaData.headerDate = timestamp;
+				map.put(methodKey, imsplexMetaData);
+			}
+		} else {
+			ConcurrentHashMap<String, DatastoreMetaData> temp = new ConcurrentHashMap<String,DatastoreMetaData>();
+			DatastoreMetaData imsplexMetaData =  new DatastoreMetaData();
+			imsplexMetaData.headerDate = timestamp;
+			temp.put(methodKey, imsplexMetaData);
+			this.imsOmMetaData.put(key,temp);
+		}
+	}
+
+	/**
+	 * Returns the headers from the memCache if they exist
+	 * @param tableName
+	 * @param version
+	 * @param methodKey
+	 * @return
+	 */
+	public ArrayList<String> getGridHeadersMemCache(String version, String methodKey) {
+		String key = version.concat(":").concat(this.getTableName());
+
+		if (this.imsOmMetaData.containsKey(key)) {
+			Map<String, DatastoreMetaData> map = this.imsOmMetaData.get(key);
+			if(map.containsKey(methodKey)) {
+				DatastoreMetaData imsplexMetaData =  map.get(methodKey);
+				if (imsplexMetaData.headers != null) {
+					return imsplexMetaData.headers;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * This returns the latest date for the headers in the MEMCACHE
+	 * @param version
+	 * @param method
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public Date getHeaderLatestDateFromMemCache(String version, String method) {
+		String key = version.concat(":").concat(tableName);
+		Date date = null;
+
+		if (date == null) {
+			if (this.imsOmMetaData.get(key) != null) {
+				if (this.imsOmMetaData.get(key).get(method)!=null) {
+					date = this.imsOmMetaData.get(key).get(method).headerDate;
+				}
+			}
+		}
+		return date;
+
+	}
+
+	/**
+	 * Get the size of the derby table
+	 * @param version
+	 * @param method
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Integer getGridCountFromFileSystem(String version, String method) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Integer count = new Integer(0);
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT COUNT(*)")
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(VERSION_ID).append(" =  ?")
+			.append(" AND ").append(METHOD).append(" =  ?");
+
+			//prepare the statement to be reround so we can access the row and getInt(..)
+			ps = connection.prepareStatement(sb.toString(),ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			ps.setString(1, version);
+			ps.setString(2, method);
+
+			results = ps.executeQuery();
+
+			results.last();
+			count = results.getInt(1);
+			results.beforeFirst();
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return count;
+	}
+
+	/**
+	 * Get the last date accessed of the derby table
+	 * @param version
+	 * @param method
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Timestamp getGridLastestDateFromFileSystem(String version, String method) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(System.currentTimeMillis());
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT MAX(UPDATED)")
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(VERSION_ID).append(" =  ?")
+			.append(" AND ").append(METHOD).append(" =  ?");
+
+			//prepare the statement to be reround so we can access the row and getInt(..)
+			ps = connection.prepareStatement(sb.toString(),ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			ps.setString(1, version);
+			ps.setString(2, method);
+
+			results = ps.executeQuery();
+
+			results.last();
+			currentTimestamp = results.getTimestamp(1);
+			results.beforeFirst();
+
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+
+		return currentTimestamp;
+	}
+
+	/**
+	 * Configure the derby table mem cache
+	 * @throws OmDatastoreException
+	 * @throws DatastoreException
+	 */
+	public void autoConfigureGridMetaData() throws OmDatastoreException, DatastoreException {
+		Collection<Version> versions = null;
+		Collection<String> methodKeys = null;
+
+		//Get all sysplexId's in the discovered table
+		versions = this.getVersionsFromFileSystem();
+		String msg = null;
+
+		if(versions.size() > 0){
+			msg = "Building resource meta-data for table " + this.tableName ;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+		}
+
+
+
+		//Get all Distinct versions in the discovered table
+		versions = this.getVersionsFromFileSystem();
+
+		for(Version version: versions){
+			msg = "\tDetected Version: " + version+ LINE_SEPARATOR;
+
+			if(logger.isDebugEnabled()){
+				logger.debug(msg);
+			}
+				
+			methodKeys = this.getMethodKeysFromFileSystem(version.toString());
+
+
+			for(String method : methodKeys) {
+				//Note: All key values for setting meta-data have been discovered (sysplex,imsplex,memberName) so set query for detals
+
+				//Get the size for a given member belong to a specific sysplex and imsplex
+				Integer count = this.getGridCountFromFileSystem(version.toString(), method);
+				msg = "\tDetermined "+ this.tableName + " cache size for Version " + version + " , Table Name: " + this.tableName +  " = " + count;
+				
+				if (count > 0) {
+					configureHeadersMemCache(version.toString(), method);
+				}
+				
+				if(logger.isDebugEnabled()){
+					logger.debug(msg);
+				}				
+				//Get the latest date for a given member belonging to a specific sysplex and imsplex
+				Timestamp date = this.getGridLastestDateFromFileSystem(version.toString(), method);
+				msg = "\tDetermined "+ this.tableName + "  last updated cache date for Version:"+ version + " , Table Name: " + this.tableName +" , Method: "+method + " = " + date+ LINE_SEPARATOR;
+
+				if(logger.isDebugEnabled()){
+					logger.debug(msg);
+				}
+				//Set the memory meta data
+				this.setGridMetaDataMemCache(version.toString(), method, date);
+				msg = "\tConfiguring "+ this.tableName + "  meta-data."+ LINE_SEPARATOR;
+
+				if(logger.isDebugEnabled()){
+					logger.debug(msg);
+				}
+				//Access the memory cache for size
+				int size = this.getGridCountFromMemoryCache(version.toString(), method);
+				msg = "\tMemory cache Size for Version  "+ version + " , method: "+method + " = " + size;
+
+				if(logger.isDebugEnabled()){
+					logger.debug(msg);
+				}
+				//Access the memory cache for date
+				//Date updated = this.getGridLastestDateFromMemoryCache(version, method);
+				//msg = "\tMemory cache Date for Version: "+ version + " , method: "+method + " = " + updated+ LINE_SEPARATOR;
+
+			}
+		}
+
+
+	}
+
+	/**
+	 * Retrieve all the method keys from the file system, given the version
+	 * @param version
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Collection<String> getMethodKeysFromFileSystem(String version) throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Collection<String> imsMembers = new ArrayList<String>();
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT DISTINCT ")
+			.append(METHOD)
+			.append(" FROM ").append(this.tableName)
+			.append(" WHERE ").append(VERSION_ID).append(" =  ?");
+
+			ps = connection.prepareStatement(sb.toString());
+			ps.setString(1, version);
+
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				imsMembers.add(results.getString(METHOD));
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return imsMembers;
+	}
+
+	/**
+	 * Retrieve all the version from the file system
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	private Collection<Version> getVersionsFromFileSystem() throws OmDatastoreException{
+
+		Connection connection = null;
+		PreparedStatement ps = null;
+		StringBuffer sb = null;
+		ResultSet results = null;
+		Collection<Version> imsMembers = new ArrayList<Version>();
+
+		try{
+			connection = parentDatastore.getConnection();
+
+			sb = new StringBuffer("SELECT DISTINCT ")
+			.append(VERSION_ID)
+			.append(" FROM ").append(this.tableName);
+
+			ps = connection.prepareStatement(sb.toString());
+			results = ps.executeQuery();
+
+			while (results.next()) {
+				Version versionTemp = new Version(results.getString(VERSION_ID));
+				imsMembers.add(versionTemp);
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(results);    
+			close(ps);         
+			close(connection);
+		}   
+		return imsMembers;
+	}
+
+
+}

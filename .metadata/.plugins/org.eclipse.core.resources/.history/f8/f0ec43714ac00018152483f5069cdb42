@@ -1,0 +1,575 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-V93
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.datastore;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.im.ac.datastore.Datastore;
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.im.ac.datastore.impl.SysplexTable;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.services.Om;
+import com.ibm.ims.ea.om.ims.Ims.ImsResponseAttribute;
+import com.ibm.ims.ea.om.member.Member;
+import com.ibm.ims.ea.om.member.Member.MemberResponseAttribute;
+
+/**
+ * <pre>
+ * Table storing information about MEMBERS. 
+ * This table is a cache for all the IMS Members and some additional fields used by the caller.
+ *
+ * 
+ * MEMBER_ID	INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY
+ * CC     		VARCHAR(255)
+ * MBR    		VARCHAR(255)
+ * LATTR  		VARCHAR(255)
+ * MODI   		VARCHAR(255)
+ * LSTT   		VARCHAR(255)
+ * STT    		VARCHAR(255)
+ * TYP			VARCHAR(255)
+ * PRIMARY KEY 	(MEMBER_ID)	
+ * FOREIGN KEY 	(SYSPLEX_ID) REFERENCES SYSPLEX(SYSPLEX_ID) ON DELETE SET NULL)
+ * 
+ * MEMBER_ID CC MBR  LATTR                     MODI LSTT STT  TYP SYSPLEX_ID IMSPLX   UPDATED
+ --------- -- ---- ------------------------- ---- ---- ---- --- ---------- -------- -----------------------
+         1 0  IMS1 SHAREDQ,NO-STM,DYNMODBLKS 1    NULL NULL IMS          1 CSLPLEX1 2015-01-30 12:45:32.979
+         2 0  IMS2 SHAREDQ,NO-STM,DYNMODBLKS 1    NULL NULL IMS          1 CSLPLEX1 2015-01-30 12:45:39.266
+         3 0  IMS3 NO-STM,DYNMODBLKS         1    NULL NULL IMS          1 CSLPLEX2 2015-01-30 12:45:50.142
+
+ * @author ddgandhi
+ *</pre>
+ */
+public class OmMemberTable extends AbstractImsBaseDatastore { //implements OmImsStore 
+    final static Logger logger = LoggerFactory.getLogger(OmMemberTable.class);
+   
+	public static final String   TABLE_NAME          = "MEMBER";
+    private static final String  VERSION             = "1.0";
+    public static final String   SYSPLEX_ID          = "SYSPLEX_ID";
+    public static final String 	 IMSPLX              = "IMSPLX";
+	public static final String   MEMBER_ID      	 = "MEMBER_ID";
+	public static final String 	 UPDATED			 = "UPDATED";
+	
+	private static String IMSPLEX_TABLE_NAME = ImsOmDatastore.getDatastorePrefix()+"_"+OmImsplexTable.TABLE_NAME;
+	private static final String  SYSPLEX_TABLE_NAME  = SysplexTable.TABLE_NAME;
+	private static final String INDEX_NAME = "INDEX_MBR_SYSPLEX_IMSPLEX";
+
+	public OmMemberTable(Datastore parentDatastore) throws DatastoreException {
+ 		super(parentDatastore, TABLE_NAME, VERSION, ImsResponseAttribute.MBR.toString()); 
+	}
+
+	@Override
+	public void createTables() throws OmDatastoreException {
+		StringBuffer createSQL = new StringBuffer("CREATE TABLE ").append(this.tableName).append(" (")	
+				.append(MEMBER_ID).append(" INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, ") 	
+				.append(MemberResponseAttribute.CC).append(" VARCHAR(255) NOT NULL, ")	 
+				.append(MemberResponseAttribute.MBR).append(" VARCHAR(255), ")
+				.append(MemberResponseAttribute.LATTR).append(" VARCHAR(255), ") 											
+				.append(MemberResponseAttribute.MODI).append(" VARCHAR(255), ") 	
+				.append(MemberResponseAttribute.LSTT).append( " VARCHAR(255), ")	
+				.append(MemberResponseAttribute.STT).append(" VARCHAR(255), ")									
+				.append(MemberResponseAttribute.TYP).append(" VARCHAR(255), ")									
+				.append(SYSPLEX_ID).append(" INTEGER, ")
+				.append(IMSPLX).append(" VARCHAR(255) NOT NULL, ")
+				.append(UPDATED).append(" TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ")
+				.append(" PRIMARY KEY (" ).append(MEMBER_ID).append("), ")
+				.append(" FOREIGN KEY (").append(SYSPLEX_ID).append(") REFERENCES ").append(SYSPLEX_TABLE_NAME).append("(").append(SYSPLEX_ID).append(") ON DELETE SET NULL) ");
+
+		StringBuffer index = new StringBuffer("CREATE INDEX ").append(INDEX_NAME).append(" ON ").append(this.tableName)
+				.append(" (").append(MemberResponseAttribute.MBR).append(",")
+				.append(IMSPLX).append(",")
+				.append(SYSPLEX_ID) 
+				.append(")");
+		try{
+			execute(createSQL.toString());
+		} catch(DatastoreException e) {
+			OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			omDatastoreException.setQuery("DROP TABLE " + this.tableName);
+			throw omDatastoreException;
+		}
+		
+		try {
+            execute(index.toString());
+		} catch (DatastoreException e) {
+            OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+            omDatastoreException.setQuery(index.toString());
+            throw omDatastoreException;
+      }
+	}
+
+
+	public int addMember(Member member,int sysplexId, String imsplexName)  throws DatastoreException{
+		Collection<Member> memberes = new ArrayList<Member>(1);
+		memberes.add(member);
+		return addMember(memberes, sysplexId, imsplexName);
+	}
+
+
+	public int addMember(Collection<Member> members, int sysplexId, String imsplexName) throws DatastoreException {
+		Connection connection = null;
+		PreparedStatement ps = null;
+		int insertionSize=0;
+		
+		StringBuffer sb = new StringBuffer("INSERT INTO ")
+		.append(this.tableName)
+		.append(" ("+ MemberResponseAttribute.CC+","+ MemberResponseAttribute.MBR+","+MemberResponseAttribute.LATTR+","+  
+		MemberResponseAttribute.MODI+","+ MemberResponseAttribute.LSTT+","+MemberResponseAttribute.STT+","+  
+		MemberResponseAttribute.TYP+","+ SYSPLEX_ID+","+ IMSPLX +")").
+		append(" VALUES (?,?,?,?,?,?,?,?,?)");
+		
+		try{
+			int i = 0;
+			connection = parentDatastore.getConnection();
+			connection.setAutoCommit(false);
+			ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+
+			for(Member member: members) {
+				ps.setString(1, member.getProperty(MemberResponseAttribute.CC));
+				ps.setString(2, member.getProperty(MemberResponseAttribute.MBR));
+				ps.setString(3, member.getProperty(MemberResponseAttribute.LATTR));
+				ps.setString(4, member.getProperty(MemberResponseAttribute.MODI));
+				ps.setString(5, null); //We don't want to store status at this time, let getMember manage LSTT and STT member.getProperty(MemberResponseAttribute.LSTT)
+				ps.setString(6, null); //member.getProperty(MemberResponseAttribute.STT)
+				ps.setString(7, member.getProperty(MemberResponseAttribute.TYP)); 
+				ps.setInt(8, sysplexId);
+				ps.setString(9, imsplexName);
+				ps.addBatch();
+				
+				if((++i) % 1000 == 0) {
+					insertionSize += ps.executeBatch().length;
+					connection.commit();
+					ps.clearBatch();
+				}
+			}
+			 
+			insertionSize += ps.executeBatch().length;
+			connection.commit();
+			ps.clearBatch();
+		} catch(SQLException e) {
+			try{
+				logAndRollback(connection, e);
+			} catch(DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(ps);
+			close(connection);
+		}
+		return insertionSize;
+	}
+
+//**************************************************************************************
+// Get Member methods
+//**************************************************************************************	
+
+	public Collection<Member> getMember(int sysplexId, String[] systemId) throws OmDatastoreException {
+		Collection<Member> memberes = new ArrayList<Member>();
+		try {
+			memberes = this.getMember(sysplexId, null, systemId, null);
+		} catch (OmConnectionException e) {
+			/** Will not be thrown because we pass null for the Om, so eat the error **/
+		} catch (OmException e) {
+			/** Will not be thrown because we pass null for the Om, so eat the error **/
+		}
+		return memberes;
+	}
+	
+
+	public Collection<Member> getMember(int sysplexId, String imsplexName, String[] systemId) throws OmDatastoreException {
+		Collection<Member> members = new ArrayList<Member>();
+		try {
+			members = this.getMember(sysplexId, imsplexName, systemId, null);
+		} catch (OmConnectionException e) {
+			/** Will not be thrown because we pass null for the Om, so eat the error **/
+		} catch (OmException e) {
+			/** Will not be thrown because we pass null for the Om, so eat the error **/	
+		}
+		return members;
+	}
+	
+
+	public Collection<Member> getMember(int sysplexId, String imsplexName, String[] systemName, Om om) throws OmDatastoreException, OmException, OmConnectionException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet results = null;
+        ArrayList<Member> memberArray = new ArrayList<Member>();
+        StringBuffer sb = null;
+        Collection<Member> memberStatuses = null;
+
+        try {
+        	//If the om is not null then query for the member status
+        	if(om != null && !om.isInteractionModeCache()) {
+        		memberStatuses = om.getMemberService().getMemberStatus(systemName);
+        		
+        		if(memberStatuses.size()>0){
+        			this.updateMemberStatus(memberStatuses,sysplexId,imsplexName);
+        		}
+        	}
+        	
+        	connection = parentDatastore.getConnection();
+        	
+           	//Case: no route has been passed or the length is 0 but so we need to check if an impslexname has been passed.
+                 if(systemName == null || systemName.length == 0){
+                      if(imsplexName != null){
+                    	 sb = new StringBuffer("SELECT * FROM ")
+                    	 .append(this.tableName)
+                    	 .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                    	 .append(" AND ").append(IMSPLX).append(" = ? ")
+                     	.append(" ORDER BY ").append(MemberResponseAttribute.MBR);
+            
+                    	 ps = connection.prepareStatement(sb.toString());
+                    	 ps.setInt(1, sysplexId);
+                    	 ps.setString(2, imsplexName);
+                     }else{
+                          sb = new StringBuffer("SELECT * FROM ")
+	                	 .append(this.tableName)
+	                	 .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+//	                	 .append(" AND ").append(IMSPLX).append(" = ? ")
+	                 	.append(" ORDER BY ").append(MemberResponseAttribute.MBR);
+	        
+	                	 ps = connection.prepareStatement(sb.toString());
+	                	 ps.setInt(1, sysplexId);
+                     }
+                      
+                      results = ps.executeQuery();
+
+                      while (results.next()) {
+                      	Member member = new Member(results);
+                      	memberArray.add(member);
+                      }                      
+                 } else {//Route has been passed and for each we route the command and concat the results
+                	String sqlIn = this.sqlInGenerator(MemberResponseAttribute.MBR.toString(), systemName);	 
+                	 sb = new StringBuffer("SELECT * FROM ")
+                		 .append(this.tableName)
+                		 .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                		 .append(" AND ").append(IMSPLX).append(" = ? ")
+                	 .append(sqlIn)
+                    	.append(" ORDER BY ").append(MemberResponseAttribute.MBR);
+                	 
+                		 ps = connection.prepareStatement(sb.toString());
+             		 	 ps.setInt(1, sysplexId);
+                		 ps.setString(2, imsplexName);
+                		 
+                		 results = ps.executeQuery();
+
+                 while (results.next()) {
+                 	Member member = new Member(results);
+                 	memberArray.add(member);
+                 }
+        	 }
+           
+            //Execute process to cleanup the status column in the derby cache
+            this.executeUpdateMemberColumnAsynchronously(memberStatuses, sysplexId, imsplexName);
+        } catch(SQLException e) {
+        	try{
+        		logAndRollback(connection, e);
+        	} catch(DatastoreException e1) {
+        		OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+        		omDatastoreException.setQuery(sb.toString());
+        		omDatastoreException.setEnvironmentId(sysplexId);
+        		throw omDatastoreException;
+        	}
+        }finally {
+        	close(results);    // ResultSet
+        	close(ps);         // PreparedStatement
+        	close(connection); // Connection
+        }
+        return memberArray;	
+	}
+	
+//*******************************************************************************************
+// Update MEMBER functions
+//*******************************************************************************************	
+	/**
+	 * Method allows updating the Members status (STT, LSTT) in the cache with the status given a collection of Members
+	 * containing STT, LSTT, sysplexId and the memberId. This is often useful in combination after discovery has been performed where returning
+	 * a list of Members could require a status update to be inserted into the cache before returning the collection of Members
+	 * @param Members Collection of Members with updated status. At minimum the object should have in it
+	 * STT, LSTT, ImsplexName and MBR. 
+	 * @param sysplexId
+	 * @param memberId
+	 * @return an array of update counts containing one element for each command in the batch. The elements of the 
+	 * array are ordered according to the order in which commands were added to the batch. 
+	 * @throws DatastoreException
+	 */
+	public int updateMemberStatus(Collection<Member> members, int sysplexId, String imsplexName) throws OmDatastoreException{
+		Connection connection = null;
+		PreparedStatement ps = null;
+		int insertionSize = 0;
+		StringBuffer sb = null;	    
+		int i =0;
+		try {
+			connection = parentDatastore.getConnection();
+
+			for(Member mbr: members){
+				if(mbr.getProperty(MemberResponseAttribute.STT) != null && mbr.getProperty(MemberResponseAttribute.LSTT) != null){
+					sb = new StringBuffer("UPDATE ")
+					.append(this.tableName)
+					.append(" SET ").append(MemberResponseAttribute.STT).append(" = ? ")
+					.append(" SET ").append(MemberResponseAttribute.LSTT).append(" =? ")
+					.append(" WHERE ").append(MemberResponseAttribute.MBR).append(" = ? ")
+					.append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+					.append(" AND ").append(IMSPLX).append(" = ? ");
+
+					ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+					ps.setString(1, mbr.getProperty(MemberResponseAttribute.STT));
+					ps.setString(2, mbr.getProperty(MemberResponseAttribute.LSTT));
+					ps.setString(3, mbr.getProperty(MemberResponseAttribute.MBR));
+					ps.setInt(4, sysplexId);
+					ps.setString(5, imsplexName);
+					ps.addBatch();
+				} else if(mbr.getProperty(MemberResponseAttribute.STT) !=null){
+					sb = new StringBuffer("UPDATE ")
+					.append(this.tableName)
+					.append(" SET ").append(MemberResponseAttribute.STT).append(" = ? ")
+					.append(" WHERE ").append(MemberResponseAttribute.MBR).append(" = ? ")
+					.append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+					.append(" AND ").append(IMSPLX).append(" = ? ");
+
+					ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+					ps.setString(1, mbr.getProperty(MemberResponseAttribute.STT));
+					ps.setString(2, mbr.getProperty(MemberResponseAttribute.MBR));
+					ps.setInt(3, sysplexId);
+					ps.setString(4, imsplexName);
+					ps.addBatch();
+				} else if(mbr.getProperty(MemberResponseAttribute.LSTT) != null){
+					sb = new StringBuffer("UPDATE ")
+					.append(this.tableName)
+					.append(" SET ").append(MemberResponseAttribute.LSTT).append(" = ? ")
+					.append(" WHERE ").append(MemberResponseAttribute.MBR).append(" = ? ")
+					.append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+					.append(" AND ").append(IMSPLX).append(" = ? ");
+
+					ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+					ps.setString(1, mbr.getProperty(MemberResponseAttribute.LSTT));
+					ps.setString(2, mbr.getProperty(MemberResponseAttribute.MBR));
+					ps.setInt(3, sysplexId);
+					ps.setString(4, imsplexName);
+					ps.addBatch();
+				}
+				if ((++i) % 1000 == 0) {
+					insertionSize = ps.executeBatch().length;
+					connection.commit();
+					ps.clearBatch();
+				}
+				insertionSize += ps.executeBatch().length;
+				connection.commit();
+				ps.clearBatch();
+			}
+		} catch(SQLException e) {
+			try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(ps);         
+			close(connection); 
+		}
+
+		return insertionSize;
+	}
+	
+	/**
+	 * This method will update the column (Member Attribute) with a specific value for a given collection of Members. This is helpful when 
+	 * wanting to null out or override certain values such as STT, LSTT (status). Operates similar to {@link #updateMemberColumn(MemberResponseAttribute, String, String, int, String)}
+	 * but will do so a bit more efficiently only targeting the Members in the collection of Members. 
+	 * @param members
+	 * @param MemberResponseAttribute
+	 * @param value
+	 * @param sysplexId
+	 * @param memberId
+	 * @return
+	 * @throws DatastoreException
+	 */
+
+	public int updateMemberColumn(Collection<Member> members, MemberResponseAttribute memberResponseAttribute, String value, int sysplexId, String imsplexName) throws OmDatastoreException{
+	    StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(memberResponseAttribute).append(" = ? ")
+        .append(" WHERE ").append(MemberResponseAttribute.MBR).append(" = ? ")
+        .append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+        
+        Connection connection = null;
+        PreparedStatement ps = null;
+        int updateSize = 0;
+          
+        try {
+        	connection = parentDatastore.getConnection();
+        	connection.setAutoCommit(false);
+            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+            int i =0;
+            
+            for(Member mbr: members){
+            	ps.setString(1, value);
+                ps.setString(2, mbr.getProperty(MemberResponseAttribute.MBR));
+                ps.setInt(3, sysplexId);
+                ps.setString(4, imsplexName);
+                ps.addBatch();
+                if ((++i) % 1000 == 0) {
+                	updateSize += ps.executeBatch().length;
+                	connection.commit();
+                	ps.clearBatch();
+                }
+            }
+            updateSize = ps.executeBatch().length;
+            connection.commit();
+            
+        } catch(SQLException e) {
+        	try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+        } finally {
+        	close(ps);         
+        	close(connection); 
+        }
+        
+        return updateSize;
+	}	
+
+	/**
+	 * This will update an entire column given a sysplex, imsplexName, systemId (mbr name) and the value for that column. This can be an expensive
+	 * task since there can be many rows given the above values. Its more efficient to use a method that can update only needed rows
+	 * see {@link #updateMembers(Collection<Member> members, memberResponseAttribute memberResponseAttribute, String value, int sysplexId, String imsplexName) }
+	 * @param memberResponseAttribute
+	 * @param value
+	 * @param systemId
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws DatastoreException
+	 */
+
+	public int updateMemberColumn(MemberResponseAttribute memberResponseAttribute, String value, String systemId, int sysplexId, String imsplexName) throws OmDatastoreException{
+		StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(memberResponseAttribute).append(" = ? ")
+        .append(" WHERE ").append(MemberResponseAttribute.MBR).append(" = ? ")
+        .append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+		
+		 	Connection connection = null;
+	        PreparedStatement ps = null;
+	        int result = 0;
+
+	        try {
+	        	connection = parentDatastore.getConnection();
+	            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+	            ps.setString(1, value);
+	            ps.setString(2, systemId);
+	            ps.setInt(3, sysplexId);
+	            ps.setString(4, imsplexName);
+	           
+	            ps.executeUpdate();
+	            connection.commit();
+	        } catch(SQLException e) {
+	        	try {
+					logAndRollback(connection, e);
+				} catch (DatastoreException e1) {
+					OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+					omDatastoreException.setQuery(sb.toString());
+					throw omDatastoreException;
+				}
+	        } finally {
+	        	close(ps);         // PreparedStatement
+	        	close(connection); // Connection
+	        }
+	        return result; //TODO: this always returns zero, we need to fix this
+	}
+	
+	public Collection<String> getDistinctColumn(int sysplexId,String imsplexName, MemberResponseAttribute memberResponseAttribute) throws OmDatastoreException{
+		return this.getDistinctColumn(sysplexId, imsplexName, memberResponseAttribute.toString());
+	}
+	
+//**************************************************************************************
+// asynchronous clean up methods
+//**************************************************************************************
+	/**
+	 * Executes a callable to clean up the Member status column, see {link {@link updateMemberColumnAsynchronously}
+	 * @param MemberStatuses
+	 * @param sysplexId
+	 * @param memberId
+	 * @return
+	 */
+	private int executeUpdateMemberColumnAsynchronously(Collection<Member> memberStatuses, int sysplexId, String imsplexName){
+		int result = 0;
+		ExecutorService service =  Executors.newSingleThreadExecutor();
+		updateMemberColumnAsynchronously upMembersAssychronously = new updateMemberColumnAsynchronously(memberStatuses,sysplexId,imsplexName);
+		Future<Integer> future = service.submit(upMembersAssychronously);
+		try {
+			result =  future.get();
+		} catch (InterruptedException e) {
+			//TODO: Do anything here?
+		} catch (ExecutionException e) {
+			//TODO: Do anything here?
+		}
+
+		return result;
+	}
+	/**
+	 * <pre>
+	 * Class will create a callable to run in the background for a non-blocking call to {@link OmMemberTable#updateMemberColumn(Collection, MemberResponseAttribute, String, int, String)}
+	 *
+	 * Usage:
+	 *  ExecutorService service =  Executors.newSingleThreadExecutor();
+	 *  updateMemberColumnAsynchronously upMembersAssychronously = new updateMemberColumnAsynchronously(MemberStatuses,sysplexId,imsplexName);
+	 *  Future<Integer> future = service.submit(upMembersAssychronously);
+	 *  try {
+	 *  	Integer result = future.get();
+	 *  } catch (InterruptedException e) {
+	 *  } catch (ExecutionException e) {} 
+	 * 
+	 * @author ddimatos
+	 *</pre>
+	 */
+	private class updateMemberColumnAsynchronously implements Callable<Integer> {
+		private Collection<Member> members ;
+		private int sysplexId;
+		private String imsplexName;
+
+		// Null out the statuses that were set, we want to keep the status column null after use
+		private updateMemberColumnAsynchronously(Collection<Member> members, int sysplexId, String imsplexName) {
+			this.members = members;
+			this.sysplexId = sysplexId;
+			this.imsplexName = imsplexName;
+		}
+
+		@Override
+		public Integer call() throws OmDatastoreException  {
+			//My guess is this is thread safe because Derby will not allow a read during an update
+			// Query Member returns two statuses - LSTT and STT so we return the sum of the two 
+			return (updateMemberColumn(members,MemberResponseAttribute.STT, null,sysplexId,imsplexName)) + (updateMemberColumn(members, MemberResponseAttribute.LSTT, null, sysplexId, imsplexName)) ;
+		}
+	}
+
+}

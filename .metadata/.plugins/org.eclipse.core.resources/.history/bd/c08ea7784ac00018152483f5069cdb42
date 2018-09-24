@@ -1,0 +1,30 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.tran.update.syntax;
+
+/** This CLASS is the equivalent of the Class() keyword for the type 2 Update Tran command. 
+ *  Selects the transactions associated with the specified class or classes to be updated. */
+public class CLASS {
+	
+	private String result = null;
+	
+	/** Selects the transactions associated with the specified class or classes to be updated. */
+	public CLASS(int current_class_number){
+		this.result = String.valueOf(current_class_number);
+	}
+
+	@Override
+	public String toString(){
+		StringBuilder strBld = new StringBuilder();
+		strBld.append(this.result);
+	    return strBld.toString();
+	}
+}

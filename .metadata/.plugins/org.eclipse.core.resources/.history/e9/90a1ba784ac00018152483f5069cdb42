@@ -1,0 +1,63 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon.query.config;
+
+
+public interface IconConfigQueryCommand {
+
+	/**
+	 * Filters available for the command QUERY IMSCON TYPE(CONFIG)
+	 */
+    public enum SHOW {
+    	ALL,
+    	ADAPTER,
+    	CM0ATOQ,
+    	ICONID,
+    	IPADDR,
+    	MAXSOC,
+    	NUMSOC,
+    	ODBMAC,
+    	ODBMIPMEM,
+    	ODBMTMEM,
+    	ODBMTO,
+    	PSWDMC,
+    	RACF,
+    	RECORDER,
+    	RRS,
+    	SMEM,
+    	TIMEOUT,
+    	UIDAGE,
+    	UIDCACHE,
+    	VERSION,
+    	WARNINC,
+    	WARNSOC;
+    }
+    
+    /**
+     * <pre>
+     * Specifies the optional output fields to be displayed. Output fields that are
+     * always displayed, regardless of whether SHOW is specified, include the name
+     * of the IMS Connect that processes the command, and the completion code.
+     * The filters that are supported with the {@link SHOW} keyword, which can be specified
+     * in any order.
+     * @param values
+     * </pre>
+     */
+    public void setShow(SHOW[] values);
+    
+	/**
+     * Method will return the type-2 to command as a string. The string command returned will vary
+     * depending on the arguments and options selected. 
+     * @return String
+     * @throws Exception
+     */
+    public String getCommand();
+ 	
+}

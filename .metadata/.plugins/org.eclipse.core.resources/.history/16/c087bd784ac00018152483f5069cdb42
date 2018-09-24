@@ -1,0 +1,47 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.db.update.syntax;
+
+public class DB_AREA {
+	
+private String result = null;
+	
+	public DB_AREA(String area) {
+		this.result = area;
+	}
+	public enum _DB_AREA{
+		AREA;
+	}
+	
+	public String toString() {
+		StringBuffer temp = new StringBuffer("AREA(");
+		temp.append(result).append(")");
+		return temp.toString();
+	}
+
+/*	public DB_AREA(_DB_AREA key) {
+    	this.result = key.name();
+	}*/
+	
+	
+	/*private String area = "*";
+	
+	public DB_AREA(String name){
+	    this.area = name;
+	}*/
+
+//	@Override
+//	public String toString(){
+//		StringBuilder strBld = new StringBuilder();
+//		strBld.append(this.area);
+//	    return strBld.toString();
+//	}
+}

@@ -1,0 +1,171 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2015 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+package com.ibm.ims.ea.om.member;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.ims.ea.base.om.common.messages.IQEO;
+import com.ibm.ims.ea.om.common.ImsResource;
+import com.ibm.ims.ea.om.datastore.ImsTransactionTable;
+
+/**
+ * Class represents an object type of the return values for the MEMBER Query command.
+ * All values that can be returned are mapped to this object, in the event a value 
+ * is empty or not mapped the return value would be empty string.
+ */
+public class Member extends ImsResource {
+	
+	private static final Logger logger = LoggerFactory.getLogger(Member.class);
+	
+	/**
+	 * Constructor helpful in creating an empty bean particularly in areas reflection is used. 
+	 * Should be used with ({@link Member#setMap(Map)}
+	 */
+	public Member() {
+		this.resourceType = ResourceType.MEMBER;
+	}
+
+	/**
+	 * Method creates an instance of the bean given a Map representing the resource from an OM interaction
+	 * @param omResourceResponse Map representation for IMS resource such as 
+	 * a Ims or database query.
+	 * @param properties
+	 */
+	public Member(Map<String, String> properties) {
+		super(properties);
+		this.resourceType = ResourceType.MEMBER;
+	}
+
+	public String getProperty(MemberResponseAttribute key){
+		return this.properties.get(key.toString());
+	}
+	
+	/**
+	 * Method creates an instance of the bean from an SQL ResultSet
+	 * @param resultSet
+	 * @throws SQLException
+	 */
+	public Member(ResultSet sqlResultSet) throws SQLException{		
+		//if (logger.isDebugEnabled()) { logger.debug(this.getClass() + "Member(ResultSet)"); }
+
+		resourceType = ResourceType.MEMBER;
+		ResultSetMetaData rsMetaData = sqlResultSet.getMetaData();
+		int numberOfColumns = rsMetaData.getColumnCount();
+		
+		try {					
+			for (int i = 1; i < numberOfColumns + 1; i++) {
+			      String columnName = rsMetaData.getColumnName(i);
+			      
+			      if (columnName.equals(ImsTransactionTable.SYSPLEX_ID) ){
+						properties.put(columnName, String.valueOf(sqlResultSet.getInt(columnName)));
+					}else {
+						if (sqlResultSet.getString(columnName) != null) {
+							properties.put(columnName, sqlResultSet.getString(columnName));
+						}
+					}
+			    }
+		} catch(SQLException e) {
+			if(logger.isDebugEnabled()){
+				logger.debug(IQEO.IQEO0000E.msg(new Object[] {Arrays.toString(e.getStackTrace())}));
+			}
+		}
+
+		//if (logger.isDebugEnabled()) { logger.debug(this.getClass() + "Member(ResultSet results): " + results.toString()); }
+	}
+
+	/**
+	 * MEMBER Output fields that are returned for this resource type. 
+	 * Depending on the command some fields when queried will return null.
+	 */
+	public enum MemberResponseAttribute {
+		
+		CC, MBR, LATTR, MODI, LSTT, STT, TYP ;
+	
+		public String value() {
+			return name();
+		}
+
+		public static MemberResponseAttribute fromValue(String v) {
+			return valueOf(v);
+		}
+
+		@Override
+		public String toString(){
+			return name();
+		}
+	}
+
+	/**
+	 * Displays Member specified status
+	 */
+	public static enum STATUS {
+	    LEOPT("LEOPT"), 
+	    OLCABRTC("OLCABRTC"),   
+	    OLCABRTI("OLCABRTI"),   
+	    OLCCMT1C("OLCCMT1C"),   
+	    OLCCMT1I("OLCCMT1I"),   
+	    OLCCMT2C("OLCCMT2C"),   
+	    OLCCMT2F("OLCCMT2F"),   
+	    OLCCMT2I("OLCCMT2I"),   
+	    OLCCMT3C("OLCCMT3C"),   
+	    OLCCMT3F("OLCCMT3F"),   
+	    OLCCMT3I("OLCCMT3I"),   
+	    OLCMACB ("OLCMACB "),   
+	    OLCMSTR ("OLCMSTR "),   
+	    OLCPREPC("OLCPREPC"),   
+	    OLCPREPF("OLCPREPF"),   
+	    OLCPREPI("OLCPREPI"),   
+	    OLCTERMC("OLCTERMC"),   
+	    OLCTERMF("OLCTERMF"),   
+	    OLCTERMI("OLCTERMI"),   
+	    SECCMD("SECCMD"),
+	    SECCMDT("SECCMDT"), 
+	    SECMSG("SECMSG"),
+	    XRFALT("XRFALT");
+	    
+        private String value = "";
+
+        private STATUS(String val) {
+            this.value = val;
+        }
+
+        private STATUS() {
+        }
+
+        @Override
+        public String toString() {
+            return this.value;
+        }
+	}
+	
+	@Override
+	public void setMap(Map<String, String> resourceMap) {
+		this.properties = resourceMap;
+		this.resourceType = ResourceType.MEMBER;
+	}
+
+	
+	@Override
+	public void setAttribute(String key, String value) {
+		this.properties.put(key, value);
+	}
+}
+
+
+
+
+
+

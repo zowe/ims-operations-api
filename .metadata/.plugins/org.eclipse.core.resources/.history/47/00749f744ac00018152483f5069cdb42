@@ -1,0 +1,191 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.rm.list;
+
+import java.util.ArrayList;
+import com.ibm.ims.ea.om.rm.MODIFIER;
+import com.ibm.ims.ea.om.rm.TIMEFMT.FORM;
+import com.ibm.ims.ea.om.rm.TIMEFMT.OFFSET;
+import com.ibm.ims.ea.om.rm.TIMEFMT.OFFSET_DISPLAY;
+import com.ibm.ims.ea.om.rm.TIMEFMT.YEAR_SIZE;
+
+/**
+ * <pre>
+ * Command builder for the RMxxxx RMLIST.CAGRP. 
+ * RMLIST.CAGRP takes 5 positional parameters, each are optional, entering null where a parameter is not chosen.
+ * Example use of the CAGRPCommandBuilder
+ * <code>
+		CagrpCommandBuilder rmcmdb = new CagrpCommandBuilder();
+		rmcmdb.setCagrpArg1(CAGRP_ARG_1.ALL);
+		rmcmdb.setCagrpArg2(CAGRP_ARG_2.STATIC);
+		rmcmdb.setCagrpArg3(CAGRP_ARG_3.QUIESCE);
+		rmcmdb.setCagrpArg4(OFFSET.L, OFFSET_DISPLAY.N, FORM.P, YEAR_SIZE.FOUR);
+		rmcmdb.setCagrpArg5(CAGRP_ARG_5.MEMBERS);
+		System.out.println(rmcmdb.getCommand());
+		
+		CagrpCommandBuilder rmcmdb2 = new CagrpCommandBuilder();
+		rmcmdb2.setCagrpArg1(CAGRP_ARG_1.GRPNAME);
+		rmcmdb2.setCagrpArg2(null);
+		rmcmdb2.setCagrpArg3(CAGRP_ARG_3.QUIESCE);
+		rmcmdb2.setCagrpArg4(OFFSET.L, OFFSET_DISPLAY.N, null, YEAR_SIZE.TWO);
+		rmcmdb2.setCagrpArg5(CAGRP_ARG_5.MEMBERS);
+		System.out.println(rmcmdb2.getCommand());
+ * </code>
+ * @author ddimatos
+ * </pre>
+ *
+ */
+public class CagrpCommandBuilder implements RmList {
+
+	private ArrayList<String> args 	= new ArrayList<String>(); 	//Maintains the buildig of the command
+	private String commandType 		= null;  					// Maps directly to the modifier to indicate the parser type
+	public static final String COMMA = ",";
+	
+	/**
+	 * Instantiate a LIST.RECON command builder to generate the command syntax. Instatiation also sets the commandType
+	 * that identifies the supported modifier. 
+	 */
+	public CagrpCommandBuilder() {
+		this.commandType = MODIFIER.CAGRP.name();
+	}
+	
+	// ********************************************************************************************************************
+	// * RMList CAGRP Type safe positional enum types
+	// ********************************************************************************************************************
+	
+	/**
+	 * LIST.CAGRP argument 1: ENUM TYPE STATUS
+	 */
+	enum CAGRP_ARG_1{ALL,GRPNAME};
+	
+	/**
+	 * LIST.CAGRP argument 2: STATIC or CONCURR
+	 */
+	enum CAGRP_ARG_2{STATIC,CONCURR};
+	
+	/**
+	 * LIST.CAGRP argument 3: ENUM TYPE QUIESCE
+	 */
+	enum CAGRP_ARG_3{QUIESCE};
+    
+	/**
+	 * LIST.CAGRP argument 3: ENUM TYPE QUIESCE
+	 */
+	enum CAGRP_ARG_5{MEMBERS};
+	
+	// ********************************************************************************************************************
+	// * RMList CAGRP positional argument setters. Note: LIST.CAGRP takes 5 arguments noted as Arg1 - Arg5 where the 4th
+	// * argument are the sublist of TYPES found in TIMEFMT
+	// ********************************************************************************************************************
+	
+	/**
+	 * Set the LIST.CAGRP first positional argument
+	 * @param {@link CAGRP_ARG_1} cArg_1
+	 */
+	public void setCagrpArg1(CAGRP_ARG_1 cArg_1) {
+		args.add(cArg_1 == null ? "" : cArg_1.name() + " ");
+	}
+
+	/**
+	 * Set the LIST.CAGRP second positional argument
+	 * @param {@link CAGRP_ARG_2} cArg_2
+	 */
+	public void setCagrpArg2(CAGRP_ARG_2 cArg_2) {
+		args.add(cArg_2 == null ? "" : cArg_2.name() + " ");
+	}
+
+	/**
+	 * Set the LIST.CAGRP third positional argument
+	 * @param {@link CAGRP_ARG_3} cArg_3
+	 */
+	public void setCagrpArg3(CAGRP_ARG_3 cArg_3) {
+		args.add(cArg_3 == null ? "" : cArg_3.name() + " ");
+	}
+
+	/**
+	 * Set the LIST.CAGRP fourth positional arguments for the TIMEFMT parameter
+	 * The fourth set of TIMEFMT augments are mutually exclusive and if all sublist arguments are 
+	 * omitted, the current values from the CAGRP header are used. 
+	 * @param {@link OFFSET} offset
+	 * @param {@link OFFSET_DISPLAY} offsetDisplay
+	 * @param {@link FORM} form
+	 * @param {@link YEAR_SIZE} yearSize
+	 */
+	public void setCagrpArg4(OFFSET offset, OFFSET_DISPLAY offsetDisplay, FORM form, YEAR_SIZE yearSize ) {
+		 
+	     StringBuilder temp = new StringBuilder();
+	     temp.append("TIMEFMT(");
+	     temp.append(offset   		== null ? "" + COMMA : offset + COMMA);
+	     temp.append(offsetDisplay  == null ? "" + COMMA: offsetDisplay + COMMA);
+	     temp.append(form      		== null ? "" + COMMA : form + COMMA);
+	     temp.append(yearSize   	== null ? "" : yearSize);
+	     temp.append(") ");
+	     
+	     args.add(temp.toString());
+	}
+	
+	/**
+	 * Set the LIST.CAGRP fifth positional argument
+	 * @param {@link CAGRP_ARG_5} cArg_5
+	 */
+	public void setCagrpArg5(CAGRP_ARG_5 cArg_5) {
+		args.add(cArg_5 == null ? "" : cArg_5.name() + " ");
+	}
+	
+	/**
+	 * Returns the appropriate command //"/RMLIST DBRC='CAGRP STATUS'."
+	 * @return
+	 */
+	public String getCommand() {
+        String result;
+        StringBuilder command = new StringBuilder();
+        command.append("/RMLIST DBRC='CAGRP "); 
+        for(int i = 0; i < args.size(); i++){
+        	command.append(this.args.get(i) == null ? "" : this.args.get(i));
+        }
+        command.append("'.");
+        
+        result = command.toString();
+        clear();
+        return result;
+    }
+	
+	public String getCommandType() {
+		return commandType;
+	}
+	
+    /**
+     * Method clears the variables used to build a command for reuse.
+     * Should be called after each command is built.
+     */
+    private void clear(){
+    	this.args.clear();
+    }
+    
+//    public static void main(String[] args) {
+//		CagrpCommandBuilder rmcmdb = new CagrpCommandBuilder();
+//		rmcmdb.setCagrpArg1(CAGRP_ARG_1.ALL);
+//		rmcmdb.setCagrpArg2(CAGRP_ARG_2.STATIC);
+//		rmcmdb.setCagrpArg3(CAGRP_ARG_3.QUIESCE);
+//		rmcmdb.setCagrpArg4(OFFSET.L, OFFSET_DISPLAY.N, FORM.P, YEAR_SIZE.FOUR);
+//		rmcmdb.setCagrpArg5(CAGRP_ARG_5.MEMBERS);
+//		System.out.println(rmcmdb.getCommand());
+//		
+//		CagrpCommandBuilder rmcmdb2 = new CagrpCommandBuilder();
+//		rmcmdb2.setCagrpArg1(CAGRP_ARG_1.GRPNAME);
+//		rmcmdb2.setCagrpArg2(null);
+//		rmcmdb2.setCagrpArg3(CAGRP_ARG_3.QUIESCE);
+//		rmcmdb2.setCagrpArg4(OFFSET.L, OFFSET_DISPLAY.N, null, YEAR_SIZE.TWO);
+//		rmcmdb2.setCagrpArg5(CAGRP_ARG_5.MEMBERS);
+//		System.out.println(rmcmdb2.getCommand());
+//	}
+
+	
+}

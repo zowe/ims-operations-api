@@ -1,0 +1,45 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common;
+
+/**
+ * This class contains enums and constants used by ResourceStatus class. Possible refactor later. 
+ * @author Jerry Li
+ *
+ */
+public final class Statuses {
+
+    public static enum STATUSES {
+    	statusIcon,
+    	statusIconForAlias,// For IMS Connect Odbm
+    	statusIconForXCFStatus,// For IMS Otma - Type1 Command
+    	statusIconForUserStatus,// For IMS Otma - Type1 Command
+    	statusIconLSTT,
+    	statusIconSTT,
+    }
+    
+    public static enum COLOR {
+    	RED("critical"),
+    	YELLOW("warning"),
+    	GREEN("normal");
+    	
+    	private String value;
+    	
+    	private COLOR(String val){
+    		this.value = val;
+    	}
+    	
+    	private COLOR(){}
+    	
+    	public String getColor(){
+    		return this.value;
+    	}
+    }
+}

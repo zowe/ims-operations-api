@@ -1,0 +1,1413 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.datastore;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import com.ibm.im.ac.datastore.Datastore;
+import com.ibm.im.ac.datastore.DatastoreException;
+import com.ibm.im.ac.datastore.impl.SysplexTable;
+import com.ibm.ims.ea.om.cmd.constants.ImsCommandAttributes;
+import com.ibm.ims.ea.om.cmd.v14.query.tran.QueryTran;
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+import com.ibm.ims.ea.om.common.result.OmResultSet;
+import com.ibm.ims.ea.om.common.services.Om;
+import com.ibm.ims.ea.om.tran.Transaction;
+import com.ibm.ims.ea.om.tran.Transaction.TransactionResponseAttribute;
+
+/**
+ * <pre>
+ * This table is a cache for all the IMS Transaction attributes and some additional needed fields used by the caller. 
+ * 
+ *  TRAN_ID AFIN AOCMD CC   CCTXT CMTM CONV CONVID DCLW DFNT    DRRT EDTR EDTT EMHBS EXPRT FP IMSID INQ LCLS LCP LLCT  LLP LMRG  LNP LPLCT LPLM  LQ    LSNO  LSSZ  LSTT LU   MDLN MDLT MBR      MSGT    MSN  NODE PLCTT   PGM  PSB      Q    RAOCMD RCLS RCMTM RCONV RCV RDCLW RDRRT REDTR REDTT REMHBS REPO REXPRT RFP  RGC   RINQ RLCT RLP  RMRG RMSGT RMT RNP  RPLCT RPLCTT RPLM RPSB RRCV RRMT RRSP RSER RSIDL RSIDR RSNO RSP RSPASZ RSPATR RSSZ RTLS RTMCR RTMUP RWFI SER SIDL SIDR SPASZ SPATR STT  TLS TMAC TMCR                 TMEM TMIM TMUP TPIP TRAN     TRAN_USER WFI WRK  SYSPLEX_ID IMSPLEX_ID UPDATED
+ *  ------- ---- ----- ---- ----- ---- ---- ------ ---- ------- ---- ---- ---- ----- ----- -- ----- --- ---- --- ----- --- ----- --- ----- ----- ----- ----- ----- ---- ---- ---- ---- -------- ------- ---- ---- ------- ---- -------- ---- ------ ---- ----- ----- --- ----- ----- ----- ----- ------ ---- ------ ---- ----- ---- ---- ---- ---- ----- --- ---- ----- ------ ---- ---- ---- ---- ---- ---- ----- ----- ---- --- ------ ------ ----- ---- ----- ----- ---- --- ---- ---- ----- ----- ---- --- ---- -------------------- ---- ---- ---- ---- -------- --------- --- ---- ---------- ---------- -----------------------
+ *  31916 NULL N        0 NULL  MULT N    NULL   Y    MODBLKS N    NULL Y        0     0 N  NULL  N     4   7      2 10      0  7  65535 65535     0     0     0 NULL NULL NULL NULL IMS1     MULTSEG NULL NULL 6553500 NULL DFSSAM04 NULL NULL   NULL NULL  NULL  Y   NULL  NULL  NULL  NULL  NULL   NULL NULL   NULL     0 NULL NULL NULL NULL NULL  N   NULL NULL  NULL   NULL NULL NULL NULL NULL NULL NULL  NULL  NULL N   NULL   NULL   NULL  NULL NULL  NULL  NULL N     10   10     0 NULL  NULL N   NULL 2014.264 08:52:24.75 NULL NULL NULL NULL ADDINV   TRAN_USER N   NULL          1          1 2014-09-21 10:41:45.911
+ *  31917 NULL N        0 NULL  MULT N    NULL   Y    MODBLKS N    NULL Y        0     0 N  NULL  N     4   7      2 10      0  7  65535 65535     0     0     0 NULL NULL NULL NULL IMS1     MULTSEG NULL NULL 6553500 NULL DFSSAM04 NULL NULL   NULL NULL  NULL  Y   NULL  NULL  NULL  NULL  NULL   NULL NULL   NULL     0 NULL NULL NULL NULL NULL  N   NULL NULL  NULL   NULL NULL NULL NULL NULL NULL NULL  NULL  NULL N   NULL   NULL   NULL  NULL NULL  NULL  NULL N     10   10     0 NULL  NULL N   NULL 2014.264 08:52:24.75 NULL NULL NULL NULL ADDPART  TRAN_USER N   NULL          1          1 2014-09-21 10:41:45.919
+ *  31918 NULL N        0 NULL  SNGL N    NULL   Y    MODBLKS N    NULL Y        0     0 N  NULL  N    23   0  65535  0      0  0  65535 65535     0     0     0 NULL NULL NULL NULL IMS1     MULTSEG NULL NULL 6553500 NULL TS2IAOB0 NULL NULL   NULL NULL  NULL  Y   NULL  NULL  NULL  NULL  NULL   NULL NULL   NULL     0 NULL NULL NULL NULL NULL  N   NULL NULL  NULL   NULL NULL NULL NULL NULL NULL NULL  NULL  NULL N   NULL   NULL   NULL  NULL NULL  NULL  NULL N     10   10     0 NULL  NULL N   NULL 2014.264 08:52:24.75 NULL NULL NULL NULL AOBMP    TRAN_USER Y   NULL          1          1 2014-09-21 10:41:45.92
+ *
+ * Example usage:
+ *  //Obtain an instance of the transaction table
+ *  ImsTransactionTable imsTransactionTable = ImsOMDatastore.getInstance().getImsTransactionStore();
+ * 
+ *  int size = this.getImsTransactionTableSize(sysplex, imsplex,new String[]{member.trim()});
+ *  System.out.println("Memory cache Size for "+ sysplex + ","+ imsplex+","+member + ": " + count);
+ *  		    	
+ *  //Access the memory cache for date
+ *  this.getImsTransactionTableLastUpdatedDate(sysplex, imsplex,new String[]{member.trim()});
+ *  System.out.println("Memory cache Date for "+ sysplex + ","+ imsplex+","+member + ": " + date);
+ *  
+ * @author ddimatos
+ *</pre>
+ */
+public class ImsTransactionTable extends AbstractImsBaseDatastore{
+    public static final String  TABLE_NAME      = "TRANSACTION";
+	private static final String VERSION         = "1.2";
+	public static final String SYSPLEX_ID 		= "SYSPLEX_ID";
+	private static final String IMSPLX 			= "IMSPLX" ;       //Mobile Change //ImsplexTable.IMSPLEX_ID;
+	private static final String UPDATED			= "UPDATED";
+	private static final String TRAN_ID 		= "TRAN_ID";
+	
+	private static String IMSPLEX_TABLE_NAME 	= ImsOmDatastore.getDatastorePrefix()+"_"+ OmImsplexTable.TABLE_NAME; //Mobile Change //ImsbaseDatastore.getDatastorePrefix()+"_"+ImsplexTable.TABLE_NAME;
+	private static final String SYSPLEX_TABLE_NAME 	 = SysplexTable.TABLE_NAME;
+	
+	private  static final String UPDATE_EDIT_DATE_TRIGGER = "UPDATE_TRANSACTION_DATE_TRIGGER";
+	private static final String INDEX_NAME = "INDEX_TRAN_MBR_SYSPLEX_IMSPLEX";
+	public static String USER = "TRAN_"+TransactionResponseAttribute.USER.name();
+	
+	protected ImsTransactionTable(Datastore parentDatastore) throws DatastoreException {
+		super(parentDatastore, TABLE_NAME, VERSION, TransactionResponseAttribute.MBR.toString());
+	}
+
+//*******************************************************************************************
+// Create the IMS Derby Table
+//*******************************************************************************************
+	
+	@Override
+	public void createTables() throws OmDatastoreException { 
+		StringBuffer createSQL = new StringBuffer("CREATE TABLE ").append(this.tableName).append(" (")
+				.append(TRAN_ID).append(" INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, ")
+				.append(TransactionResponseAttribute.AFIN).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.AOCMD).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.CC).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.CCTXT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.CMTM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.CONV).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.CONVID).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.DCLW).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.DFNT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.DRRT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.EDTR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.EDTT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.EMHBS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.EXPRT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.FP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.IMSID).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.INQ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LCLS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LCP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LLCT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LLP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LMRG).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LNP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LPLCT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LPLM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LQ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LSNO).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LSSZ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LSTT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.LU).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.MDLN).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.MDLT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.MBR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.MSGT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.MSN).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.NODE).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.PLCTT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.PGM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.PSB).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.Q).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RAOCMD).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RCLS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RCMTM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RCONV).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RCV).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RDCLW).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RDRRT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.REDTR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.REDTT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.REMHBS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.REPO).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.REXPRT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RFP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RGC).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RINQ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RLCT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RLP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RMRG).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RMSGT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RMT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RNP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RPLCT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RPLCTT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RPLM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RPSB).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RRCV).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RRMT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RRSP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSER).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSIDL).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSIDR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSNO).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSPASZ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSPATR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RSSZ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RTLS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RTMCR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RTMUP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.RWFI).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.SER).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.SIDL).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.SIDR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.SPASZ).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.SPATR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.STT).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TLS).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TMAC).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TMCR).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TMEM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TMIM).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TMUP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TPIP).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.TRAN).append(" VARCHAR(255), ")
+				.append(USER).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.WFI).append(" VARCHAR(255), ")
+				.append(TransactionResponseAttribute.WRK).append(" VARCHAR(255), ")
+				.append(SYSPLEX_ID).append(" INTEGER, ")
+				.append(UPDATED).append(" TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ")
+				.append(IMSPLX).append(" VARCHAR(255) NOT NULL, ")
+				.append(" FOREIGN KEY (").append(SYSPLEX_ID).append(") REFERENCES ").append(SYSPLEX_TABLE_NAME).append("(").append(SYSPLEX_ID).append(") ON DELETE SET NULL) ");
+		
+	            // Don't delete this, there is a problem with this trigger causing duplicates on update.
+	            //		 Date date = new Date();
+	            //         java.sql.Timestamp timestamp = new java.sql.Timestamp(date.getTime());
+	            //		StringBuffer trigger = new StringBuffer("CREATE TRIGGER ").append(UPDATE_EDIT_DATE_TRIGGER)
+	            //			.append(" AFTER UPDATE  OF LSTT ON ").append(this.tableName)
+	            //			.append(" REFERENCING OLD AS MODIFIEDROW FOR EACH  ROW ")
+	            //			.append(" UPDATE " ).append(this.tableName).append(" SET ")
+	            //			.append(this.tableName).append(".").append(UPDATED).append(" = ").append(" CURRENT_TIMESTAMP ")
+	            //			.append(" WHERE ").append(TRAN_ID).append(" = ").append(" MODIFIEDROW").append(".").append(TRAN_ID);
+	
+        StringBuffer index = new StringBuffer("CREATE INDEX ").append(INDEX_NAME).append(" ON ").append(this.tableName)
+                .append(" (").append(TransactionResponseAttribute.TRAN).append(",")
+                .append(TransactionResponseAttribute.MBR).append(",")
+                .append(SYSPLEX_ID).append(",")
+                .append(IMSPLX).append(")");
+        
+		try {
+			execute(createSQL.toString());
+		} catch (DatastoreException e) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+				omDatastoreException.setQuery(createSQL.toString());
+				throw omDatastoreException;
+		}
+
+			// Don't delete this it matches up with the trigger above.
+			//		try {
+			//			execute(trigger.toString());
+			//		} catch (DatastoreException e) {
+			//				OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+			//				omDatastoreException.setQuery(trigger.toString());
+			//				throw omDatastoreException;
+			//		}
+		
+	    try {
+              execute(index.toString());
+        } catch (DatastoreException e) {
+              OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+              omDatastoreException.setQuery(index.toString());
+              throw omDatastoreException;
+        }
+	}
+
+	
+//*******************************************************************************************
+// Add IMS Transactions functions
+//*******************************************************************************************
+	/**
+	 * Add a single Transaction to the derby cache. 
+	 * @param transaction
+	 * @param sysplexID
+	 * @param imsplexName
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int addImsTransaction(Transaction transaction,int sysplexId, String imsplexName)  throws OmDatastoreException{
+		Collection<Transaction> transactions = new ArrayList<Transaction>(1);
+		transactions.add(transaction);
+		return addImsTransaction(transactions,sysplexId, imsplexName);
+	}
+	
+	/**
+	 * Add IMS Transactions to the derby cache using a collection of transactions {@link Transaction}.
+	 * @param transactions
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws OmDatastoreException
+	 */
+	public int addImsTransaction(Collection<Transaction> transactions,int sysplexId, String imsplexName)  throws OmDatastoreException{
+		Connection connection 	= null;
+        PreparedStatement ps 	= null;
+        int insertionSize=0;
+        
+        StringBuffer sb = new StringBuffer("INSERT INTO ").
+    	        append(this.tableName).append(" ("+ TransactionResponseAttribute.AFIN +","+ TransactionResponseAttribute.AOCMD +","+ TransactionResponseAttribute.CC +","+ TransactionResponseAttribute.CCTXT +","+ TransactionResponseAttribute.CMTM +","+ TransactionResponseAttribute.CONV +","+ TransactionResponseAttribute.CONVID +","+ TransactionResponseAttribute.DCLW +","+ TransactionResponseAttribute.DFNT +","+ TransactionResponseAttribute.DRRT +","+ 
+    	        TransactionResponseAttribute.EDTR +","+ TransactionResponseAttribute.EDTT +","+ TransactionResponseAttribute.EMHBS +","+ TransactionResponseAttribute.EXPRT +","+   TransactionResponseAttribute.FP +","+ TransactionResponseAttribute.IMSID +","+ TransactionResponseAttribute.INQ +","+ TransactionResponseAttribute.LCLS +","+ TransactionResponseAttribute.LCP  +","+ TransactionResponseAttribute.LLCT +","+
+    	        TransactionResponseAttribute.LLP +","+ TransactionResponseAttribute.LMRG +","+ TransactionResponseAttribute.LNP +","+ TransactionResponseAttribute.LPLCT +","+ TransactionResponseAttribute.LPLM +","+ TransactionResponseAttribute.LQ +","+ TransactionResponseAttribute.LSNO +","+ TransactionResponseAttribute.LSSZ +","+ TransactionResponseAttribute.LSTT +","+ TransactionResponseAttribute.LU +","+ 
+    	        TransactionResponseAttribute.MDLN +","+ TransactionResponseAttribute.MDLT +","+ TransactionResponseAttribute.MBR +","+ TransactionResponseAttribute.MSGT +","+ TransactionResponseAttribute.MSN +","+ TransactionResponseAttribute.NODE +","+ TransactionResponseAttribute.PLCTT +","+ TransactionResponseAttribute.PGM +","+ TransactionResponseAttribute.PSB     +","+  TransactionResponseAttribute.Q +","+   
+    	        TransactionResponseAttribute.RAOCMD  +","+ TransactionResponseAttribute.RCLS  +","+ TransactionResponseAttribute.RCMTM +","+ TransactionResponseAttribute.RCONV +","+ TransactionResponseAttribute.RCV +","+ TransactionResponseAttribute.RDCLW +","+ TransactionResponseAttribute.RDRRT +","+ TransactionResponseAttribute.REDTR +","+ TransactionResponseAttribute.REDTT +","+ 
+    	        TransactionResponseAttribute.REMHBS +","+ TransactionResponseAttribute.REPO +","+ TransactionResponseAttribute.REXPRT  +","+ TransactionResponseAttribute.RFP +","+ TransactionResponseAttribute.RGC +","+ TransactionResponseAttribute.RINQ +","+ TransactionResponseAttribute.RLCT +","+ TransactionResponseAttribute.RLP +","+ TransactionResponseAttribute.RMRG +","+    
+    	        TransactionResponseAttribute.RMSGT +","+ TransactionResponseAttribute.RMT   +","+ TransactionResponseAttribute.RNP   +","+ TransactionResponseAttribute.RPLCT +","+ TransactionResponseAttribute.RPLCTT  +","+ TransactionResponseAttribute.RPLM +","+ TransactionResponseAttribute.RPSB +","+ TransactionResponseAttribute.RRCV    +","+ TransactionResponseAttribute.RRMT +","+ TransactionResponseAttribute.RRSP +","+    
+    	        TransactionResponseAttribute.RSER  +","+ TransactionResponseAttribute.RSIDL +","+ TransactionResponseAttribute.RSIDR +","+ TransactionResponseAttribute.RSNO  +","+ TransactionResponseAttribute.RSP   +","+ TransactionResponseAttribute.RSPASZ +","+ TransactionResponseAttribute.RSPATR +","+ TransactionResponseAttribute.RSSZ +","+ TransactionResponseAttribute.RTLS +","+ TransactionResponseAttribute.RTMCR +","+    
+    	        TransactionResponseAttribute.RTMUP +","+ TransactionResponseAttribute.RWFI  +","+ TransactionResponseAttribute.SER   +","+ TransactionResponseAttribute.SIDL  +","+ TransactionResponseAttribute.SIDR  +","+ TransactionResponseAttribute.SPASZ +","+ TransactionResponseAttribute.SPATR +","+ TransactionResponseAttribute.STT +","+ TransactionResponseAttribute.TLS +","+ TransactionResponseAttribute.TMAC +","+ TransactionResponseAttribute.TMCR +","+ 
+    	        TransactionResponseAttribute.TMEM  +","+ TransactionResponseAttribute.TMIM  +","+ TransactionResponseAttribute.TMUP  +","+ TransactionResponseAttribute.TPIP  +","+  TransactionResponseAttribute.TRAN +","+ ImsTransactionTable.USER +","+TransactionResponseAttribute.WFI +","+ TransactionResponseAttribute.WRK +","+ SYSPLEX_ID +","+ IMSPLX +")").
+    	        append(" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    	        	    
+		try {
+            int i = 0;
+            connection = parentDatastore.getConnection();
+            connection.setAutoCommit(false);
+            ps = connection.prepareStatement(sb.toString(),Statement.RETURN_GENERATED_KEYS);
+            
+			for (Transaction tran : transactions) {
+				ps.setString(1, tran.getProperty(TransactionResponseAttribute.AFIN));    
+				ps.setString(2, tran.getProperty(TransactionResponseAttribute.AOCMD));    
+				ps.setString(3, tran.getProperty(TransactionResponseAttribute.CC));       
+				ps.setString(4, tran.getProperty(TransactionResponseAttribute.CCTXT));          
+				ps.setString(5, tran.getProperty(TransactionResponseAttribute.CMTM));        
+				ps.setString(6, tran.getProperty(TransactionResponseAttribute.CONV));     
+				ps.setString(7, tran.getProperty(TransactionResponseAttribute.CONVID));   
+				ps.setString(8, tran.getProperty(TransactionResponseAttribute.DCLW));   
+				ps.setString(9, tran.getProperty(TransactionResponseAttribute.DFNT));   
+				ps.setString(10, tran.getProperty(TransactionResponseAttribute.DRRT));  
+				ps.setString(11, tran.getProperty(TransactionResponseAttribute.EDTR));  
+				ps.setString(12, tran.getProperty(TransactionResponseAttribute.EDTT));  
+				ps.setString(13, tran.getProperty(TransactionResponseAttribute.EMHBS));   
+				ps.setString(14, tran.getProperty(TransactionResponseAttribute.EXPRT));   
+				ps.setString(15, tran.getProperty(TransactionResponseAttribute.FP));    
+				ps.setString(16, tran.getProperty(TransactionResponseAttribute.IMSID));   
+				ps.setString(17, tran.getProperty(TransactionResponseAttribute.INQ));   
+				ps.setString(18, tran.getProperty(TransactionResponseAttribute.LCLS));  
+				ps.setString(19, tran.getProperty(TransactionResponseAttribute.LCP));   
+				ps.setString(20, tran.getProperty(TransactionResponseAttribute.LLCT));  
+				ps.setString(21, tran.getProperty(TransactionResponseAttribute.LLP));   
+				ps.setString(22, tran.getProperty(TransactionResponseAttribute.LMRG));  
+				ps.setString(23, tran.getProperty(TransactionResponseAttribute.LNP));   
+				ps.setString(24, tran.getProperty(TransactionResponseAttribute.LPLCT));   
+				ps.setString(25, tran.getProperty(TransactionResponseAttribute.LPLM));  
+				ps.setString(26, tran.getProperty(TransactionResponseAttribute.LQ));    
+				ps.setString(27, tran.getProperty(TransactionResponseAttribute.LSNO));  
+				ps.setString(28, tran.getProperty(TransactionResponseAttribute.LSSZ));  
+				ps.setString(29, null); //We don't want to store the status at this point, let getTransactions manage LSTT tran.getProperty(TransactionResponseAttribute.LSTT));  
+				ps.setString(30, tran.getProperty(TransactionResponseAttribute.LU));    
+				ps.setString(31, tran.getProperty(TransactionResponseAttribute.MDLN));  
+				ps.setString(32, tran.getProperty(TransactionResponseAttribute.MDLT));  
+				ps.setString(33, tran.getProperty(TransactionResponseAttribute.MBR));   
+				ps.setString(34, tran.getProperty(TransactionResponseAttribute.MSGT));  
+				ps.setString(35, tran.getProperty(TransactionResponseAttribute.MSN));   
+				ps.setString(36, tran.getProperty(TransactionResponseAttribute.NODE));  
+				ps.setString(37, tran.getProperty(TransactionResponseAttribute.PLCTT));  
+				ps.setString(38, tran.getProperty(TransactionResponseAttribute.PGM));   
+				ps.setString(39, tran.getProperty(TransactionResponseAttribute.PSB));   
+				ps.setString(40, tran.getProperty(TransactionResponseAttribute.Q));    
+				ps.setString(41, tran.getProperty(TransactionResponseAttribute.RAOCMD));    
+				ps.setString(42, tran.getProperty(TransactionResponseAttribute.RCLS));  
+				ps.setString(43, tran.getProperty(TransactionResponseAttribute.RCMTM));   
+				ps.setString(44, tran.getProperty(TransactionResponseAttribute.RCONV));   
+				ps.setString(45, tran.getProperty(TransactionResponseAttribute.RCV));   
+				ps.setString(46, tran.getProperty(TransactionResponseAttribute.RDCLW));   
+				ps.setString(47, tran.getProperty(TransactionResponseAttribute.RDRRT));   
+				ps.setString(48, tran.getProperty(TransactionResponseAttribute.REDTR));   
+				ps.setString(49, tran.getProperty(TransactionResponseAttribute.REDTT));   
+				ps.setString(50, tran.getProperty(TransactionResponseAttribute.REMHBS));    
+				ps.setString(51, tran.getProperty(TransactionResponseAttribute.REPO));  
+				ps.setString(52, tran.getProperty(TransactionResponseAttribute.REXPRT));    
+				ps.setString(53, tran.getProperty(TransactionResponseAttribute.RFP));   
+				ps.setString(54, tran.getProperty(TransactionResponseAttribute.RGC));   
+				ps.setString(55, tran.getProperty(TransactionResponseAttribute.RINQ));  
+				ps.setString(56, tran.getProperty(TransactionResponseAttribute.RLCT));  
+				ps.setString(57, tran.getProperty(TransactionResponseAttribute.RLP));   
+				ps.setString(58, tran.getProperty(TransactionResponseAttribute.RMRG));  
+				ps.setString(59, tran.getProperty(TransactionResponseAttribute.RMSGT));   
+				ps.setString(60, tran.getProperty(TransactionResponseAttribute.RMT));   
+				ps.setString(61, tran.getProperty(TransactionResponseAttribute.RNP));   
+				ps.setString(62, tran.getProperty(TransactionResponseAttribute.RPLCT));   
+				ps.setString(63, tran.getProperty(TransactionResponseAttribute.RPLCTT));    
+				ps.setString(64, tran.getProperty(TransactionResponseAttribute.RPLM));  
+				ps.setString(65, tran.getProperty(TransactionResponseAttribute.RPSB));  
+				ps.setString(66, tran.getProperty(TransactionResponseAttribute.RRCV));  
+				ps.setString(67, tran.getProperty(TransactionResponseAttribute.RRMT));  
+				ps.setString(68, tran.getProperty(TransactionResponseAttribute.RRSP));  
+				ps.setString(69, tran.getProperty(TransactionResponseAttribute.RSER));  
+				ps.setString(70, tran.getProperty(TransactionResponseAttribute.RSIDL));   
+				ps.setString(71, tran.getProperty(TransactionResponseAttribute.RSIDR));   
+				ps.setString(72, tran.getProperty(TransactionResponseAttribute.RSNO));  
+				ps.setString(73, tran.getProperty(TransactionResponseAttribute.RSP));   
+				ps.setString(74, tran.getProperty(TransactionResponseAttribute.RSPASZ));    
+				ps.setString(75, tran.getProperty(TransactionResponseAttribute.RSPATR));    
+				ps.setString(76, tran.getProperty(TransactionResponseAttribute.RSSZ));  
+				ps.setString(77, tran.getProperty(TransactionResponseAttribute.RTLS));  
+				ps.setString(78, tran.getProperty(TransactionResponseAttribute.RTMCR));   
+				ps.setString(79, tran.getProperty(TransactionResponseAttribute.RTMUP));   
+				ps.setString(80, tran.getProperty(TransactionResponseAttribute.RWFI));  
+				ps.setString(81, tran.getProperty(TransactionResponseAttribute.SER));   
+				ps.setString(82, tran.getProperty(TransactionResponseAttribute.SIDL));  
+				ps.setString(83, tran.getProperty(TransactionResponseAttribute.SIDR));  
+				ps.setString(84, tran.getProperty(TransactionResponseAttribute.SPASZ));   
+				ps.setString(85, tran.getProperty(TransactionResponseAttribute.SPATR));   
+				ps.setString(86, tran.getProperty(TransactionResponseAttribute.STT));   
+				ps.setString(87, tran.getProperty(TransactionResponseAttribute.TLS));   
+				ps.setString(88, tran.getProperty(TransactionResponseAttribute.TMAC));  
+				ps.setString(89, tran.getProperty(TransactionResponseAttribute.TMCR));  
+				ps.setString(90, tran.getProperty(TransactionResponseAttribute.TMEM));  
+				ps.setString(91, tran.getProperty(TransactionResponseAttribute.TMIM));  
+				ps.setString(92, tran.getProperty(TransactionResponseAttribute.TMUP));  
+				ps.setString(93, tran.getProperty(TransactionResponseAttribute.TPIP));  
+				ps.setString(94, tran.getProperty(TransactionResponseAttribute.TRAN));  
+				ps.setString(95, tran.toMap().get(ImsTransactionTable.USER.toString()));    
+				ps.setString(96, tran.getProperty(TransactionResponseAttribute.WFI));    
+				ps.setString(97, tran.getProperty(TransactionResponseAttribute.WRK));    
+				ps.setInt(98, sysplexId);    
+				ps.setString(99, imsplexName);  //Mobile Change //ps.setInt(99, imsplexId);    
+				ps.addBatch();
+				
+				if ((++i) % 1000 == 0) {
+					insertionSize += ps.executeBatch().length;
+					connection.commit();
+					ps.clearBatch();
+				}
+			}
+			
+			insertionSize += ps.executeBatch().length;
+			connection.commit();
+			ps.clearBatch();
+		} catch (SQLException e) {
+        	try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+		} finally {
+			close(ps); 
+			close(connection);
+		}
+
+		return insertionSize;
+	}
+	
+	/**
+	 * Add IMS Transactions to the cache using a properties map. See {@link OmResultSet#getResponseProperties()}
+	 * @param transactions
+	 * @param sysplexID
+	 * @param imsplexName
+	 * @throws OmDatastoreException
+	 */
+	public int addImsTransaction(Properties transaction,int sysplexId, String imsplexName)  throws OmDatastoreException{
+        Properties[] transactions = new Properties[]{transaction};
+        return addImsTransaction(transactions, sysplexId, imsplexName);
+	}
+	
+	/**
+	 * Add IMS Transactions to the cache using a collection of properties maps. See {@link OmResultSet#getResponseProperties()}
+	 * @param transactions
+	 * @param sysplexID
+	 * @param imsplexName
+	 * @throws OmDatastoreException
+	 */
+	public int addImsTransaction(Properties[] transactions,int sysplexId, String imsplexName)  throws OmDatastoreException{
+	    Connection connection 	= null;
+        PreparedStatement ps 	= null;
+        int insertionSize=0;
+        
+        StringBuffer sb = new StringBuffer("INSERT INTO ").
+	    append(this.tableName).append(" ("+ TransactionResponseAttribute.AFIN +","+ TransactionResponseAttribute.AOCMD +","+ TransactionResponseAttribute.CC +","+ TransactionResponseAttribute.CCTXT +","+ TransactionResponseAttribute.CMTM +","+ TransactionResponseAttribute.CONV +","+ TransactionResponseAttribute.CONVID +","+ TransactionResponseAttribute.DCLW +","+ TransactionResponseAttribute.DFNT +","+ TransactionResponseAttribute.DRRT +","+ 
+	    		TransactionResponseAttribute.EDTR +","+ TransactionResponseAttribute.EDTT +","+ TransactionResponseAttribute.EMHBS +","+ TransactionResponseAttribute.EXPRT +","+   TransactionResponseAttribute.FP +","+ TransactionResponseAttribute.IMSID +","+ TransactionResponseAttribute.INQ +","+ TransactionResponseAttribute.LCLS +","+ TransactionResponseAttribute.LCP  +","+ TransactionResponseAttribute.LLCT +","+
+	    		TransactionResponseAttribute.LLP +","+ TransactionResponseAttribute.LMRG +","+ TransactionResponseAttribute.LNP +","+ TransactionResponseAttribute.LPLCT +","+ TransactionResponseAttribute.LPLM +","+ TransactionResponseAttribute.LQ +","+ TransactionResponseAttribute.LSNO +","+ TransactionResponseAttribute.LSSZ +","+ TransactionResponseAttribute.LSTT +","+ TransactionResponseAttribute.LU +","+ 
+	    		TransactionResponseAttribute.MDLN +","+ TransactionResponseAttribute.MDLT +","+ TransactionResponseAttribute.MBR +","+ TransactionResponseAttribute.MSGT +","+ TransactionResponseAttribute.MSN +","+ TransactionResponseAttribute.NODE +","+ TransactionResponseAttribute.PLCTT +","+ TransactionResponseAttribute.PGM +","+ TransactionResponseAttribute.PSB     +","+  TransactionResponseAttribute.Q +","+   
+	    		TransactionResponseAttribute.RAOCMD  +","+ TransactionResponseAttribute.RCLS  +","+ TransactionResponseAttribute.RCMTM +","+ TransactionResponseAttribute.RCONV +","+ TransactionResponseAttribute.RCV +","+ TransactionResponseAttribute.RDCLW +","+ TransactionResponseAttribute.RDRRT +","+ TransactionResponseAttribute.REDTR +","+ TransactionResponseAttribute.REDTT +","+ 
+	    		TransactionResponseAttribute.REMHBS +","+ TransactionResponseAttribute.REPO +","+ TransactionResponseAttribute.REXPRT  +","+ TransactionResponseAttribute.RFP +","+ TransactionResponseAttribute.RGC +","+ TransactionResponseAttribute.RINQ +","+ TransactionResponseAttribute.RLCT +","+ TransactionResponseAttribute.RLP +","+ TransactionResponseAttribute.RMRG +","+    
+	    		TransactionResponseAttribute.RMSGT +","+ TransactionResponseAttribute.RMT   +","+ TransactionResponseAttribute.RNP   +","+ TransactionResponseAttribute.RPLCT +","+ TransactionResponseAttribute.RPLCTT  +","+ TransactionResponseAttribute.RPLM +","+ TransactionResponseAttribute.RPSB +","+ TransactionResponseAttribute.RRCV    +","+ TransactionResponseAttribute.RRMT +","+ TransactionResponseAttribute.RRSP +","+    
+	    		TransactionResponseAttribute.RSER  +","+ TransactionResponseAttribute.RSIDL +","+ TransactionResponseAttribute.RSIDR +","+ TransactionResponseAttribute.RSNO  +","+ TransactionResponseAttribute.RSP   +","+ TransactionResponseAttribute.RSPASZ +","+ TransactionResponseAttribute.RSPATR +","+ TransactionResponseAttribute.RSSZ +","+ TransactionResponseAttribute.RTLS +","+ TransactionResponseAttribute.RTMCR +","+    
+	    		TransactionResponseAttribute.RTMUP +","+ TransactionResponseAttribute.RWFI  +","+ TransactionResponseAttribute.SER   +","+ TransactionResponseAttribute.SIDL  +","+ TransactionResponseAttribute.SIDR  +","+ TransactionResponseAttribute.SPASZ +","+ TransactionResponseAttribute.SPATR +","+ TransactionResponseAttribute.STT +","+ TransactionResponseAttribute.TLS +","+ TransactionResponseAttribute.TMAC +","+ TransactionResponseAttribute.TMCR +","+ 
+	    		TransactionResponseAttribute.TMEM  +","+ TransactionResponseAttribute.TMIM  +","+ TransactionResponseAttribute.TMUP  +","+ TransactionResponseAttribute.TPIP  +","+  TransactionResponseAttribute.TRAN +","+ ImsTransactionTable.USER +","+ TransactionResponseAttribute.WFI +","+ TransactionResponseAttribute.WRK +","+ SYSPLEX_ID +","+ IMSPLX +")").
+	    		append(" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+	   
+        try {
+            int i = 0;
+            connection = parentDatastore.getConnection();
+            connection.setAutoCommit(false);
+            ps = connection.prepareStatement(sb.toString(),Statement.RETURN_GENERATED_KEYS);
+            
+            for(Properties transaction: transactions){
+                ps.setString(1, transaction.getProperty(TransactionResponseAttribute.AFIN.toString()));
+                ps.setString(2, transaction.getProperty(TransactionResponseAttribute.AOCMD.toString()));
+                ps.setString(3, transaction.getProperty(TransactionResponseAttribute.CC.toString()));
+                ps.setString(4, transaction.getProperty(TransactionResponseAttribute.CCTXT.toString()));
+                ps.setString(5, transaction.getProperty(TransactionResponseAttribute.CMTM.toString()));
+                ps.setString(6, transaction.getProperty(TransactionResponseAttribute.CONV.toString()));
+                ps.setString(7, transaction.getProperty(TransactionResponseAttribute.CONVID.toString()));
+                ps.setString(8, transaction.getProperty(TransactionResponseAttribute.DCLW.toString()));
+                ps.setString(9, transaction.getProperty(TransactionResponseAttribute.DFNT.toString()));
+                ps.setString(10, transaction.getProperty(TransactionResponseAttribute.DRRT.toString()));
+                ps.setString(11, transaction.getProperty(TransactionResponseAttribute.EDTR.toString()));
+                ps.setString(12, transaction.getProperty(TransactionResponseAttribute.EDTT.toString()));
+                ps.setString(13, transaction.getProperty(TransactionResponseAttribute.EMHBS.toString()));
+                ps.setString(14, transaction.getProperty(TransactionResponseAttribute.EXPRT.toString()));
+                ps.setString(15, transaction.getProperty(TransactionResponseAttribute.FP.toString()));
+                ps.setString(16, transaction.getProperty(TransactionResponseAttribute.IMSID.toString()));
+                ps.setString(17, transaction.getProperty(TransactionResponseAttribute.INQ.toString()));
+                ps.setString(18, transaction.getProperty(TransactionResponseAttribute.LCLS.toString()));
+                ps.setString(19, transaction.getProperty(TransactionResponseAttribute.LCP.toString()));
+                ps.setString(20, transaction.getProperty(TransactionResponseAttribute.LLCT.toString()));
+                ps.setString(21, transaction.getProperty(TransactionResponseAttribute.LLP.toString()));
+                ps.setString(22, transaction.getProperty(TransactionResponseAttribute.LMRG.toString()));
+                ps.setString(23, transaction.getProperty(TransactionResponseAttribute.LNP.toString()));
+                ps.setString(24, transaction.getProperty(TransactionResponseAttribute.LPLCT.toString()));
+                ps.setString(25, transaction.getProperty(TransactionResponseAttribute.LPLM.toString()));
+                ps.setString(26, transaction.getProperty(TransactionResponseAttribute.LQ.toString()));
+                ps.setString(27, transaction.getProperty(TransactionResponseAttribute.LSNO.toString()));
+                ps.setString(28, transaction.getProperty(TransactionResponseAttribute.LSSZ.toString()));
+                ps.setString(29, null); //We don't want to store the status at this point, let getTransactions manage LSTT //transaction.getProperty(TransactionResponseAttribute.LSTT.toString()));
+                ps.setString(30, transaction.getProperty(TransactionResponseAttribute.LU.toString()));
+                ps.setString(31, transaction.getProperty(TransactionResponseAttribute.MDLN.toString()));
+                ps.setString(32, transaction.getProperty(TransactionResponseAttribute.MDLT.toString()));
+                ps.setString(33, transaction.getProperty(TransactionResponseAttribute.MBR.toString()));
+                ps.setString(34, transaction.getProperty(TransactionResponseAttribute.MSGT.toString()));
+                ps.setString(35, transaction.getProperty(TransactionResponseAttribute.MSN.toString()));
+                ps.setString(36, transaction.getProperty(TransactionResponseAttribute.NODE.toString()));
+                ps.setString(37, transaction.getProperty(TransactionResponseAttribute.PLCTT.toString()));
+                ps.setString(38, transaction.getProperty(TransactionResponseAttribute.PGM.toString()));
+                ps.setString(39, transaction.getProperty(TransactionResponseAttribute.PSB.toString()));   
+                ps.setString(40, transaction.getProperty(TransactionResponseAttribute.Q.toString()));
+                ps.setString(41, transaction.getProperty(TransactionResponseAttribute.RAOCMD.toString()));
+                ps.setString(42, transaction.getProperty(TransactionResponseAttribute.RCLS.toString()));
+                ps.setString(43, transaction.getProperty(TransactionResponseAttribute.RCMTM.toString()));
+                ps.setString(44, transaction.getProperty(TransactionResponseAttribute.RCONV.toString()));
+                ps.setString(45, transaction.getProperty(TransactionResponseAttribute.RCV.toString()));
+                ps.setString(46, transaction.getProperty(TransactionResponseAttribute.RDCLW.toString()));
+                ps.setString(47, transaction.getProperty(TransactionResponseAttribute.RDRRT.toString()));
+                ps.setString(48, transaction.getProperty(TransactionResponseAttribute.REDTR.toString()));
+                ps.setString(49, transaction.getProperty(TransactionResponseAttribute.REDTT.toString()));
+                ps.setString(50, transaction.getProperty(TransactionResponseAttribute.REMHBS.toString()));
+                ps.setString(51, transaction.getProperty(TransactionResponseAttribute.REPO.toString()));
+                ps.setString(52, transaction.getProperty(TransactionResponseAttribute.REXPRT.toString()));
+                ps.setString(53, transaction.getProperty(TransactionResponseAttribute.RFP.toString()));
+                ps.setString(54, transaction.getProperty(TransactionResponseAttribute.RGC.toString()));
+                ps.setString(55, transaction.getProperty(TransactionResponseAttribute.RINQ.toString()));
+                ps.setString(56, transaction.getProperty(TransactionResponseAttribute.RLCT.toString()));
+                ps.setString(57, transaction.getProperty(TransactionResponseAttribute.RLP.toString()));
+                ps.setString(58, transaction.getProperty(TransactionResponseAttribute.RMRG.toString()));
+                ps.setString(59, transaction.getProperty(TransactionResponseAttribute.RMSGT.toString()));
+                ps.setString(60, transaction.getProperty(TransactionResponseAttribute.RMT.toString()));
+                ps.setString(61, transaction.getProperty(TransactionResponseAttribute.RNP.toString()));
+                ps.setString(62, transaction.getProperty(TransactionResponseAttribute.RPLCT.toString()));
+                ps.setString(63, transaction.getProperty(TransactionResponseAttribute.RPLCTT.toString()));
+                ps.setString(64, transaction.getProperty(TransactionResponseAttribute.RPLM.toString()));
+                ps.setString(65, transaction.getProperty(TransactionResponseAttribute.RPSB.toString()));
+                ps.setString(66, transaction.getProperty(TransactionResponseAttribute.RRCV.toString())); 
+                ps.setString(67, transaction.getProperty(TransactionResponseAttribute.RRMT.toString()));
+                ps.setString(68, transaction.getProperty(TransactionResponseAttribute.RRSP.toString()));
+                ps.setString(69, transaction.getProperty(TransactionResponseAttribute.RSER.toString()));
+                ps.setString(70, transaction.getProperty(TransactionResponseAttribute.RSIDL.toString()));
+                ps.setString(71, transaction.getProperty(TransactionResponseAttribute.RSIDR.toString()));
+                ps.setString(72, transaction.getProperty(TransactionResponseAttribute.RSNO.toString()));
+                ps.setString(73, transaction.getProperty(TransactionResponseAttribute.RSP.toString())); 
+                ps.setString(74, transaction.getProperty(TransactionResponseAttribute.RSPASZ.toString()));
+                ps.setString(75, transaction.getProperty(TransactionResponseAttribute.RSPATR.toString()));
+                ps.setString(76, transaction.getProperty(TransactionResponseAttribute.RSSZ.toString()));
+                ps.setString(77, transaction.getProperty(TransactionResponseAttribute.RTLS.toString()));
+                ps.setString(78, transaction.getProperty(TransactionResponseAttribute.RTMCR.toString()));
+                ps.setString(79, transaction.getProperty(TransactionResponseAttribute.RTMUP.toString()));
+                ps.setString(80, transaction.getProperty(TransactionResponseAttribute.RWFI.toString()));
+                ps.setString(81, transaction.getProperty(TransactionResponseAttribute.SER.toString())); 
+                ps.setString(82, transaction.getProperty(TransactionResponseAttribute.SIDL.toString()));
+                ps.setString(83, transaction.getProperty(TransactionResponseAttribute.SIDR.toString()));
+                ps.setString(84, transaction.getProperty(TransactionResponseAttribute.SPASZ.toString()));
+                ps.setString(85, transaction.getProperty(TransactionResponseAttribute.SPATR.toString()));
+                ps.setString(86, transaction.getProperty(TransactionResponseAttribute.STT.toString()));
+                ps.setString(87, transaction.getProperty(TransactionResponseAttribute.TLS.toString()));
+                ps.setString(88, transaction.getProperty(TransactionResponseAttribute.TMAC.toString()));
+                ps.setString(89, transaction.getProperty(TransactionResponseAttribute.TMCR.toString()));
+                ps.setString(90, transaction.getProperty(TransactionResponseAttribute.TMEM.toString()));
+                ps.setString(91, transaction.getProperty(TransactionResponseAttribute.TMIM.toString()));
+                ps.setString(92, transaction.getProperty(TransactionResponseAttribute.TMUP.toString()));
+                ps.setString(93, transaction.getProperty(TransactionResponseAttribute.TPIP.toString()));
+                ps.setString(94, transaction.getProperty(TransactionResponseAttribute.TRAN.toString()));
+                ps.setString(95, transaction.getProperty(TransactionResponseAttribute.USER.toString()));  //USER);
+                ps.setString(96, transaction.getProperty(TransactionResponseAttribute.WFI.toString()));
+                ps.setString(97, transaction.getProperty(TransactionResponseAttribute.WRK.toString()));
+                ps.setInt(98, sysplexId);
+                ps.setString(99, imsplexName);
+                ps.addBatch();
+                
+    			if ((++i) % 1000 == 0) {
+    				insertionSize += ps.executeBatch().length;
+    				connection.commit();
+    				ps.clearBatch();
+    			}
+            }
+		
+            insertionSize += ps.executeBatch().length;
+            connection.commit();
+            ps.clearBatch();
+		
+            //Populate the meta-data with the latest update
+//            this.autoConfigureResourceMetatData(sysplexId, imsplexId);
+		
+        } catch(SQLException e) {
+        	try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+        } finally {
+        	close(ps);         
+        	close(connection); 
+        }
+        
+        return insertionSize;
+	}
+
+//*******************************************************************************************
+// Update IMS Transactions functions
+//*******************************************************************************************
+	
+	/**
+	 * Update IMS Transactions to the derby cache using a collection of transactions {@link Transaction}.
+	 * @param transactions
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return int of how many were updated
+	 * @throws OmDatastoreException
+	 */
+	public int updateTransaction(Collection<Transaction> transactions,int sysplexId, String imsplexName)  throws OmDatastoreException{
+		Connection connection 	= null;
+		PreparedStatement ps 	= null;
+		int insertionSize=0;
+						
+		StringBuffer  sb = new StringBuffer("UPDATE ")
+		.append(this.tableName).append(" SET ") 
+		.append("AFIN = ? , ") 
+		.append("AOCMD = ? , ") 
+		.append("CC = ? , ") 
+		.append("CCTXT = ? , ") 
+		.append("CMTM = ? , ") 
+		.append("CONV = ? , ") 
+		.append("CONVID = ? , ") 
+		.append("DCLW = ? , ") 
+		.append("DFNT = ? , ") 
+		.append("DRRT = ? , ") 
+		.append("EDTR = ? , ") 
+		.append("EDTT = ? , ") 
+		.append("EMHBS = ? , ") 
+		.append("EXPRT = ? , ") 
+		.append("FP = ? , ") 
+		.append("IMSID = ? , ") 
+		.append("INQ = ? , ") 
+		.append("LCLS = ? , ") 
+		.append("LCP = ? , ") 
+		.append("LLCT = ? , ") 
+		.append("LLP = ? , ") 
+		.append("LMRG = ? , ") 
+		.append("LNP = ? , ") 
+		.append("LPLCT = ? , ") 
+		.append("LPLM = ? , ") 
+		.append("LQ = ? , ") 
+		.append("LSNO = ? , ") 
+		.append("LSSZ = ? , ") 
+		.append("LSTT = ? , ") 
+		.append("LU = ? , ") 
+		.append("MDLN = ? , ") 
+		.append("MDLT = ? , ") 
+		.append("MBR = ? , ") 
+		.append("MSGT = ? , ") 
+		.append("MSN = ? , ") 
+		.append("NODE = ? , ") 
+		.append("PLCTT = ? , ") 
+		.append("PGM = ? , ") 
+		.append("PSB = ? , ") 
+		.append("Q = ? , ") 
+		.append("RAOCMD = ? , ") 
+		.append("RCLS = ? , ") 
+		.append("RCMTM = ? , ") 
+		.append("RCONV = ? , ") 
+		.append("RCV = ? , ") 
+		.append("RDCLW = ? , ") 
+		.append("RDRRT = ? , ") 
+		.append("REDTR = ? , ") 
+		.append("REDTT = ? , ") 
+		.append("REMHBS = ? , ") 
+		.append("REPO = ? , ") 
+		.append("REXPRT = ? , ") 
+		.append("RFP = ? , ") 
+		.append("RGC = ? , ") 
+		.append("RINQ = ? , ") 
+		.append("RLCT = ? , ") 
+		.append("RLP = ? , ") 
+		.append("RMRG = ? , ") 
+		.append("RMSGT = ? , ") 
+		.append("RMT = ? , ") 
+		.append("RNP = ? , ") 
+		.append("RPLCT = ? , ") 
+		.append("RPLCTT = ? , ") 
+		.append("RPLM = ? , ") 
+		.append("RPSB = ? , ") 
+		.append("RRCV = ? , ") 
+		.append("RRMT = ? , ") 
+		.append("RRSP = ? , ") 
+		.append("RSER = ? , ") 
+		.append("RSIDL = ? , ") 
+		.append("RSIDR = ? , ") 
+		.append("RSNO = ? , ") 
+		.append("RSP = ? , ") 
+		.append("RSPASZ = ? , ") 
+		.append("RSPATR = ? , ") 
+		.append("RSSZ = ? , ") 
+		.append("RTLS = ? , ") 
+		.append("RTMCR = ? , ") 
+		.append("RTMUP = ? , ") 
+		.append("RWFI = ? , ") 
+		.append("SER = ? , ") 
+		.append("SIDL = ? , ") 
+		.append("SIDR = ? , ") 
+		.append("SPASZ = ? , ") 
+		.append("SPATR = ? , ") 
+		.append("STT = ? , ") 
+		.append("TLS = ? , ") 
+		.append("TMAC = ? , ") 
+		.append("TMCR = ? , ") 
+		.append("TMEM = ? , ") 
+		.append("TMIM = ? , ") 
+		.append("TMUP = ? , ") 
+		.append("TPIP = ? , ") 
+		.append("TRAN = ? , ") 
+		.append("TRAN_USER = ? , ") 
+		.append("WFI = ? , ") 
+		.append("WRK = ?  ") 
+		.append(" WHERE ").append(TransactionResponseAttribute.TRAN).append(" = ? ")
+        .append(" AND ").append(TransactionResponseAttribute.MBR).append(" = ? ")
+		.append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+		.append(" AND ").append(IMSPLX).append(" = ? ");
+   	        	    
+		try{
+			int i = 0;
+	        connection = parentDatastore.getConnection();
+	        connection.setAutoCommit(false);
+	        ps = connection.prepareStatement(sb.toString(),Statement.RETURN_GENERATED_KEYS);
+	           
+			for(Transaction transaction: transactions){
+				ps.setString(1, transaction.getProperty(TransactionResponseAttribute.AFIN)); 
+				ps.setString(2, transaction.getProperty(TransactionResponseAttribute.AOCMD)); 
+				ps.setString(3, transaction.getProperty(TransactionResponseAttribute.CC)); 
+				ps.setString(4, transaction.getProperty(TransactionResponseAttribute.CCTXT)); 
+				ps.setString(5, transaction.getProperty(TransactionResponseAttribute.CMTM)); 
+				ps.setString(6, transaction.getProperty(TransactionResponseAttribute.CONV)); 
+				ps.setString(7, transaction.getProperty(TransactionResponseAttribute.CONVID)); 
+				ps.setString(8, transaction.getProperty(TransactionResponseAttribute.DCLW)); 
+				ps.setString(9, transaction.getProperty(TransactionResponseAttribute.DFNT)); 
+				ps.setString(10, transaction.getProperty(TransactionResponseAttribute.DRRT)); 
+				ps.setString(11, transaction.getProperty(TransactionResponseAttribute.EDTR)); 
+				ps.setString(12, transaction.getProperty(TransactionResponseAttribute.EDTT)); 
+				ps.setString(13, transaction.getProperty(TransactionResponseAttribute.EMHBS)); 
+				ps.setString(14, transaction.getProperty(TransactionResponseAttribute.EXPRT)); 
+				ps.setString(15, transaction.getProperty(TransactionResponseAttribute.FP)); 
+				ps.setString(16, transaction.getProperty(TransactionResponseAttribute.IMSID)); 
+				ps.setString(17, transaction.getProperty(TransactionResponseAttribute.INQ)); 
+				ps.setString(18, transaction.getProperty(TransactionResponseAttribute.LCLS)); 
+				ps.setString(19, transaction.getProperty(TransactionResponseAttribute.LCP)); 
+				ps.setString(20, transaction.getProperty(TransactionResponseAttribute.LLCT)); 
+				ps.setString(21, transaction.getProperty(TransactionResponseAttribute.LLP)); 
+				ps.setString(22, transaction.getProperty(TransactionResponseAttribute.LMRG)); 
+				ps.setString(23, transaction.getProperty(TransactionResponseAttribute.LNP)); 
+				ps.setString(24, transaction.getProperty(TransactionResponseAttribute.LPLCT)); 
+				ps.setString(25, transaction.getProperty(TransactionResponseAttribute.LPLM)); 
+				ps.setString(26, transaction.getProperty(TransactionResponseAttribute.LQ)); 
+				ps.setString(27, transaction.getProperty(TransactionResponseAttribute.LSNO)); 
+				ps.setString(28, transaction.getProperty(TransactionResponseAttribute.LSSZ)); 
+				ps.setString(29, transaction.getProperty(TransactionResponseAttribute.LSTT)); 
+				ps.setString(30, transaction.getProperty(TransactionResponseAttribute.LU)); 
+				ps.setString(31, transaction.getProperty(TransactionResponseAttribute.MDLN)); 
+				ps.setString(32, transaction.getProperty(TransactionResponseAttribute.MDLT)); 
+				ps.setString(33, transaction.getProperty(TransactionResponseAttribute.MBR)); 
+				ps.setString(34, transaction.getProperty(TransactionResponseAttribute.MSGT)); 
+				ps.setString(35, transaction.getProperty(TransactionResponseAttribute.MSN)); 
+				ps.setString(36, transaction.getProperty(TransactionResponseAttribute.NODE)); 
+				ps.setString(37, transaction.getProperty(TransactionResponseAttribute.PLCTT)); 
+				ps.setString(38, transaction.getProperty(TransactionResponseAttribute.PGM)); 
+				ps.setString(39, transaction.getProperty(TransactionResponseAttribute.PSB)); 
+				ps.setString(40, transaction.getProperty(TransactionResponseAttribute.Q)); 
+				ps.setString(41, transaction.getProperty(TransactionResponseAttribute.RAOCMD)); 
+				ps.setString(42, transaction.getProperty(TransactionResponseAttribute.RCLS)); 
+				ps.setString(43, transaction.getProperty(TransactionResponseAttribute.RCMTM)); 
+				ps.setString(44, transaction.getProperty(TransactionResponseAttribute.RCONV)); 
+				ps.setString(45, transaction.getProperty(TransactionResponseAttribute.RCV)); 
+				ps.setString(46, transaction.getProperty(TransactionResponseAttribute.RDCLW)); 
+				ps.setString(47, transaction.getProperty(TransactionResponseAttribute.RDRRT)); 
+				ps.setString(48, transaction.getProperty(TransactionResponseAttribute.REDTR)); 
+				ps.setString(49, transaction.getProperty(TransactionResponseAttribute.REDTT)); 
+				ps.setString(50, transaction.getProperty(TransactionResponseAttribute.REMHBS)); 
+				ps.setString(51, transaction.getProperty(TransactionResponseAttribute.REPO)); 
+				ps.setString(52, transaction.getProperty(TransactionResponseAttribute.REXPRT)); 
+				ps.setString(53, transaction.getProperty(TransactionResponseAttribute.RFP)); 
+				ps.setString(54, transaction.getProperty(TransactionResponseAttribute.RGC)); 
+				ps.setString(55, transaction.getProperty(TransactionResponseAttribute.RINQ)); 
+				ps.setString(56, transaction.getProperty(TransactionResponseAttribute.RLCT)); 
+				ps.setString(57, transaction.getProperty(TransactionResponseAttribute.RLP)); 
+				ps.setString(58, transaction.getProperty(TransactionResponseAttribute.RMRG)); 
+				ps.setString(59, transaction.getProperty(TransactionResponseAttribute.RMSGT)); 
+				ps.setString(60, transaction.getProperty(TransactionResponseAttribute.RMT)); 
+				ps.setString(61, transaction.getProperty(TransactionResponseAttribute.RNP)); 
+				ps.setString(62, transaction.getProperty(TransactionResponseAttribute.RPLCT)); 
+				ps.setString(63, transaction.getProperty(TransactionResponseAttribute.RPLCTT)); 
+				ps.setString(64, transaction.getProperty(TransactionResponseAttribute.RPLM)); 
+				ps.setString(65, transaction.getProperty(TransactionResponseAttribute.RPSB)); 
+				ps.setString(66, transaction.getProperty(TransactionResponseAttribute.RRCV)); 
+				ps.setString(67, transaction.getProperty(TransactionResponseAttribute.RRMT)); 
+				ps.setString(68, transaction.getProperty(TransactionResponseAttribute.RRSP)); 
+				ps.setString(69, transaction.getProperty(TransactionResponseAttribute.RSER)); 
+				ps.setString(70, transaction.getProperty(TransactionResponseAttribute.RSIDL)); 
+				ps.setString(71, transaction.getProperty(TransactionResponseAttribute.RSIDR)); 
+				ps.setString(72, transaction.getProperty(TransactionResponseAttribute.RSNO)); 
+				ps.setString(73, transaction.getProperty(TransactionResponseAttribute.RSP)); 
+				ps.setString(74, transaction.getProperty(TransactionResponseAttribute.RSPASZ)); 
+				ps.setString(75, transaction.getProperty(TransactionResponseAttribute.RSPATR)); 
+				ps.setString(76, transaction.getProperty(TransactionResponseAttribute.RSSZ)); 
+				ps.setString(77, transaction.getProperty(TransactionResponseAttribute.RTLS)); 
+				ps.setString(78, transaction.getProperty(TransactionResponseAttribute.RTMCR)); 
+				ps.setString(79, transaction.getProperty(TransactionResponseAttribute.RTMUP)); 
+				ps.setString(80, transaction.getProperty(TransactionResponseAttribute.RWFI)); 
+				ps.setString(81, transaction.getProperty(TransactionResponseAttribute.SER)); 
+				ps.setString(82, transaction.getProperty(TransactionResponseAttribute.SIDL)); 
+				ps.setString(83, transaction.getProperty(TransactionResponseAttribute.SIDR)); 
+				ps.setString(84, transaction.getProperty(TransactionResponseAttribute.SPASZ)); 
+				ps.setString(85, transaction.getProperty(TransactionResponseAttribute.SPATR)); 
+				ps.setString(86, transaction.getProperty(TransactionResponseAttribute.STT)); 
+				ps.setString(87, transaction.getProperty(TransactionResponseAttribute.TLS)); 
+				ps.setString(88, transaction.getProperty(TransactionResponseAttribute.TMAC)); 
+				ps.setString(89, transaction.getProperty(TransactionResponseAttribute.TMCR)); 
+				ps.setString(90, transaction.getProperty(TransactionResponseAttribute.TMEM)); 
+				ps.setString(91, transaction.getProperty(TransactionResponseAttribute.TMIM)); 
+				ps.setString(92, transaction.getProperty(TransactionResponseAttribute.TMUP)); 
+				ps.setString(93, transaction.getProperty(TransactionResponseAttribute.TPIP)); 
+				ps.setString(94, transaction.getProperty(TransactionResponseAttribute.TRAN)); 
+				ps.setString(95, transaction.getProperty(TransactionResponseAttribute.USER)); 
+				ps.setString(96, transaction.getProperty(TransactionResponseAttribute.WFI)); 
+				ps.setString(97, transaction.getProperty(TransactionResponseAttribute.WRK)); 
+				ps.setString(98, transaction.getProperty( TransactionResponseAttribute.TRAN));
+				ps.setString(99, transaction.getProperty( TransactionResponseAttribute.MBR));
+				ps.setInt(100, sysplexId);
+				ps.setString(101, imsplexName);
+				ps.addBatch();
+				
+				if ((++i) % 1000 == 0) {
+					insertionSize += ps.executeBatch().length;
+					connection.commit();
+					ps.clearBatch();
+				}
+			}
+			
+			insertionSize += ps.executeBatch().length;
+			connection.commit();
+			ps.clearBatch();
+			
+			//Populate the meta-data with the latest update
+			this.autoConfigureResourceMetaData(sysplexId, imsplexName);
+			
+		} catch (SQLException e) {
+	       	try {
+					logAndRollback(connection, e);
+				} catch (DatastoreException e1) {
+					OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+					omDatastoreException.setQuery(sb.toString());
+					throw omDatastoreException;
+				}
+			} finally {
+				close(ps); 
+				close(connection);
+			}
+
+		return insertionSize;
+	}
+	
+	/**
+	 * Method allows updating the transactions status (LSTT) in the cache with the status given a collection of transactions
+	 * containing LSTT, sysplexId and the imsplexId. This is often useful in combination after discovery has been performed where returning
+	 * a list of transactions could require a status update to be inserted into the cache before returning the collection of transactions
+	 * @param transactions Collection of transactions with updated status. At minimum the object should have in it
+	 * LSTT,TRAN and MBR. 
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return an array of update counts containing one element for each command in the batch. The elements of the 
+	 * array are ordered according to the order in which commands were added to the batch. 
+	 * @throws DatastoreException
+	 */
+	private int updateTransactionStatus(Collection<Transaction> transactions, int sysplexId, String imsplexName) throws OmDatastoreException{
+		
+		StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(TransactionResponseAttribute.LSTT).append(" = ? ")
+        .append(" WHERE ").append(TransactionResponseAttribute.TRAN).append(" = ? ")
+        .append(" AND ").append(TransactionResponseAttribute.MBR).append(" = ? ")
+        .append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+        
+        Connection connection = null;
+        PreparedStatement ps = null;
+        int insertionSize = 0;
+        
+        try {
+        	connection = parentDatastore.getConnection();
+        	connection.setAutoCommit(false);
+            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+            int i =0;
+            
+            for(Transaction tran: transactions){
+            	ps.setString(1, tran.getProperty(TransactionResponseAttribute.LSTT));
+                ps.setString(2, tran.getProperty(TransactionResponseAttribute.TRAN));
+                ps.setString(3, tran.getProperty(TransactionResponseAttribute.MBR));
+                ps.setInt(4, sysplexId);
+                ps.setString(5,imsplexName);
+                ps.addBatch();
+              
+
+                if ((++i) % 1000 == 0) {
+					insertionSize += ps.executeBatch().length;
+					connection.commit();
+					ps.clearBatch();
+				}
+            }
+            
+			insertionSize += ps.executeBatch().length;
+			connection.commit();
+			ps.clearBatch();
+			
+        } catch(SQLException e) {
+        	try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+        } finally {
+        	close(ps);         
+        	close(connection); 
+        }
+        
+        return insertionSize;
+	}
+	
+	/**
+	 * This method will update the column (IMS Attribute) with a specific value for a given collection of transactions. This is helpful when 
+	 * wanting to null out or override certain values such as LSTT (status). Operates similar to {@link #updateTransactionColumn(TransactionResponseAttribute, String, String, int, int)}
+	 * but will do so a bit more efficiently only targeting the transactions in the collection of transactions. 
+	 * @param transactions
+	 * @param TransactionResponseAttribute
+	 * @param value
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws DatastoreException
+	 */
+	private int updateTransactionColumn(Collection<Transaction> transactions, TransactionResponseAttribute transactionResponseAttribute, String value, int sysplexId, String imsplexName) throws OmDatastoreException{
+	    StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(transactionResponseAttribute).append(" = ? ")
+        .append(" WHERE ").append(TransactionResponseAttribute.TRAN).append(" = ? ")
+        .append(" AND ").append(TransactionResponseAttribute.MBR).append(" = ? ")
+        .append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+        
+        Connection connection = null;
+        PreparedStatement ps = null;
+        int updateSize = 0;
+        
+        try {
+        	connection = parentDatastore.getConnection();
+        	connection.setAutoCommit(false);
+            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+            int i =0;
+            
+            for(Transaction tran: transactions){
+            	ps.setString(1, value);
+                ps.setString(2, tran.getProperty(TransactionResponseAttribute.TRAN));
+                ps.setString(3, tran.getProperty(TransactionResponseAttribute.MBR));
+                ps.setInt(4, sysplexId);
+                ps.setString(5,imsplexName);
+                ps.addBatch();
+                if ((++i) % 1000 == 0) {
+                	updateSize += ps.executeBatch().length;
+                	connection.commit();
+                	ps.clearBatch();
+                }
+            }
+            updateSize = ps.executeBatch().length;
+            connection.commit();
+            
+        } catch(SQLException e) {
+        	try {
+				logAndRollback(connection, e);
+			} catch (DatastoreException e1) {
+				OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+				omDatastoreException.setQuery(sb.toString());
+				throw omDatastoreException;
+			}
+        } finally {
+        	close(ps);         
+        	close(connection); 
+        }
+        
+        return updateSize;
+	}
+	
+	/**
+	 * This will update an entire column given a sysplex, imsplex, systemId (ims name) and the value for that column. This can be an expensive
+	 * task since there can be many rows given the above values. Its more efficient to use a method that can update only needed rows
+	 * see {@link #updateTransactions(Collection<Transaction> transactions, TransactionResponseAttribute transactionResponseAttribute, String value, int sysplexId, int imsplexId) }
+	 * @param transactionResponseAttribute
+	 * @param value
+	 * @param systemId
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws DatastoreException
+	 */
+	public int updateTransactionColumn(TransactionResponseAttribute transactionResponseAttribute, String value,String systemId, int sysplexId, String imsplexName) throws OmDatastoreException{
+		StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(transactionResponseAttribute).append(" = ? ")
+        .append(" WHERE ").append(TransactionResponseAttribute.MBR).append(" = ? ")
+        .append(" AND ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+		
+		 Connection connection = null;
+	        PreparedStatement ps = null;
+	        int result = 0;
+
+	        try {
+	        	connection = parentDatastore.getConnection();
+	            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+	            ps.setString(1, value);
+	            ps.setString(2, systemId);
+	            ps.setInt(3, sysplexId);
+	            ps.setString(4, imsplexName);
+	           
+	            ps.executeUpdate();
+	            connection.commit();
+	            
+	        } catch(SQLException e) {
+	        	try {
+					logAndRollback(connection, e);
+				} catch (DatastoreException e1) {
+					OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+					omDatastoreException.setQuery(sb.toString());
+					throw omDatastoreException;
+				}
+	        } finally {
+	        	close(ps);         // PreparedStatement
+	        	close(connection); // Connection
+	        }
+	        return result; //TODO: this always returns zero, we need to fix this
+	}
+	
+	/**
+	 * This will update an entire column given a sysplex , imsplex and the value for that column. This can be an expensive
+	 * task since there can be many rows given the above values. Its more efficient to use a method that can update only needed rows
+	 * see {@link #updateTransactions(Collection<Transaction> transactions, TransactionResponseAttribute transactionResponseAttribute, String value, int sysplexId, int imsplexId) }
+	 * @param Column
+	 * @param value
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws DatastoreException
+	 */
+	public int updateTransactionColumn(TransactionResponseAttribute Column, String value, int sysplexId, String imsplexName) throws OmDatastoreException{
+		
+		StringBuffer sb = new StringBuffer("UPDATE ")
+        .append(this.tableName)
+        .append(" SET ").append(Column).append(" = ? ")
+        .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+        .append(" AND ").append(IMSPLX).append(" = ? ");
+		
+		 Connection connection = null;
+	        PreparedStatement ps = null;
+	        int result = 0;
+
+	        try {
+	        	connection = parentDatastore.getConnection();
+	            ps = connection.prepareStatement(sb.toString(), Statement.RETURN_GENERATED_KEYS);
+	            ps.setString(1, value);
+	            ps.setInt(2, sysplexId);
+	            ps.setString(3, imsplexName);
+	           
+	            ps.executeUpdate();
+	            connection.commit();
+	            
+	        } catch(SQLException e) {
+	        	try {
+					logAndRollback(connection, e);
+				} catch (DatastoreException e1) {
+					OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+					omDatastoreException.setQuery(sb.toString());
+					throw omDatastoreException;
+				}
+	        } finally {
+	        	close(ps);         // PreparedStatement
+	        	close(connection); // Connection
+	        }
+	        return result;
+	}
+	
+//**************************************************************************************
+// Get transactions methods
+//**************************************************************************************
+	
+    public Collection<Transaction> getTransactions(int sysplexId,String[] imsSystemName) throws OmDatastoreException {
+    	Collection<Transaction> transactions = new ArrayList<Transaction>();
+    	try {
+        	transactions =  this.getTransactions(sysplexId,null,imsSystemName,null);
+		} catch (OmConnectionException e) { 
+			/** Will not be thrown because we pass null for the Om, so eat the error **/
+		} catch (OmException e){ 
+			/** Will not be thrown because we pass null for the Om, so eat the error **/
+		}
+    	
+        
+        return transactions;
+    }
+    
+	/**
+	 * Get transactions from Derby cache ordered by LSTT and Tran. Note that the cache does not maintain the transaction
+	 * state (LSTT). You just make a separate call to OM for that and insert it to the cache before requesting transactions.
+	 * After a transaction update of status, and calling this function , you should delete the updates. 
+	 * @param imsSystemName
+	 * @param sysplexId
+	 * @param imsplexName
+	 * @return
+	 * @throws OmConnectionException 
+	 * @throws OmException 
+	 * @throws DatastoreException
+	 */
+	public Collection<Transaction> getTransactions(int sysplexId, String imsplexName,String[] imsSystemName) throws OmDatastoreException {
+		Collection<Transaction> transactions = new ArrayList<Transaction>();
+		
+		try {
+			transactions = this.getTransactions(sysplexId,imsplexName,imsSystemName,null);
+		} catch (OmConnectionException e) { 
+			/** Will not be thrown because we pass null so eat the error **/
+		} catch (OmException e){ 
+			/** Will not be thrown because we pass null so eat the error **/
+		}
+		
+		return transactions;
+	}
+	
+	public Collection<Transaction> getTransactions(int sysplexId, String imsplexName,String[] imsSystemName,Om om) throws OmDatastoreException, OmException, OmConnectionException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet results = null;
+        ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+        StringBuffer sb = null; 
+        Collection<Transaction> transactionStatuses = null;
+        
+        try {
+        	
+        	//If the om is not null then query IMS for the transactions status
+        	if(om != null && !om.isInteractionModeCache()){
+    			EnumSet<QueryTran.StatusOptions> queryTranStatusOptionsSet = EnumSet.allOf(QueryTran.StatusOptions.class);
+    			QueryTran.StatusOptions[] queryTranStatusOptions = (QueryTran.StatusOptions[]) queryTranStatusOptionsSet.toArray(new QueryTran.StatusOptions[queryTranStatusOptionsSet.size()]);
+
+    			transactionStatuses = om.getTransactionService().getTransactionsByStatus(queryTranStatusOptions,imsSystemName);//getTransactionsStatus(new String[]{ImsCommandAttributes.ASTERISK},queryTranStatusOptions,imsSystemName);
+
+    			if(transactionStatuses.size()>0){
+    				this.updateTransactionStatus(transactionStatuses,sysplexId,imsplexName);
+    			}
+        	}
+
+        	connection = parentDatastore.getConnection();
+            
+           	//Case: no route has been passed or the length is 0 but so we need to check if an impslexname has been passed.
+        	if(imsSystemName == null || imsSystemName.length == 0){
+        		if(imsplexName != null){
+                    sb = new StringBuffer("SELECT * FROM ")
+                    .append(this.tableName)
+                    .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                    .append(" AND ").append(IMSPLX).append(" = ? ")
+                    .append(" ORDER BY ").append(TransactionResponseAttribute.TRAN);
+                    
+                    ps = connection.prepareStatement(sb.toString());
+                    ps.setInt(1, sysplexId);
+                    ps.setString(2, imsplexName);
+            	}else{
+            		 sb = new StringBuffer("SELECT * FROM ")
+                     .append(this.tableName)
+                     .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                     .append(" ORDER BY ").append(TransactionResponseAttribute.TRAN);
+                     
+                     ps = connection.prepareStatement(sb.toString());
+                     ps.setInt(1, sysplexId);
+            	}
+        		
+        		results = ps.executeQuery();
+                
+                while (results.next()) {
+                	Transaction tran = new Transaction(results);
+                    transactions.add(tran);
+                }
+                
+        	}else{ //Route has been passed and for each we route the command and concat the results
+        		String sqlIn = this.sqlInGenerator(TransactionResponseAttribute.MBR.toString(), imsSystemName);
+                sb = new StringBuffer("SELECT * FROM ")
+                    .append(this.tableName)
+                    .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                    .append(" AND ").append(IMSPLX).append(" = ? ")
+                    .append(sqlIn)
+                    .append(" ORDER BY ").append(TransactionResponseAttribute.TRAN);
+                         
+                     ps = connection.prepareStatement(sb.toString());
+                     ps.setInt(1, sysplexId);
+                     ps.setString(2, imsplexName);
+                	
+                     results = ps.executeQuery();
+                    
+                     while (results.next()) {
+                    	 Transaction tran = new Transaction(results);
+                         transactions.add(tran);
+                     }
+        	}
+            
+            //Execute process to cleanup the status column in the derby cache
+            this.executeUpdateTransactionColumnAsynchronously(transactionStatuses,sysplexId,imsplexName);
+        } catch(SQLException e) {
+            try {
+                logAndRollback(connection, e);
+            } catch (DatastoreException e1) {
+                OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+                omDatastoreException.setQuery(sb.toString());
+                omDatastoreException.setEnvironmentId(sysplexId);
+                throw omDatastoreException;
+            }
+        } finally {
+            close(results);    
+            close(ps);         
+            close(connection); 
+        }
+        
+        return transactions;    
+    }
+	
+//**************************************************************************************
+// Get transactions by name methods
+//**************************************************************************************
+      public Collection<Transaction> getTransactionsByName(int sysplexId,String[] transactionNames) throws OmDatastoreException {
+    	  Collection<Transaction> transactions = new ArrayList<Transaction>();
+    	  
+          try {
+        	  transactions =  getTransactionsByName(sysplexId, null,new String[]{ImsCommandAttributes.ASTERISK},transactionNames,null);
+          } catch (OmConnectionException e) { 
+  			/** Will not be thrown because we pass null for the Om, so eat the error **/
+  		  } catch (OmException e){ 
+  			/** Will not be thrown because we pass null for the Om, so eat the error **/
+  		  }
+          
+          return transactions;
+      }
+      
+      public Collection<Transaction> getTransactionsByName(int sysplexId, String imsplexName,String[] transactionNames) throws OmDatastoreException {
+    	  Collection<Transaction> transactions = new ArrayList<Transaction>();
+    	 
+          try {
+        	  transactions = getTransactionsByName(sysplexId, imsplexName,new String[]{ImsCommandAttributes.ASTERISK},transactionNames,null);
+          } catch (OmConnectionException e) { 
+  			/** Will not be thrown because we pass null for the Om, so eat the error **/
+  		  } catch (OmException e){ 
+  			/** Will not be thrown because we pass null for the Om, so eat the error **/
+  		  }
+          
+          return transactions;
+      }
+	   
+      public Collection<Transaction> getTransactionsByName(int sysplexId, String imsplexName, String[] imsSystemName, String[] transactionNames, Om om) throws OmDatastoreException, OmException, OmConnectionException {
+           Connection connection = null;
+           PreparedStatement ps = null;
+           ResultSet results = null;
+           ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+           StringBuffer sb = null; 
+           Collection<Transaction> transactionStatuses = null;
+
+           try{
+           		//If the om is not null then query IMS for the transactions status
+           		if(om != null && !om.isInteractionModeCache()){
+           			EnumSet<QueryTran.StatusOptions> queryTranStatusOptionsSet = EnumSet.allOf(QueryTran.StatusOptions.class);
+        			QueryTran.StatusOptions[] queryTranStatusOptions = (QueryTran.StatusOptions[]) queryTranStatusOptionsSet.toArray(new QueryTran.StatusOptions[queryTranStatusOptionsSet.size()]);
+        			
+           			//Note: This error can happen when no trans return with one of the requested statues "RC = 02000004, RSN =00001014 , RSM = CSLN055I, RSNTxt = At least one request completed with warning(s)"
+           			transactionStatuses = om.getTransactionService().getTransactionsByStatus(queryTranStatusOptions,imsSystemName); //getTransactionsStatus(transactionNames,queryTranStatusOptions,imsSystemName);
+
+           			//3) Insert the result of the status query into derby (if derby is empty nothing will happen)
+           			if(transactionStatuses.size()>0){
+           				this.updateTransactionStatus(transactionStatuses,sysplexId,imsplexName);
+           			}
+           		}
+           		
+               connection = parentDatastore.getConnection();
+               String sqlNameSearch = this.sqlResourceGenerator(TransactionResponseAttribute.TRAN.toString(), transactionNames);
+               
+               //Case: no route has been passed or the length is 0 but so we need to check if an impslexname has been passed.
+               if(imsSystemName == null || imsSystemName.length == 0){
+               	if(imsplexName != null){
+                      	
+                       sb = new StringBuffer("SELECT * FROM ")
+                      	.append(this.tableName)
+                      	.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                      	.append(" AND ").append(IMSPLX).append(" = ? ")
+                      	.append(sqlNameSearch);
+                          
+                       ps = connection.prepareStatement(sb.toString());
+                       ps.setInt(1, sysplexId);
+                       ps.setString(2, imsplexName);
+                  	}else{
+                       	
+                       sb = new StringBuffer("SELECT * FROM ")
+                      	.append(this.tableName)
+                      	.append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                      	.append(sqlNameSearch);
+                           
+                        ps = connection.prepareStatement(sb.toString());
+                        ps.setInt(1, sysplexId);
+                  	}
+               		
+               	results = ps.executeQuery();
+                       
+                   while (results.next()) {
+                	   Transaction tran = new Transaction(results);
+                       transactions.add(tran);
+                   }
+                       
+               }else{ //Route has been passed and for each we route the command and concat the results
+               	
+               	String sqlIn = this.sqlInGenerator(TransactionResponseAttribute.MBR.toString(), imsSystemName);
+                   sb = new StringBuffer("SELECT * FROM ")
+                      	.append(this.tableName)
+                       .append(" WHERE ").append(SYSPLEX_ID).append(" = ? ")
+                       .append(" AND ").append(IMSPLX).append(" = ? ")
+                       .append(sqlIn)
+                       .append(sqlNameSearch);
+                           
+                       ps = connection.prepareStatement(sb.toString());
+                       ps.setInt(1, sysplexId);
+                       ps.setString(2, imsplexName);
+                           
+                       results = ps.executeQuery();
+                           
+                       while (results.next()) {
+                    	   Transaction tran = new Transaction(results);
+                           transactions.add(tran);
+                       }
+               }
+               
+               //Execute process to cleanup the status column in the derby cache
+               this.executeUpdateTransactionColumnAsynchronously(transactionStatuses,sysplexId,imsplexName);
+               
+           } catch(SQLException e) {
+               try {
+                   logAndRollback(connection, e);
+               } catch (DatastoreException e1) {
+                   OmDatastoreException omDatastoreException = new OmDatastoreException(e1);
+                   omDatastoreException.setQuery(sb.toString());
+                   throw omDatastoreException;
+               }
+           } finally {
+               close(results);    // ResultSet
+               close(ps);         // PreparedStatement
+               close(connection); // Connection
+           }
+           
+           return transactions;
+       }
+	
+       public Collection<String> getDistinctColumn(int sysplexId,String imsplexName,TransactionResponseAttribute transactionResponseAttribute) throws OmDatastoreException{
+          return this.getDistinctColumn(sysplexId, imsplexName, transactionResponseAttribute.toString());
+       }
+       
+//**************************************************************************************
+// asynchronous clean up methods
+//**************************************************************************************
+      
+     /**
+      * Executes a callable to clean up the transaction status column, see {link {@link UpdateTransactionColumnAsynchronously}
+      * @param transactionStatuses
+      * @param sysplexId
+      * @param imsplexName
+      * @return
+      */
+     private int executeUpdateTransactionColumnAsynchronously(Collection<Transaction> transactionStatuses, int sysplexId,String imsplexName){
+    	 int result = 0;
+    	 ExecutorService service =  Executors.newSingleThreadExecutor();
+         UpdateTransactionColumnAsynchronously upTransactionsAssychronously = new UpdateTransactionColumnAsynchronously(transactionStatuses,sysplexId,imsplexName);
+         Future<Integer> future = service.submit(upTransactionsAssychronously);
+         try {
+			result =  future.get();
+         } catch (InterruptedException e) {
+        	 //TODO: Do anything here?
+         } catch (ExecutionException e) {
+        	//TODO: Do anything here?
+         }
+         
+         return result;
+     }
+     
+    /**
+     * <pre>
+     * Class will create a callable to run in the background for a non-blocking call to {@link ImsTransactionTable#updateTransactionColumn(Collection, TransactionResponseAttribute, String, int, int)}
+     *
+     * Usage:
+     *  ExecutorService service =  Executors.newSingleThreadExecutor();
+     *  updateTransactionColumnAsynchronously upTransactionsAssychronously = new updateTransactionColumnAsynchronously(transactionStatuses,sysplexId,imsplexId);
+     *  Future<Integer> future = service.submit(upTransactionsAssychronously);
+     *  try {
+     *  	Integer result = future.get();
+     *  } catch (InterruptedException e) {
+     *  } catch (ExecutionException e) {} 
+     * 
+     * @author ddimatos
+     *</pre>
+     */
+    private class UpdateTransactionColumnAsynchronously implements Callable<Integer> {
+    	private Collection<Transaction> transactions ;
+    	private int sysplexId;
+    	private String imsplexName = null;
+    	      
+    	// Null out the statuses that were set, we want to keep the status column null after use
+    	private UpdateTransactionColumnAsynchronously(Collection<Transaction> transactions, int sysplexId,String imsplexName) {
+    		this.transactions = transactions;
+    		this.sysplexId = sysplexId;
+    		this.imsplexName = imsplexName;
+    	}
+
+    	@Override
+    	public Integer call() throws OmDatastoreException  {
+    		//My guess is this is thread safe because Derby will not allow a read during an update
+    		return new Integer (updateTransactionColumn(transactions,TransactionResponseAttribute.LSTT,null,sysplexId,imsplexName));
+    	}
+    }
+}
+
+

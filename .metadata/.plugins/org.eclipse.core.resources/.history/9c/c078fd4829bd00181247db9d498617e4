@@ -1,0 +1,5 @@
+package zowe.mc.servlet;
+
+public class Servlet {
+
+}

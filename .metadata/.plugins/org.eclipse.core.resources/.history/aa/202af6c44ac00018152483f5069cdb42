@@ -1,0 +1,34 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.common.service;
+
+import java.util.Collection;
+
+import com.ibm.ims.ea.om.common.exception.OmConnectionException;
+import com.ibm.ims.ea.om.common.exception.OmDatastoreException;
+import com.ibm.ims.ea.om.common.exception.OmException;
+
+/**
+ * Provides extended function of Icon services through data manipulation 
+ * and aggregation of various services.
+ * @author ddimatos
+ */
+public interface ExtendedIconService {
+	
+	/**
+	 * Method will discover other IMSPlexes that have been configured for an IMS Connect Connection.
+	 * Uses several {@link IconServices} to determine which IMSPlexes are available.
+	 * @return
+	 * @throws OmException 
+	 * @throws OmConnectionException 
+	 * @throws OmDatastoreException 
+	 */
+	public Collection<String> getImsplexesForHostandPort(String host, int port) throws OmException, OmConnectionException, OmDatastoreException;
+}

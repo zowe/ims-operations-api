@@ -1,0 +1,68 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+package com.ibm.ims.ea.om.icon.query.imsplex;
+
+public interface IconImsplexQueryCommand {
+
+	public enum SHOW{
+		ALL,
+		MEMBER,
+		STATUS;
+	}
+	
+	public enum STATUS {
+		ACTIVE,
+		DISCONNECT,
+		NOTACTIVE;
+	}
+	
+    /**
+     * <pre>
+     * Specifies the optional output fields to be displayed. Output fields that are
+     * always displayed, regardless of whether SHOW is specified, include the name
+     * of the IMS Connect that processes the command, and the completion code.
+     * The filters that are supported with the {@link SHOW} keyword, which can be specified
+     * in any order.
+     * @param values
+     * </pre>
+     */
+	public void setShow(SHOW[] values);
+	
+	/**
+	 * <pre>
+	 * Displays the status of the IMSplex. For a description of the possible state
+	 * returned.
+	 * If the IMSplex goes down, IMS Connect is notified (through SCI) of the
+	 * status of the IMSplex. When the IMSplex is brought back up and restarted,
+	 * IMS Connect is notified and automatically reconnects to the IMSplex.
+	 * @param values
+	 * </pre>
+	 */
+	public void setStatus(STATUS[] values);
+	
+    /**
+     * Specifies the 1-8 character name of the IMSPLEX. Wildcards can be specified
+     * for the database name. The database name is a repeatable parameter.
+     * @param values String
+     */
+	public void setName(String[] values);
+	
+	/**
+     * Method will return the type-2 to command as a string. The string command returned will vary
+     * depending on the arguments and options selected. 
+     * @return String
+     * @throws Exception
+     */
+    public String getCommand();
+    
+    
+    public void setRoute(String[] routeName);
+
+}

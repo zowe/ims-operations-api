@@ -1,0 +1,56 @@
+/*********************************************************************************
+ * Licensed Materials - Property of IBM
+ * 5655-TAC
+ * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
+ * US Government Users Restricted Rights - Use, duplication or
+ * disclosure restricted by GSA ADP Schedule Contract with 
+ * IBM Corp.               
+ *********************************************************************************/
+
+
+package com.ibm.ims.ea.om.icon.query.datastore;
+
+public interface IconDatastoreQueryCommand {
+	
+	public enum SHOW {
+		ALL,
+		ACKTO,
+		APPL,
+		CM0ATOQ,
+		DRU,
+		GROUP,
+		MAXI,
+		MEMBER,
+		OAAV,
+		RRNAME,
+		SMEM,
+		STATE,
+		STATUS,
+		TMEM;
+	}
+	
+	public enum STATE {
+		AVAIL,
+		SEVERE,
+		WARN;
+	}
+	
+	public enum STATUS {
+		ACTIVE,
+		DISCONNECT,
+		NOTACTIVE;
+	}
+	
+	public void setName(String[] names);
+	
+	public void setShow(SHOW[] shows);
+	
+	public void setSMEM(String[] name);
+	
+	public void setState(STATE[] states);
+	
+	public void setStatus(STATUS[] status);
+	
+	public void setRoute(String[] routeName);
+	
+}
