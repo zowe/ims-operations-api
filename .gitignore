@@ -3,6 +3,8 @@
 .classpath
 clientdb.xml
 RemoteSystemsTempFiles/
+.recommenders
+.metadata
 
 # Log file
 *.log
