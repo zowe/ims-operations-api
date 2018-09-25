@@ -7,7 +7,7 @@
  * IBM Corp.               
  *********************************************************************************/
 
-package com.ibm.ims.ea.om.connection.icon.create;
+package icon.create;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -16,12 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ibm.ims.connect.ApiProperties;
-import com.ibm.ims.ea.om.common.connection.factory.OMConnection;
-import com.ibm.ims.ea.om.common.exception.OmConnectionException;
-import com.ibm.ims.ea.om.common.services.Om;
-import com.ibm.ims.ea.om.connection.icon.IconOmConnection;
-import com.ibm.ims.ea.om.connection.icon.helpers.ConnectionFactoryProperties;
-import com.ibm.ims.ea.om.connection.icon.helpers.TmInteractionProperties;
+
+import icon.helpers.ConnectionFactoryProperties;
+import icon.helpers.TmInteractionProperties;
+import om.connection.IconOmConnection;
+import om.connection.OMConnection;
+import om.exception.OmConnectionException;
+import om.services.Om;
 
 public final class CreateOmConnection {
 	final static Logger logger = LoggerFactory.getLogger(CreateOmConnection.class);

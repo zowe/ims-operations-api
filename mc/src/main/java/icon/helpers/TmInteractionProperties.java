@@ -7,7 +7,7 @@
  * IBM Corp.               
  *********************************************************************************/
 
-package com.ibm.ims.ea.om.connection.icon.helpers;
+package icon.helpers;
 
 import com.ibm.ims.connect.TmInteractionAttributes;
 

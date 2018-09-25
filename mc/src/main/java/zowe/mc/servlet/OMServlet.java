@@ -1,11 +1,70 @@
 package zowe.mc.servlet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map.Entry;
+
 import javax.servlet.http.HttpSession;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import icon.helpers.ConnectionFactoryProperties;
+import icon.helpers.MCInteraction;
+import icon.helpers.TmInteractionProperties;
+import json.java.JSONArray;
+import json.java.JSONObject;
+import om.connection.IconOmConnection;
+import om.connection.IconOmConnectionFactory;
+import om.connection.OMConnection;
+import om.exception.OmConnectionException;
+import om.exception.OmException;
+import om.exception.message.OM_CONNECTION;
+import om.exception.message.OM_EXCEPTION;
+import om.message.IQEO;
+import om.message.OmCommandErrorMbr;
+import om.message.OmInteractionContext;
+import om.message.OmMessageContext;
+import om.result.OmResultSet;
+import om.services.Om;
+
+import java.util.Properties;
+import java.util.Set;
 
 public class OMServlet {
+
+	static final Logger logger = LoggerFactory.getLogger(OMServlet.class);
+
+	//Message Key's used for OM Message Communication
+	private static final String COMMAND               = "command";                               //passed in context
+	private static final String MESSAGE               = "message";                               //passed in context
+	private static final String MESSAGE_TITTLE        = "messageTitle";                          //passed in context
+	private static final String STATUS                = "status";                                //INFO,WARNING,ERROR - decided here in servlet
+	private static final String OM_SUCCESS_ZERO       = "00000000";  
+	private static final String FLAG				  = "flag";
+
+	//Message status sent to the client for interpretation
+	private static enum OM_MESSAGE_STATUS_TYPE {
+		ERROR("error"), 
+		WARNING("warning"), 
+		SUCCESS("success"), 
+		INFORMATION("information"), 
+		CRITICAL("critical"), 
+		ATTENTION("attention"), 
+		COMPLIANCE("compliance");
+
+		private String value;
+
+		private OM_MESSAGE_STATUS_TYPE(String val) {
+			this.value = val;
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
 
 	/**
 	 * Method will execute an IMS Type1/2 command orginating from the command console in the E4A UI. This method is 
@@ -15,7 +74,7 @@ public class OMServlet {
 	 * @return
 	 * @throws OmDatastoreException 
 	 */
-	public JSONObject executeUserImsCommand(JSONArray params, HttpSession session) throws Exception //Make our own custom exception
+	public JSONObject executeUserImsCommand(String command, HttpSession session) throws Exception //Make our own custom exception
 	{
 		//MAKE THESE STATIC
 		String CMD_PREFIX = "CMD(";
@@ -23,29 +82,19 @@ public class OMServlet {
 		String SUFFIX = ")";
 
 		JSONObject result = new JSONObject();
-		JSONObject commandExecutedGrid = new JSONObject();
-		JSONArray columns = new JSONArray();                    //Column values used by gridx
-		JSONArray  data = new JSONArray();                      //data used by gridx
-		JSONObject commandExecutedText = new JSONObject();
-		JSONObject paramValues = (JSONObject) params.get(0);    //Get the Resource Node key/values
-		JSONObject commandValues = (JSONObject) params.get(1);  //Get the command sent over, may support more than one in the future
-		JSONObject routedIms = (JSONObject) params.get(2);      //get the IMS's to route to
 
-		//Values from the resource node
-		Long env            =  (Long) paramValues.get("sysplexId");
-		String imsplexName  = (String) paramValues.get("imsplexName");
-
-		//Command that was entered
-		String command      = (String) commandValues.get("commandEntered");
 
 		//IMS's they selected in the dropdown to route to
-		JSONArray routedImsArray = (JSONArray) routedIms.get("routedIms");
+		//JSONArray routedImsArray = (JSONArray) routedIms.get("routedIms");
 
-		String commandType = (String) paramValues.get("commandType");
-		String fileName = (String) paramValues.get("fileName");
+
 		//OM message contents sent back to UI
-		JSONObject omMessageContext = new JSONObject();
 		JSONObject message = new JSONObject();
+		JSONArray columns = new JSONArray();   
+		JSONArray  data = new JSONArray(); 
+		JSONObject commandExecutedGrid = new JSONObject();
+		JSONObject commandExecutedText = new JSONObject();
+
 
 		//User session
 		//UserInfo userInfo = UserBinding.getUserInfo(session);        
@@ -53,230 +102,80 @@ public class OMServlet {
 
 		StringBuffer commandFormatted = null;
 		int counter = 0; //Used to create an ID for display a Grid.
-		OMConnection omConnection = null;
+		IconOmConnection omConnection = null;
 		Om om = null;
 		OmResultSet omResultSet;
 		ArrayList<String> results = new ArrayList<String>();
+
+		MCInteraction mcSpec = new MCInteraction();
+		mcSpec.setHostname("hostname");
+		mcSpec.setPort(9999);
+		mcSpec.setDatastoreName("IMS1");
+		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
+
 		try {
-			omConnection = OMConnectionManager.getInstance().getConnection(longToIntSafely(env), imsplexName, userInfo);
+			omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
+			omConnection.createConnection();
+
 			om = new Om(omConnection);
 
-			int routedImsArrayLength = routedImsArray.size();
 
-			if(routedImsArrayLength >0){
-				for(int i = 0;i < routedImsArrayLength; i++){
-					if(i == routedImsArrayLength-1){
-						routedImsString+=routedImsArray.get(i);
-					}else{
-						routedImsString+=routedImsArray.get(i) + ",";
-					}
+
+
+			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
+			commandFormatted = new StringBuffer(CMD_PREFIX).append(command).append(SUFFIX).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
+			omResultSet= om.getCommandService().executeImsCommand("executeUserImsCommand",commandFormatted.toString());
+
+			//Build the columns to be used by the grid:
+			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
+			if(columnProperties != null){
+				for(Properties p : columnProperties){
+					JSONObject columnTitle = new JSONObject();
+					String columnName = (String) p.get("SLBL");
+					columnTitle.put("field", columnName);
+					columnTitle.put("name", columnName);
+					columns.add(columnTitle);
 				}
-
-				//Single Type1/Type2 command typed by the user 
-				if(commandType.equalsIgnoreCase("SINGLE")){
-					//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
-					commandFormatted = new StringBuffer(CMD_PREFIX).append(command).append(SUFFIX).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
-					omResultSet= om.getCommandService().executeImsCommand("executeUserImsCommand",commandFormatted.toString());
-
-					//Build the columns to be used by the grid:
-					Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
-					if(columnProperties != null){
-						for(Properties p : columnProperties){
-							JSONObject columnTitle = new JSONObject();
-							String columnName = (String) p.get("SLBL");
-							columnTitle.put("field", columnName);
-							columnTitle.put("name", columnName);
-							columns.add(columnTitle);
-						}
-					}
-
-					//Responseproperties is the results as a map from connect api
-					Properties[] dataProperties = omResultSet.getResponseProperties();
-					if(dataProperties != null){
-						for(Properties p : dataProperties){
-							JSONObject prop = new JSONObject();
-							prop.put("resourceId", counter++);
-							prop.putAll(p);
-							data.add(prop);
-						}
-					}
-
-					commandExecutedGrid.put("columns",columns);
-					commandExecutedGrid.put("data", data);
-					commandExecutedGrid.put("identity", "resourceId");
-
-					//This result is for displaying a dojo grid
-					result.put("commandExecutedGrid", commandExecutedGrid);
-
-					//This result is for displaying a result as formatted text
-					commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
-
-					result.put("commandExecutedText", commandExecutedText);
-
-					//Type of command Type1 or Type2
-					result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
-
-					//If there is response message data being returned
-					if(omResultSet.getResponseMsgData() != null) {
-						//Convert to JSONArray and add to message
-						Properties[] messageData = omResultSet.getResponseMsgData();
-						JSONArray msgData = new JSONArray();
-						for (Properties p : messageData) {
-							JSONObject responseMsgData = new JSONObject();
-							responseMsgData.putAll(p);
-							msgData.add(responseMsgData);
-						}
-						message.put("msgDataFromType2", msgData);
-					}
-				} else { //Batch File - commands execution
-					LinkedList<String> resultsList = new LinkedList<String>();
-					int i=1;
-					String response = null;
-					boolean isReturnCode = false;
-					String fileNamePrint = "File Name.............: " + fileName +"<br>";
-
-					resultsList.add(fileNamePrint);
-					int count=0;
-
-					JSONArray storeData = new JSONArray();
-					if(command.contains("<div>")){
-						command = command.replaceAll("<div>", "");
-					}
-					if(command.contains("</div>")){
-						command = command.replaceAll("</div>", "");
-					}
-					for(String commandIms: command.split("<br />")){
-						if(!commandIms.isEmpty()){
-							//Comment in the editor need to be ignored
-							if(!commandIms.matches("\\/\\*(.|\\s)*?\\*\\/|\\/\\/.*(?<!>)")) {
-								commandFormatted = new StringBuffer();
-								//We need to process the command, prepare it with the PREFIX and ROUTE SUFFIX
-								commandFormatted = new StringBuffer(CMD_PREFIX).append(commandIms).append(SUFFIX).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
-								omResultSet = om.getCommandService().executeImsCommand("executeImsCommand"+i++,commandFormatted.toString());
-
-								if(!omResultSet.getOmMessageContext().getOmReturnCode().equals("00000000")){
-									isReturnCode = true;
-								}
-								//System.out.println("isReturnCode: " + isReturnCode);  
-								//System.out.println("count" +(count++));
-								response = "=========================================================================================================================================================================================================================================================================================================================" + "<br>";
-								response += commandFormatted + "<br>"; //Print command
-								response += "=========================================================================================================================================================================================================================================================================================================================" + "<br>";
-								//response += "<br>" + omResultSet.getOmMessageContext().getOmMessageSummary() + "<br>";
-
-								response += "IMSplex....... : " +imsplexName + "<br>";
-								response += "Routing....... : " +routedImsString + "<br>";
-								response += "Return Code... : " +omResultSet.getOmMessageContext().getOmReturnCode() + "<br>";
-								response += "Reason Code... : " +omResultSet.getOmMessageContext().getOmReasonCode() + "<br>";
-								response += "Reason text... : " +omResultSet.getOmMessageContext().getOmReasonText() + "<br>";
-								response += "Start Time.... : " +omResultSet.getOmMessageContext().getOmStartTime() + "<br>";
-								response += "Stop Time..... : " + omResultSet.getOmMessageContext().getOmStopTime() + "<br>\n";
-								response += omResultSet.toStringAsTable_batch(); //Print Response
-
-								results.add(response);    
-								//response message data being returned
-								if(omResultSet.getResponseMsgData() != null) {
-									//Convert to JSONArray and add to message
-									Properties[] messageData = omResultSet.getResponseMsgData();
-									JSONArray msgData = new JSONArray();
-									for(Properties p: messageData) {
-										JSONObject responseMsgData = new JSONObject();
-										responseMsgData.putAll(p);
-										msgData.add(responseMsgData);
-									}
-									message.put("msgDataFromType2", msgData);
-								}
-								result.put("message", omResultSet.getOmMessageContext().getOmMessageSummary());
-								result.put("Start Time", omResultSet.getOmMessageContext().getOmStartTime());
-
-								//Overall Return Code. 0 means - all good and 8 - means one or more command returned non-zero return code from OM(can be warning or error).
-								String overAllRC;
-								if(isReturnCode){
-									overAllRC="OverAll Return Code...: " + "8";	
-								} else {
-									overAllRC="OverAll Return Code...: " + "0";
-								}
-
-								resultsList.add(overAllRC);
-								resultsList.addAll(results);
-
-								commandExecutedText = new JSONObject();
-								commandExecutedText.put("commandRun", response); //resultsList.toString().replace(", ", "").replace("[", "").replace("]", "").trim()
-								result.put("identity", "Batch Commands");
-								result.put("overAllReturnCode", overAllRC);
-								storeData.add(commandExecutedText); //commandRun
-							}
-						}
-					}
-					//To test what is the output(command results) size when written to a file 
-					/*  File file = new File("C:/results2.txt");
-    				if(!file.exists()){
-    					file.createNewFile();
-    				}
-
-    				FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
-    				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-    				bufferedWriter.write(storeData.toString()); //response
-    				bufferedWriter.close();*/
-					result.put("data", storeData);
-				}
-			}else{
-				if(commandType.equalsIgnoreCase("SINGLE")){ // Single line command - TODO - merge to have common logic for single and batch spoc
-					//We need to proccess the command, prepare it with the PREFIX
-					commandFormatted = new StringBuffer(CMD_PREFIX).append(command).append(SUFFIX);
-					omResultSet = om.getCommandService().executeImsCommand("executeUserImsCommand",commandFormatted.toString());
-
-					//Build the columns to be used by the grid:
-					Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
-					if(columnProperties != null){
-						for(Properties p : columnProperties){
-							JSONObject columnTitle = new JSONObject();
-							String columnName = (String) p.get("SLBL");
-							columnTitle.put("field", columnName);
-							columnTitle.put("name", columnName);
-							columns.add(columnTitle);
-						}
-					}
-
-					Properties[] dataProperties = omResultSet.getResponseProperties();
-					if(dataProperties != null){
-						for(Properties p : dataProperties){
-							JSONObject prop = new JSONObject();
-							prop.put("resourceId", counter++);
-							prop.putAll(p);
-							data.add(prop);
-						}
-					}
-
-					commandExecutedGrid.put("columns",columns);
-					commandExecutedGrid.put("data", data);
-					commandExecutedGrid.put("identity", "resourceId");
-
-					//This result is for displaying a dojo grid
-					result.put("commandExecutedGrid", commandExecutedGrid);
-
-					//This result is for displaying a result as formatted text
-					commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
-
-					result.put("commandExecutedText", commandExecutedText);
-
-					//Type of command Type1 or Type2
-					result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
-
-					//If there is response message data being returned
-					if(omResultSet.getResponseMsgData() != null) {
-						//Convert to JSONArray and add to message
-						Properties[] messageData = omResultSet.getResponseMsgData();
-						JSONArray msgData = new JSONArray();
-						for (Properties p : messageData) {
-							JSONObject responseMsgData = new JSONObject();
-							responseMsgData.putAll(p);
-							msgData.add(responseMsgData);
-						}
-						message.put("msgDataFromType2", msgData);
-					}
-				} 
 			}
+			//Responseproperties is the results as a map from connect api
+			Properties[] dataProperties = omResultSet.getResponseProperties();
+			if(dataProperties != null){
+				for(Properties p : dataProperties){
+					JSONObject prop = new JSONObject();
+					prop.put("resourceId", counter++);
+					prop.putAll(p);
+					data.add(prop);
+				}
+			}
+
+			commandExecutedGrid.put("columns",columns);
+			commandExecutedGrid.put("data", data);
+			commandExecutedGrid.put("identity", "resourceId");
+
+			//This result is for displaying a dojo grid
+			result.put("commandExecutedGrid", commandExecutedGrid);
+
+			//This result is for displaying a result as formatted text
+			commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
+
+			result.put("commandExecutedText", commandExecutedText);
+
+			//Type of command Type1 or Type2
+			result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
+
+			//If there is response message data being returned
+			if(omResultSet.getResponseMsgData() != null) {
+				//Convert to JSONArray and add to message
+				Properties[] messageData = omResultSet.getResponseMsgData();
+				JSONArray msgData = new JSONArray();
+				for (Properties p : messageData) {
+					JSONObject responseMsgData = new JSONObject();
+					responseMsgData.putAll(p);
+					msgData.add(responseMsgData);
+				}
+				message.put("msgDataFromType2", msgData);
+			}
+
 			message.put("omInteractionContexts", omInteractionContextsToJSON(om));
 			message.put("omMessageContext", omMessageContextToJSON(om));
 		}catch (OmConnectionException e) {
@@ -293,4 +192,144 @@ public class OMServlet {
 		result.put("message", message);
 		return result;
 	}
+
+
+
+	// ************************************************************************************************************
+	// * Private Servlet Helpers
+	// ************************************************************************************************************
+	protected JSONObject omInteractionContextsToJSON(Om om){
+		JSONObject omInteractionContextsJson 	= new JSONObject();
+
+		//Loop through the omInteracxtionContext and set it in the response
+		Set<Entry<String, OmInteractionContext>> omInteractionContexts = om.getOmInteractionContexts().entrySet();
+		for (Entry<String, OmInteractionContext> interactionContext : omInteractionContexts) {
+			omInteractionContextsJson.put(interactionContext.getKey(), this.omInteractionContextToJSON(interactionContext.getValue()));
+		}
+		return omInteractionContextsJson;
+	}
+
+	protected JSONObject omMessageContextToJSON(Om om){
+		JSONObject omMessageContext = new JSONObject();
+		//Loop through the OM message context and set it in the response
+		Set<Entry<String, OmMessageContext>> omMessages = om.getOmMessageContexts().entrySet();
+		for (Entry<String, OmMessageContext> omMessage : omMessages) {
+			omMessageContext.put(omMessage.getKey(), this.omMessageContextToJSON(omMessage.getValue()));
+		}
+		return omMessageContext;
+	}
+
+	protected JSONObject omInteractionContextToJSON(OmInteractionContext omInteractionContext){
+		JSONObject interactionConext = new JSONObject();
+		if(omInteractionContext != null){
+
+			JSONArray imsAttributesJsonArray = new JSONArray();
+
+			//We should not hit a null case here but just in case lets leave it for now. 
+			if(omInteractionContext.getResourceAttributes() != null){
+				imsAttributesJsonArray.addAll(omInteractionContext.getResourceAttributes());
+			}
+
+			interactionConext.put("resourceAttributes", imsAttributesJsonArray);
+			interactionConext.put("resourceLastUpdated", omInteractionContext.getResourceLastUpdated());
+			interactionConext.put("resourceCacheSize", omInteractionContext.getResourceCasheSize());
+			interactionConext.put("resourceVersion", omInteractionContext.getResourceVersion());
+			interactionConext.put("interactionMessage", omInteractionContext.getInteractionMessage());
+			interactionConext.put("liveModeEnabled", omInteractionContext.getLiveModeEnabled());
+			interactionConext.put("environment", omInteractionContext.getEnvironment());
+			interactionConext.put("imsplexName", omInteractionContext.getImsplexName());
+			interactionConext.put("identifier", omInteractionContext.getIdentifier());
+		}
+		return interactionConext;
+	}
+
+	/**
+	 * Convert an OM Exceptoin to JSON to be sent to the UI Single message.
+	 * @param e
+	 * @return
+	 */
+	private JSONObject omExceptionToJSON(OmException e) {
+		JSONObject omExceptionJson = new JSONObject();
+
+		//Log the exception since we have been called to process one.
+		if (logger.isErrorEnabled()) {
+			String logMsg = IQEO.IQEO0015E.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
+			logger.error(logMsg);
+		}
+
+		if (e != null) {
+			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
+			omExceptionJson.put(STATUS, OM_MESSAGE_STATUS_TYPE.ERROR.toString());
+			omExceptionJson.put(MESSAGE_TITTLE, OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
+			omExceptionJson.put(MESSAGE, msg);
+			omExceptionJson.put(COMMAND, e.getOmCommandExecuted());
+		}
+
+		return omExceptionJson;
+	}
+
+	/**
+	 * Method will map a OmMessageContext to a JSON object with the contracted Keys to be consumed by the client.
+	 * @param omMessageContext
+	 * @return
+	 */
+	private JSONArray omMessageContextToJSON(OmMessageContext omMessageContext) {
+		JSONArray omMessages = new JSONArray(); //Collection of all the omMessages
+
+		//If there is a member error it can be a mesg per member so we have to travers the mbr errors
+		//where as om would only return one error not a list of them. 
+		if (omMessageContext.getOmCommandErrorMbrs() != null) {
+			Collection<OmCommandErrorMbr> omCommandErrorMbrs = omMessageContext.getOmCommandErrorMbrs();
+			for (OmCommandErrorMbr omCommandErrorMbr : omCommandErrorMbrs) {
+				JSONObject omMessage = new JSONObject();
+				omMessage.put(STATUS, OM_MESSAGE_STATUS_TYPE.WARNING.toString());
+				omMessage.put(MESSAGE_TITTLE, omCommandErrorMbr.getOmMemberMessageTittle());
+				omMessage.put(MESSAGE, omCommandErrorMbr.getOmMemberMessageSummary());
+				omMessage.put(COMMAND, omMessageContext.getOmCommandExecuted());
+				omMessages.add(omMessage);
+			}
+		} else if (omMessageContext != null) { //non-zero case, something went wrong
+			JSONObject omMessage = new JSONObject();
+			if (!omMessageContext.getOmReturnCode().equals(OM_SUCCESS_ZERO)) {
+				omMessage.put(STATUS, OM_MESSAGE_STATUS_TYPE.WARNING.toString());
+				omMessage.put(MESSAGE_TITTLE, omMessageContext.getOmMessageTittle());
+				omMessage.put(MESSAGE, omMessageContext.getOmMessageSummary());
+				omMessage.put(COMMAND, omMessageContext.getOmCommandExecuted());
+			} else { //success, we still need to propagate the OM Commands to the UI for display
+				omMessage.put(STATUS, OM_MESSAGE_STATUS_TYPE.SUCCESS.toString());
+				omMessage.put(MESSAGE_TITTLE, omMessageContext.getOmMessageTittle());
+				omMessage.put(MESSAGE, omMessageContext.getOmMessageSummary());
+				omMessage.put(COMMAND, omMessageContext.getOmCommandExecuted());
+			}
+			omMessages.add(omMessage);
+		}
+
+		return omMessages;
+	}
+
+	private JSONObject omConnectionExceptionToJSON(OmConnectionException e) {
+		JSONObject omConnectionExceptionJson = new JSONObject();
+
+		//Log the exception since we have been called to process one.
+		if (logger.isErrorEnabled()) {
+			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
+			logger.error(logMsg);
+		}
+
+		String msg = "";
+
+		if (e != null) {
+
+			msg = OM_CONNECTION.OM_CONNECTION_EXCEPTION_MESG.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
+
+		}
+
+		omConnectionExceptionJson.put(STATUS, OM_MESSAGE_STATUS_TYPE.ERROR.toString());
+		omConnectionExceptionJson.put(MESSAGE_TITTLE, OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
+		omConnectionExceptionJson.put(MESSAGE, msg);
+		omConnectionExceptionJson.put(COMMAND, "N/A");
+
+		return omConnectionExceptionJson;
+	}
+
 }
