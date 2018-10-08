@@ -2,23 +2,25 @@ package zowe.mc.servlet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
-import javax.servlet.http.HttpSession;
+import javax.annotation.Resource;
+import javax.ejb.Stateless;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import icon.helpers.ConnectionFactoryProperties;
+import com.ibm.ims.connect.ConnectionFactory;
+
 import icon.helpers.MCInteraction;
-import icon.helpers.TmInteractionProperties;
 import json.java.JSONArray;
 import json.java.JSONObject;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
-import om.connection.OMConnection;
 import om.exception.OmConnectionException;
+import om.exception.OmDatastoreException;
 import om.exception.OmException;
 import om.exception.message.OM_CONNECTION;
 import om.exception.message.OM_EXCEPTION;
@@ -27,12 +29,14 @@ import om.message.OmCommandErrorMbr;
 import om.message.OmInteractionContext;
 import om.message.OmMessageContext;
 import om.result.OmResultSet;
+import om.service.CommandService;
 import om.services.Om;
 
-import java.util.Properties;
-import java.util.Set;
-
+@Stateless
 public class OMServlet {
+	
+	@Resource (name = "mc_cf")
+	private ConnectionFactory mcCF;
 
 	static final Logger logger = LoggerFactory.getLogger(OMServlet.class);
 
@@ -74,8 +78,19 @@ public class OMServlet {
 	 * @return
 	 * @throws OmDatastoreException 
 	 */
-	public JSONObject executeUserImsCommand(String command, HttpSession session) throws Exception //Make our own custom exception
+	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec) throws Exception //Make our own custom exception
 	{
+		
+		mcSpec.setHostname(mcCF.getHostName());
+		mcSpec.setPort(mcCF.getPortNumber());
+		
+		//Validate mcSpec
+		if (mcSpec.getImsPlexName() == null || mcSpec.getHostname() == null
+			 || mcSpec.getPort() == null || mcSpec.getDatastores() == null) {
+			
+			throw new Exception("MCInteraction must contain plex name, hostname, port, and datastores");
+		}
+		
 		//MAKE THESE STATIC
 		String CMD_PREFIX = "CMD(";
 		String ROUTE_PREFIX = " ROUTE(";
@@ -83,22 +98,20 @@ public class OMServlet {
 
 		JSONObject result = new JSONObject();
 
-
-		//IMS's they selected in the dropdown to route to
-		//JSONArray routedImsArray = (JSONArray) routedIms.get("routedIms");
-
-
 		//OM message contents sent back to UI
 		JSONObject message = new JSONObject();
 		JSONArray columns = new JSONArray();   
 		JSONArray  data = new JSONArray(); 
 		JSONObject commandExecutedGrid = new JSONObject();
 		JSONObject commandExecutedText = new JSONObject();
+		
+		//ArrayList<String> routedIms = new ArrayList<String>();
+		ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
 
 		//User session
 		//UserInfo userInfo = UserBinding.getUserInfo(session);        
-		String routedImsString = "";
+		String routedPlex = "";
 
 		StringBuffer commandFormatted = null;
 		int counter = 0; //Used to create an ID for display a Grid.
@@ -106,25 +119,42 @@ public class OMServlet {
 		Om om = null;
 		OmResultSet omResultSet;
 		ArrayList<String> results = new ArrayList<String>();
+		
+		String routedImsString = "";
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname("hostname");
-		mcSpec.setPort(9999);
-		mcSpec.setDatastoreName("IMS1");
 		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
-
+		routedPlex = mcSpec.getImsPlexName();
+		
 		try {
 			omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
-			omConnection.createConnection();
+		
 
 			om = new Om(omConnection);
 
+			//Figure out how to deal with versioning later.
+			CommandService cService = om.getCommandService();
+			
+			OmResultSet plexResultSet= cService.executeImsCommand("executeUserImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
+			Properties[] response = plexResultSet.getResponseProperties();
+			for (int i = 0; i<response.length; i++) {
+				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
+			}
 
-
+			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
+				//throw exception, invalid datastores, are not inside the plex specified
+			} else {
+				StringBuilder sb = new StringBuilder();
+				for (String s : mcSpec.getDatastores()) {
+					sb.append(s);
+					sb.append(",");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				routedImsString = sb.toString();
+			}
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
 			commandFormatted = new StringBuffer(CMD_PREFIX).append(command).append(SUFFIX).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
-			omResultSet= om.getCommandService().executeImsCommand("executeUserImsCommand",commandFormatted.toString());
+			omResultSet= cService.executeImsCommand("executeUserImsCommand",commandFormatted.toString());
 
 			//Build the columns to be used by the grid:
 			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();

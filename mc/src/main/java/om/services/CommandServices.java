@@ -54,8 +54,9 @@ public final class CommandServices extends ServicesHelper implements CommandServ
 
 		try{
 			//Since no version was passed use the latest version
-			this.version = this.resourceVersion.get("latestResourceVersion");
-
+			//this.version = this.resourceVersion.get("latestResourceVersion");
+			this.version = new Version("15.1.0");
+			
 			Service service = new Service(this.om, this.version);
 			omResultSet = service.executeCommand(callingMethodName,command);
 			return omResultSet;

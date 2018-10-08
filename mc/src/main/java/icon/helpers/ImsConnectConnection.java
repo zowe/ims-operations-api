@@ -27,6 +27,8 @@ import com.ibm.ims.connect.InputMessage;
 import com.ibm.ims.connect.OutputMessage;
 import com.ibm.ims.connect.TmInteraction;
 
+import utils.TraceUtil;
+
 
 /**
  * Common connection instance to help set up and connect to IMS Connect with and without SSL. At the common
@@ -160,6 +162,7 @@ public class ImsConnectConnection implements ApiProperties{  //Note: This might 
 		//Populate InputMessage object with input byte array
         byte[][] inData2DByteArray = new byte[1][];
         inData2DByteArray[0] = new String(command).getBytes(tmInteraction.getImsConnectCodepage());
+        TraceUtil.dumpBytesInHex(inData2DByteArray[0]);
         inputMessage.setInputMessageData(inData2DByteArray);
         //defect 52031 SQH avoid duplicate client Id error
         tmInteraction.setCancelClientId(false);

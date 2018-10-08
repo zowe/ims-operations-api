@@ -32,7 +32,7 @@ public class FIDManager {
 	
 	//testing code review remove this comment when finished...
 	private FIDManager() {
-		myFidVersionMap = ResourceBundle.getBundle("com.ibm.ims.ea.om.common.fid.macroVersions");
+		myFidVersionMap = ResourceBundle.getBundle("macroVersions");
 		myFIDReaders = new ConcurrentHashMap<String, FIDReader>();
 		for (String key : myFidVersionMap.keySet()) {
 			FIDReader reader = new FIDReader(myFidVersionMap.getString(key));

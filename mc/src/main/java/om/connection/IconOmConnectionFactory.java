@@ -95,7 +95,7 @@ public class IconOmConnectionFactory implements OMConnectionFactory {
             
         //ICON TMinteraction properties
         TmInteractionProperties tmInteractionProperties = null;
-        tmInteractionProperties = new TmInteractionProperties(mcSpec.getDatastoreName());
+        tmInteractionProperties = new TmInteractionProperties(mcSpec.getImsPlexName());
             
         //Create an OmConnection to establish the connection and be placed in the cacheConnection
         IconOmConnection iconOmConnection = new IconOmConnection(connectionFactoryProperties, tmInteractionProperties);
