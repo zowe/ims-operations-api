@@ -82,8 +82,8 @@ extends TestCase
 		JSONObject omMessageContext = (JSONObject) message.get("omMessageContext");
 		JSONArray executeUserCommand = (JSONArray) omMessageContext.get("executeUserImsCommand");
 		JSONObject messageTitle = (JSONObject) executeUserCommand.get(0);
-		String text = (String) messageTitle.get("messageTitle");
-		assertTrue(text.equals("Operations Manager successfully executed the command."));
+		String text = (String) messageTitle.get("status");
+		assertTrue(text.equals("success"));
 		
 	}
 	
@@ -95,8 +95,8 @@ extends TestCase
 		JSONObject omMessageContext = (JSONObject) message.get("omMessageContext");
 		JSONArray executeUserCommand = (JSONArray) omMessageContext.get("executeUserImsCommand");
 		JSONObject messageTitle = (JSONObject) executeUserCommand.get(0);
-		String text = (String) messageTitle.get("messageTitle");
-		assertTrue(text.equals("Operations Manager successfully executed the command."));
+		String text = (String) messageTitle.get("status");
+		assertTrue(text.equals("success"));
 		
 	}
 }

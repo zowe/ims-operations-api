@@ -96,7 +96,7 @@ public enum OM_MESSAGE {
     public String msg() {
         String message = "";
         try {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceBundleName, Locale.getDefault(), classLoader);
+            ResourceBundle resourceBundle = ResourceBundle.getBundle("OM_MESSAGE", Locale.getDefault(), classLoader);
             message = resourceBundle.getString(this.msgCode);
         } catch (MissingResourceException e) {
             String errMsg = "IQEO0004E: The resource bundle cannot be found, or a resource is missing from a resource bundle. Message = " + e + " " + Arrays.toString(e.getStackTrace());

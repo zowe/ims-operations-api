@@ -56,7 +56,7 @@
 			<artifactId>IMSConnectAPI</artifactId>
 			<version>1.0</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>javax.ejb</groupId>
 			<artifactId>javax.ejb-api</artifactId>
 			<version>3.2</version>
@@ -66,8 +66,20 @@
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0-m10</version>
 		</dependency>
+		<dependency>
+			<groupId>j2ee</groupId>
+			<artifactId>j2ee</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm</groupId>
+			<artifactId>imsico</artifactId>
+			<version>1512</version>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 	<build>
+		<finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>

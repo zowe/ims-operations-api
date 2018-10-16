@@ -12,7 +12,9 @@ import javax.ejb.Stateless;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.ims.connect.ConnectionFactory;
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.ConnectionFactory;
 
 import icon.helpers.MCInteraction;
 import json.java.JSONArray;
@@ -31,10 +33,11 @@ import om.message.OmMessageContext;
 import om.result.OmResultSet;
 import om.service.CommandService;
 import om.services.Om;
+import javax.resource.spi.*;
 
 @Stateless
 public class OMServlet {
-	
+
 	@Resource (name = "mc_cf")
 	private ConnectionFactory mcCF;
 
@@ -81,16 +84,23 @@ public class OMServlet {
 	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec) throws Exception //Make our own custom exception
 	{
 		
-		mcSpec.setHostname(mcCF.getHostName());
-		mcSpec.setPort(mcCF.getPortNumber());
+		//need getters for hostname and port for cf, getmanagedconnectionfactory is protected
+		com.ibm.connector2.ims.ico.IMSConnectionFactory cf = (com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF;
 		
+		if (mcSpec.getHostname() == null) {
+			//mcSpec.setHostname(((com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF).getHostName());
+		}
+		if (mcSpec.getPort() == null) {
+			//mcSpec.setPort(((com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF).getPortNumber());
+		}
+
 		//Validate mcSpec
 		if (mcSpec.getImsPlexName() == null || mcSpec.getHostname() == null
-			 || mcSpec.getPort() == null || mcSpec.getDatastores() == null) {
-			
+				|| mcSpec.getPort() == null || mcSpec.getDatastores() == null) {
+
 			throw new Exception("MCInteraction must contain plex name, hostname, port, and datastores");
 		}
-		
+
 		//MAKE THESE STATIC
 		String CMD_PREFIX = "CMD(";
 		String ROUTE_PREFIX = " ROUTE(";
@@ -104,7 +114,7 @@ public class OMServlet {
 		JSONArray  data = new JSONArray(); 
 		JSONObject commandExecutedGrid = new JSONObject();
 		JSONObject commandExecutedText = new JSONObject();
-		
+
 		//ArrayList<String> routedIms = new ArrayList<String>();
 		ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
@@ -119,21 +129,21 @@ public class OMServlet {
 		Om om = null;
 		OmResultSet omResultSet;
 		ArrayList<String> results = new ArrayList<String>();
-		
+
 		String routedImsString = "";
 
 		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
 		routedPlex = mcSpec.getImsPlexName();
-		
+
 		try {
 			omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
-		
+
 
 			om = new Om(omConnection);
 
 			//Figure out how to deal with versioning later.
 			CommandService cService = om.getCommandService();
-			
+
 			OmResultSet plexResultSet= cService.executeImsCommand("executeUserImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
 			Properties[] response = plexResultSet.getResponseProperties();
 			for (int i = 0; i<response.length; i++) {
