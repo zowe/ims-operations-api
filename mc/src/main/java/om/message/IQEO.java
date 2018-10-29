@@ -104,7 +104,7 @@ public enum IQEO {
     /* *******************************************************************************/
     final static Logger logger             = LoggerFactory.getLogger(IQEO.class);
     private ClassLoader classLoader        = this.getClass().getClassLoader();
-    private String      resourceBundleName = this.getClass().getName();
+    private String      resourceBundleName = this.getClass().getSimpleName();
 
     /**
      * <pre>

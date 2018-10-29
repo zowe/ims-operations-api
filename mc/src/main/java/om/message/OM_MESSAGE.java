@@ -141,7 +141,7 @@ public enum OM_MESSAGE {
         MessageFormat msgfmt = null;
 
         try {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle("OM_Message", Locale.getDefault(), classLoader);
+            ResourceBundle resourceBundle = ResourceBundle.getBundle("OM_MESSAGE", Locale.getDefault(), classLoader);
             String message = resourceBundle.getString(this.msgCode);
             msgfmt = new MessageFormat(message);
         } catch (MissingResourceException e) {

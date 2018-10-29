@@ -83,10 +83,10 @@ public class OMServlet {
 	 */
 	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec) throws Exception //Make our own custom exception
 	{
-		
+
 		//need getters for hostname and port for cf, getmanagedconnectionfactory is protected
 		com.ibm.connector2.ims.ico.IMSConnectionFactory cf = (com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF;
-		
+
 		if (mcSpec.getHostname() == null) {
 			//mcSpec.setHostname(((com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF).getHostName());
 		}
@@ -146,20 +146,26 @@ public class OMServlet {
 
 			OmResultSet plexResultSet= cService.executeImsCommand("executeUserImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
 			Properties[] response = plexResultSet.getResponseProperties();
-			for (int i = 0; i<response.length; i++) {
-				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
-			}
 
-			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
-				//throw exception, invalid datastores, are not inside the plex specified
-			} else {
-				StringBuilder sb = new StringBuilder();
-				for (String s : mcSpec.getDatastores()) {
-					sb.append(s);
-					sb.append(",");
+			if (plexImsMbrs.isEmpty()) {
+				routedImsString = "*";
+			}
+			else {
+				for (int i = 0; i<response.length; i++) {
+					plexImsMbrs.add(response[i].getProperty("IMSMBR"));
 				}
-				sb.deleteCharAt(sb.length()-1);
-				routedImsString = sb.toString();
+
+				if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
+					//throw exception, invalid datastores, are not inside the plex specified
+				} else {
+					StringBuilder sb = new StringBuilder();
+					for (String s : mcSpec.getDatastores()) {
+						sb.append(s);
+						sb.append(",");
+					}
+					sb.deleteCharAt(sb.length()-1);
+					routedImsString = sb.toString();
+				}
 			}
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
