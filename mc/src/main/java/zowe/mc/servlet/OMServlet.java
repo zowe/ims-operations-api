@@ -169,7 +169,7 @@ public class OMServlet {
 			}
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
-			commandFormatted = new StringBuffer(CMD_PREFIX).append(command).append(SUFFIX).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
+			commandFormatted = new StringBuffer(command).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
 			omResultSet= cService.executeImsCommand("executeUserImsCommand",commandFormatted.toString());
 
 			//Build the columns to be used by the grid:
