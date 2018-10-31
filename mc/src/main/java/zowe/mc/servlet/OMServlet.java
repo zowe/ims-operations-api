@@ -91,7 +91,7 @@ public class OMServlet {
 		JSONArray columns = new JSONArray();   
 		JSONArray  data = new JSONArray(); 
 		JSONObject commandExecutedGrid = new JSONObject();
-		JSONObject commandExecutedText = new JSONObject();
+		//JSONObject commandExecutedText = new JSONObject();
 
 		ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
@@ -141,17 +141,19 @@ public class OMServlet {
 			commandFormatted = new StringBuffer(command).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
 			omResultSet= cService.executeImsCommand("executeUserImsCommand",commandFormatted.toString());
 
-			//Build the columns to be used by the grid:
-			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
-			if(columnProperties != null){
-				for(Properties p : columnProperties){
-					JSONObject columnTitle = new JSONObject();
-					String columnName = (String) p.get("SLBL");
-					columnTitle.put("field", columnName);
-					columnTitle.put("name", columnName);
-					columns.add(columnTitle);
-				}
-			}
+//			//Build the columns to be used by the grid:
+//			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
+//			if(columnProperties != null){
+//				for(Properties p : columnProperties){
+//					JSONObject columnTitle = new JSONObject();
+//					String columnName = (String) p.get("SLBL");
+//					columnTitle.put("field", columnName);
+//					columnTitle.put("name", columnName);
+//					columns.add(columnTitle);
+//				}
+//			}
+			
+			
 			//Responseproperties is the results as a map from connect api
 			Properties[] dataProperties = omResultSet.getResponseProperties();
 			if(dataProperties != null){
@@ -163,7 +165,7 @@ public class OMServlet {
 				}
 			}
 
-			commandExecutedGrid.put("columns",columns);
+			//commandExecutedGrid.put("columns",columns);
 			commandExecutedGrid.put("data", data);
 			commandExecutedGrid.put("identity", "resourceId");
 
@@ -171,9 +173,9 @@ public class OMServlet {
 			result.put("commandExecutedGrid", commandExecutedGrid);
 
 			//This result is for displaying a result as formatted text
-			commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
+			//commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
 
-			result.put("commandExecutedText", commandExecutedText);
+			//result.put("commandExecutedText", commandExecutedText);
 
 			//Type of command Type1 or Type2
 			result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
