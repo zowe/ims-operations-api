@@ -20,7 +20,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
+/**
+ * Tests for QUERY IMS rest services
+ * @author jerryli
+ *
+ */
 public class QueryTest 
 {
 
@@ -28,7 +32,9 @@ public class QueryTest
 	private static WebTarget webTarget = null;
 
 	
-
+	/**
+	 * Setup rest client and webtarget address
+	 */
 	@BeforeAll
 	public static void setUp() {
 		
@@ -37,12 +43,15 @@ public class QueryTest
 
 	}
 	
-
+	
+	/**
+	 * Tests rest service for submitting QUERY PGM IMS command
+	 * @throws Exception
+	 */
 	@Test
 	public void testQueryPgm() throws Exception {
 		logger.info("TESTING Query PGM");
 		String path = "/Query/PGM";
-
 
 		Response response =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "ec32016a.vmec.svl.ibm.com")
 				.header("port", "9999")

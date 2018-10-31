@@ -360,6 +360,7 @@ public class OMServlet {
 		if (logger.isErrorEnabled()) {
 			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
 			logger.error(logMsg);
+			logger.error(e.getMessage());
 		}
 
 		String msg = "";
@@ -372,7 +373,7 @@ public class OMServlet {
 
 		omConnectionExceptionJson.put(STATUS, OM_MESSAGE_STATUS_TYPE.ERROR.toString());
 		omConnectionExceptionJson.put(MESSAGE_TITTLE, OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
-		omConnectionExceptionJson.put(MESSAGE, msg);
+		omConnectionExceptionJson.put(MESSAGE, e.getMessage());
 		omConnectionExceptionJson.put(COMMAND, "N/A");
 
 		return omConnectionExceptionJson;

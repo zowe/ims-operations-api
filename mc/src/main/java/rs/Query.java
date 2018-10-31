@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -27,6 +28,8 @@ import utils.Type2CommandSerializable;
 import zowe.mc.servlet.OMServlet;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -45,16 +48,17 @@ public class Query {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from Query PGM IMS command", httpMethod="GET", notes = "<br>This service submits a 'Query PGM' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200,response = JSONObject.class, message = "Successful operation"),@ApiResponse(code = 400, message = "Bad Request", response = Error.class)})
+	@ApiResponses(value = { @ApiResponse(code = 200,response = JSONObject.class, message = "Successful operation"),@ApiResponse(code = 400, message = "Bad Request", response = JSONObject.class)})
 	public Response execute(@QueryParam("names") List<String> name,
-			@Context HttpHeaders httpheaders) {
+			@HeaderParam("hostname") String hostname,
+			@HeaderParam("port") String port,
+			@HeaderParam("plex") String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 
-		MultivaluedMap<String, String> headers = httpheaders.getRequestHeaders();
-		mcSpec.setHostname(headers.get("hostname").get(0));
-		mcSpec.setPort(Integer.parseInt(headers.get("port").get(0)));
-		mcSpec.setImsPlexName(headers.get("plex").get(0));
+		mcSpec.setHostname(hostname);
+		mcSpec.setPort(Integer.parseInt(port));
+		mcSpec.setImsPlexName(plex);
 
 		QueryPgm pgm = new QueryPgm();
 		pgm.getNAME().addAll(name);

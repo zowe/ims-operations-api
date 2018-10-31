@@ -13,6 +13,11 @@ import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
 
+/**
+ * Tests for IMS connections
+ * @author jerryli
+ *
+ */
 public class ConnectionTest {
 
 	private static MCInteraction mcSpec = new MCInteraction();
@@ -20,20 +25,23 @@ public class ConnectionTest {
 
 	@BeforeAll
 	public static void setUp() {
-		mcSpec.setHostname("ec32016a.vmec.svl.ibm.com");
-		mcSpec.setPort(9999);
-		mcSpec.setImsPlexName("IM00P");
-		mcSpec.getDatastores().add("IMS1");
-		mcSpec.getDatastores().add("IMS2");
+		
+		mcSpec.setHostname(TestProperties.hostname);
+		mcSpec.setPort(TestProperties.port);
+		mcSpec.setImsPlexName(TestProperties.plex);
 	}
 
+	/**
+	 * Test connection to IMS
+	 * @throws Exception
+	 */
 	@Test
 	public void testImsConnection() throws Exception
 	{
 		logger.info("TESTING MC Connection");
 		try {
 
-			if (logger.isDebugEnabled()) logger.debug("Creating connection to " + mcSpec.getHostname() + ":" + mcSpec.getPort());
+			if (logger.isDebugEnabled()) logger.debug("Creating connection to " + mcSpec.getHostname() + ":" + mcSpec.getPort() + " - " + TestProperties.plex);
 
 			IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
 			IconOmConnection omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
