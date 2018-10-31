@@ -19,11 +19,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 import com.ibm.ims.connect.Cmderr;
 import com.ibm.ims.connect.ImsConnectApiException;
@@ -32,15 +29,14 @@ import com.ibm.ims.connect.Msgdata;
 import com.ibm.ims.connect.Type2CmdResponse;
 
 import om.exception.OmConnectionException;
-import om.exception.OmDatastoreException;
 import om.exception.OmException;
 import om.fid.FIDManager;
 import om.fid.FIDReader;
 import om.message.OM_MESSAGE;
 import om.message.OmCommandErrorMbr;
 import om.message.OmMessageContext;
-import om.result.OmResultSet;
 import om.result.OmResult.COMMAND_TYPE;
+import om.result.OmResultSet;
 import om.version.Version;
 import utils.ArrayUtils;
 import utils.ThreadHelper;
@@ -84,7 +80,7 @@ public class Service extends ThreadHelper{
 		if (logger.isDebugEnabled()) { logger.debug("<< noOpCommand("+OM_READY_CMD+ ")");}
 	}
 
-	public OmResultSet executeCommand(String callingMethodName, String command) throws OmException,OmConnectionException, OmDatastoreException {
+	public OmResultSet executeCommand(String callingMethodName, String command) throws OmException,OmConnectionException {
 		if (logger.isDebugEnabled()) {
 			logger.debug(">> executeCommand(" + callingMethodName +", " +command+ ")");
 		}
@@ -166,7 +162,7 @@ public class Service extends ThreadHelper{
 	//        return resultSet;
 	//    }
 
-	private OmResultSet processResponse(InputStream inputStream, String command) throws OmException, IOException, OmDatastoreException, OmConnectionException{
+	private OmResultSet processResponse(InputStream inputStream, String command) throws OmException, IOException, OmConnectionException{
 		if(logger.isDebugEnabled()) { 
 			logger.debug(">> processType2Response(...)"); 
 		}
@@ -488,15 +484,10 @@ public class Service extends ThreadHelper{
 	 * and return a {@link OmResultSet}. Command is passed so it can be attached to the omMessageconext.
 	 * @param inputStream
 	 * @return
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 * @throws ImsConnectApiException
 	 * @throws OmException
 	 * @throws OmConnectionException 
-	 * @throws OmDatastoreException 
 	 */
-	protected OmResultSet processCmdResponse(InputStream inputStream, String command) throws OmException, OmDatastoreException, OmConnectionException {
+	protected OmResultSet processCmdResponse(InputStream inputStream, String command) throws OmException, OmConnectionException {
 		if(logger.isDebugEnabled()) { logger.debug(">> processCmdResponse(...)"); }
 
 		OmResultSet resultSet    = null;

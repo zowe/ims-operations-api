@@ -1,5 +1,13 @@
 package json.xml.internal;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Properties;
+import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 // IBM Confidential OCO Source Material
 // (C) COPYRIGHT International Business Machines Corp. 2006
 // The source code for this program is not published or otherwise divested
@@ -8,17 +16,8 @@ package json.xml.internal;
 
 
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import java.util.logging.*;
-import java.util.Stack;
-import java.util.StringTokenizer;
-import java.util.Properties;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
 
 
 /**

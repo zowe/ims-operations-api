@@ -1,16 +1,10 @@
 package om.services;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import om.constants.ImsCommandAttributes;
-import om.exception.OmDatastoreException;
 import om.version.Version;
 
 public abstract class ServicesHelper {// extends Service {
@@ -20,7 +14,7 @@ public abstract class ServicesHelper {// extends Service {
 	protected boolean isDiscovering = false;
 	protected Om om = null;
 	protected Map<String, Version> resourceVersion = null;
-	private static final Logger logger = LoggerFactory.getLogger(ServicesHelper.class);
+	//private static final Logger logger = LoggerFactory.getLogger(ServicesHelper.class);
 	
 	
     
@@ -30,22 +24,22 @@ public abstract class ServicesHelper {// extends Service {
     	this.imsplexName = om.getOMConnection().getImsplex();
     }
 
-    /**
-     * Method converts a Datastore Exception often thrown by the abstract datastore dependency and converted into and
-     * OmDatastoreExecption that contains added meta-data such as where it originated from.
-     * @param e
-     * @param sysplexId
-     * @param imsplexId
-     * @param imsplexName
-     * @return
-     */
-    protected OmDatastoreException convertDatatstoreException(OmDatastoreException e, int sysplexId, String imsplexName) {
-        OmDatastoreException omDatastoreException = new OmDatastoreException(e);
-        omDatastoreException.setEnvironmentId(sysplexId);
-        omDatastoreException.setImsplexName(imsplexName);
-        omDatastoreException.setQuery("No Query Availble");
-        return omDatastoreException;
-    }
+//    /**
+//     * Method converts a Datastore Exception often thrown by the abstract datastore dependency and converted into and
+//     * OmDatastoreExecption that contains added meta-data such as where it originated from.
+//     * @param e
+//     * @param sysplexId
+//     * @param imsplexId
+//     * @param imsplexName
+//     * @return
+//     */
+//    protected OmDatastoreException convertDatatstoreException(OmDatastoreException e, int sysplexId, String imsplexName) {
+//        OmDatastoreException omDatastoreException = new OmDatastoreException(e);
+//        omDatastoreException.setEnvironmentId(sysplexId);
+//        omDatastoreException.setImsplexName(imsplexName);
+//        omDatastoreException.setQuery("No Query Availble");
+//        return omDatastoreException;
+//    }
     
     /**
      * Method will review the route members passed and if there is at least one route member that is a '*', then a new

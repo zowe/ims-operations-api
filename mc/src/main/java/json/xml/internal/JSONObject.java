@@ -1,22 +1,19 @@
 package json.xml.internal;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
 // IBM Confidential OCO Source Material
 // (C) COPYRIGHT International Business Machines Corp. 2006
 // The source code for this program is not published or otherwise divested
 // of its trade secrets, irrespective of what has been deposited with the
 // U.S. Copyright Office.
-
-
-import java.util.logging.*;
-import java.util.StringTokenizer;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Properties;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**

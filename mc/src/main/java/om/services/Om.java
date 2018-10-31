@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import om.connection.OMConnection;
-import om.exception.OmConnectionException;
-import om.exception.OmException;
 import om.message.OmInteractionContext;
 import om.message.OmMessageContext;
 import om.service.CommandService;

@@ -10,7 +10,6 @@
 package om.service;
 
 import om.exception.OmConnectionException;
-import om.exception.OmDatastoreException;
 import om.exception.OmException;
 import om.result.OmResultSet;
 import om.version.Version;
@@ -26,7 +25,7 @@ public interface CommandService {
      * @throws OmConnectionException 
      * @throws OmDatastoreException 
      */
-    public OmResultSet executeImsCommand(String callingMethodName, String command) throws OmException, OmConnectionException, OmDatastoreException;
+    public OmResultSet executeImsCommand(String callingMethodName, String command) throws OmException, OmConnectionException;
 
     /**
      * Executes a Type1 or Type2 IMS Command
@@ -40,6 +39,6 @@ public interface CommandService {
      * @throws OmConnectionException
      * @throws OmDatastoreException
      */
-	public OmResultSet executeImsCommand(String callingMethodName, String command,Version version) throws OmException, OmConnectionException, OmDatastoreException;
+	public OmResultSet executeImsCommand(String callingMethodName, String command,Version version) throws OmException, OmConnectionException;
 
 }

@@ -12,33 +12,21 @@ package om.connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.UUID;
-
-import javax.servlet.http.HttpSession;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import com.ibm.ims.connect.ApiProperties;
 
 import icon.helpers.ConnectionFactoryProperties;
-import icon.helpers.IconOmConnectionConstants;
 import icon.helpers.MCInteraction;
 import icon.helpers.TmInteractionProperties;
 import om.exception.OmConnectionException;
-import om.exception.OmDatastoreException;
-import om.exception.OmException;
-import om.message.IQEO;
-import om.services.Om;
 
 /**
  * Class will provide access to a number of IconOmConnection(s) stored in a cache based on the connection key (IMSPlex)
  * @author ddimatos
  */
 public class IconOmConnectionFactory implements OMConnectionFactory {
-	private final static Logger logger = LoggerFactory.getLogger(IconOmConnectionFactory.class); //Logger
+	//private final static Logger logger = LoggerFactory.getLogger(IconOmConnectionFactory.class); //Logger
 	private String myConnectionType = "";                                                        //Our EA OM ICON FACTORY Type (name) "FACTORY_IMS_CONNECT"
 	private long threadId = 0;																	 //Help identify the thread
 	private String sessionId = "";																 //Hash code for the given object instance

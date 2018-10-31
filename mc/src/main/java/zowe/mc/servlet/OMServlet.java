@@ -8,13 +8,10 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.resource.cci.ConnectionFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 
 import icon.helpers.MCInteraction;
 import json.java.JSONArray;
@@ -22,7 +19,6 @@ import json.java.JSONObject;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
-import om.exception.OmDatastoreException;
 import om.exception.OmException;
 import om.exception.message.OM_CONNECTION;
 import om.exception.message.OM_EXCEPTION;
@@ -33,7 +29,6 @@ import om.message.OmMessageContext;
 import om.result.OmResultSet;
 import om.service.CommandService;
 import om.services.Om;
-import javax.resource.spi.*;
 
 @Stateless
 public class OMServlet {
@@ -49,7 +44,6 @@ public class OMServlet {
 	private static final String MESSAGE_TITTLE        = "messageTitle";                          //passed in context
 	private static final String STATUS                = "status";                                //INFO,WARNING,ERROR - decided here in servlet
 	private static final String OM_SUCCESS_ZERO       = "00000000";  
-	private static final String FLAG				  = "flag";
 
 	//Message status sent to the client for interpretation
 	private static enum OM_MESSAGE_STATUS_TYPE {
@@ -81,28 +75,12 @@ public class OMServlet {
 	 * @return
 	 * @throws OmDatastoreException 
 	 */
-	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec) throws Exception //Make our own custom exception
+	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec)  //Make our own custom exception
 	{
 
-		//need getters for hostname and port for cf, getmanagedconnectionfactory is protected
-		com.ibm.connector2.ims.ico.IMSConnectionFactory cf = (com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF;
-
-		if (mcSpec.getHostname() == null) {
-			//mcSpec.setHostname(((com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF).getHostName());
-		}
-		if (mcSpec.getPort() == null) {
-			//mcSpec.setPort(((com.ibm.connector2.ims.ico.IMSConnectionFactory) mcCF).getPortNumber());
-		}
-
-		//Validate mcSpec
-		if (mcSpec.getImsPlexName() == null || mcSpec.getHostname() == null
-				|| mcSpec.getPort() == null || mcSpec.getDatastores() == null) {
-
-			throw new Exception("MCInteraction must contain plex name, hostname, port, and datastores");
-		}
 
 		//MAKE THESE STATIC
-		String CMD_PREFIX = "CMD(";
+		//String CMD_PREFIX = "CMD(";
 		String ROUTE_PREFIX = " ROUTE(";
 		String SUFFIX = ")";
 
@@ -115,25 +93,16 @@ public class OMServlet {
 		JSONObject commandExecutedGrid = new JSONObject();
 		JSONObject commandExecutedText = new JSONObject();
 
-		//ArrayList<String> routedIms = new ArrayList<String>();
 		ArrayList<String> plexImsMbrs = new ArrayList<String>();
-
-
-		//User session
-		//UserInfo userInfo = UserBinding.getUserInfo(session);        
-		String routedPlex = "";
 
 		StringBuffer commandFormatted = null;
 		int counter = 0; //Used to create an ID for display a Grid.
 		IconOmConnection omConnection = null;
 		Om om = null;
 		OmResultSet omResultSet;
-		ArrayList<String> results = new ArrayList<String>();
-
 		String routedImsString = "";
 
 		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
-		routedPlex = mcSpec.getImsPlexName();
 
 		try {
 			omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
@@ -228,8 +197,6 @@ public class OMServlet {
 			message.put("OmConnectionException", omConnectionExceptionToJSON(e));
 		} catch (OmException e) {
 			message.put("OmException", omExceptionToJSON(e));
-		} catch (Exception e){
-			e.printStackTrace();
 		}finally{
 			if(om != null){
 				om.releaseConnection();
@@ -363,17 +330,15 @@ public class OMServlet {
 			logger.error(e.getMessage());
 		}
 
-		String msg = "";
-
+		String msg = "A";
 		if (e != null) {
 
-			msg = OM_CONNECTION.OM_CONNECTION_EXCEPTION_MESG.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
-
+			msg = e.getMessage();
 		}
 
 		omConnectionExceptionJson.put(STATUS, OM_MESSAGE_STATUS_TYPE.ERROR.toString());
 		omConnectionExceptionJson.put(MESSAGE_TITTLE, OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
-		omConnectionExceptionJson.put(MESSAGE, e.getMessage());
+		omConnectionExceptionJson.put(MESSAGE, msg);
 		omConnectionExceptionJson.put(COMMAND, "N/A");
 
 		return omConnectionExceptionJson;

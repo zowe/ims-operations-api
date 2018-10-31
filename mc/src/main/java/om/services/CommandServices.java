@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import om.exception.OmConnectionException;
-import om.exception.OmDatastoreException;
 import om.exception.OmException;
 import om.result.OmResultSet;
 import om.service.CommandService;
@@ -46,7 +45,7 @@ public final class CommandServices extends ServicesHelper implements CommandServ
 
 
 
-	public OmResultSet executeImsCommand(String callingMethodName, String command) throws OmException,OmConnectionException, OmDatastoreException {
+	public OmResultSet executeImsCommand(String callingMethodName, String command) throws OmException,OmConnectionException {
 		if (logger.isDebugEnabled()) logger.debug(">> executeImsCommand("+ callingMethodName + "," +command+ ")");
 
 		//Local omresultSet otherwise we risk data corruption of the service is reused. 
@@ -67,7 +66,7 @@ public final class CommandServices extends ServicesHelper implements CommandServ
 		}
 	}
 
-	public OmResultSet executeImsCommand(String callingMethodName, String command, Version version) throws OmException,OmConnectionException, OmDatastoreException {
+	public OmResultSet executeImsCommand(String callingMethodName, String command, Version version) throws OmException,OmConnectionException {
 		if (logger.isDebugEnabled()) logger.debug(">> executeImsCommand("+ callingMethodName + "," +command+ version +")");
 
 		//Local omresultSet otherwise we risk data corruption of the service is reused. 

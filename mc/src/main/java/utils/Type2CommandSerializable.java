@@ -19,14 +19,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-
-
 import javax.xml.bind.annotation.XmlElement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import om.exception.OmCommandGenerationException;
 
 public class Type2CommandSerializable {
