@@ -24,8 +24,8 @@ public class TraceUtil {
 		int totalRowCount = 0;
 		for (int i = 0; i < buffer.length; i++)
 		{
-			int j = (int) ((buffer[i] & 0xF0) >> 4);
-			int k = (int) (buffer[i] & 0x0F);
+			int j = ((buffer[i] & 0xF0) >> 4);
+			int k = (buffer[i] & 0x0F);
 
 			strbuf.append(Integer.toString(j, 16));
 			strbuf.append(Integer.toString(k, 16));

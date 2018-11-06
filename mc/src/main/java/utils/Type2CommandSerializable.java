@@ -358,7 +358,7 @@ public class Type2CommandSerializable {
 					field.setAccessible(true);
 					for (Annotation annotateField: annotations) {
 						XmlElement anno = (XmlElement) annotateField;
-						Object obj = (Object) field.get(set);
+						Object obj = field.get(set);
 						if (obj != null) {
 							setPopulated = true;
 							cmd.append(anno.name()).append(PARAOP);

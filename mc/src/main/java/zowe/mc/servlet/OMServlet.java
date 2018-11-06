@@ -79,28 +79,21 @@ public class OMServlet {
 	{
 
 
-		//MAKE THESE STATIC
-		//String CMD_PREFIX = "CMD(";
-		String ROUTE_PREFIX = " ROUTE(";
-		String SUFFIX = ")";
 
 		JSONObject result = new JSONObject();
 
 		//OM message contents sent back to UI
 		JSONObject message = new JSONObject();
-		JSONArray columns = new JSONArray();   
 		JSONArray  data = new JSONArray(); 
 		JSONObject commandExecutedGrid = new JSONObject();
 		//JSONObject commandExecutedText = new JSONObject();
 
 		ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
-		StringBuffer commandFormatted = null;
 		int counter = 0; //Used to create an ID for display a Grid.
 		IconOmConnection omConnection = null;
 		Om om = null;
 		OmResultSet omResultSet;
-		String routedImsString = "";
 
 		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
 
@@ -116,44 +109,33 @@ public class OMServlet {
 			OmResultSet plexResultSet= cService.executeImsCommand("executeUserImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
 			Properties[] response = plexResultSet.getResponseProperties();
 
-			if (plexImsMbrs.isEmpty()) {
-				routedImsString = "*";
-			}
-			else {
-				for (int i = 0; i<response.length; i++) {
-					plexImsMbrs.add(response[i].getProperty("IMSMBR"));
-				}
 
-				if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
-					//throw exception, invalid datastores, are not inside the plex specified
-				} else {
-					StringBuilder sb = new StringBuilder();
-					for (String s : mcSpec.getDatastores()) {
-						sb.append(s);
-						sb.append(",");
-					}
-					sb.deleteCharAt(sb.length()-1);
-					routedImsString = sb.toString();
-				}
+			for (int i = 0; i<response.length; i++) {
+				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
 			}
+
+//			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
+//				OmException e = new OmException("Invalid datastores. Check your datastores are part of the: " + mcSpec.getImsPlexName());
+//				
+//			} 
+
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
-			commandFormatted = new StringBuffer(command).append(ROUTE_PREFIX).append(routedImsString).append(SUFFIX);
-			omResultSet= cService.executeImsCommand("executeUserImsCommand",commandFormatted.toString());
+			omResultSet= cService.executeImsCommand("executeUserImsCommand",command);
 
-//			//Build the columns to be used by the grid:
-//			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
-//			if(columnProperties != null){
-//				for(Properties p : columnProperties){
-//					JSONObject columnTitle = new JSONObject();
-//					String columnName = (String) p.get("SLBL");
-//					columnTitle.put("field", columnName);
-//					columnTitle.put("name", columnName);
-//					columns.add(columnTitle);
-//				}
-//			}
-			
-			
+			//			//Build the columns to be used by the grid:
+			//			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
+			//			if(columnProperties != null){
+			//				for(Properties p : columnProperties){
+			//					JSONObject columnTitle = new JSONObject();
+			//					String columnName = (String) p.get("SLBL");
+			//					columnTitle.put("field", columnName);
+			//					columnTitle.put("name", columnName);
+			//					columns.add(columnTitle);
+			//				}
+			//			}
+
+
 			//Responseproperties is the results as a map from connect api
 			Properties[] dataProperties = omResultSet.getResponseProperties();
 			if(dataProperties != null){
@@ -196,9 +178,11 @@ public class OMServlet {
 			message.put("omInteractionContexts", omInteractionContextsToJSON(om));
 			message.put("omMessageContext", omMessageContextToJSON(om));
 		}catch (OmConnectionException e) {
-			message.put("OmConnectionException", omConnectionExceptionToJSON(e));
+			JSONObject omConnectionExceptionJSON = omConnectionExceptionToJSON(e);
+			message.put("errorMessage", omConnectionExceptionJSON.get("message"));
 		} catch (OmException e) {
-			message.put("OmException", omExceptionToJSON(e));
+			JSONObject omExceptionJSON = omExceptionToJSON(e);
+			message.put("errorMessage", omExceptionJSON.get("message"));
 		}finally{
 			if(om != null){
 				om.releaseConnection();

@@ -16,7 +16,8 @@ public class LibertyApplication extends Application{
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setVersion("1.0.2");
 		beanConfig.setSchemes(new String[]{"http"});
-		beanConfig.setBasePath("localhost:9080/mc/services");
+		beanConfig.setHost("localhost:9080");
+		beanConfig.setBasePath("/mc/services");
 		beanConfig.setResourcePackage("rs");
 		beanConfig.setScan(true);
 		beanConfig.setTitle("Management Console for Zowe");
