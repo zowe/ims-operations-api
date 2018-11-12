@@ -27,27 +27,23 @@ public class RestUtils {
 	 * @return
 	 */
 	public static Response processCommandOutput(JSONObject result) {
-		JSONObject data = (JSONObject) result.get("commandExecutedGrid");
+		if (result != null) {
+			JSONObject message = (JSONObject) result.get("messages");
+			JSONArray executeUserImsCommand = (JSONArray) message.get("executeImsCommand");
+			JSONObject messageElement = (JSONObject) executeUserImsCommand.get(0);
+			String status = (String) messageElement.get("status");
 
-		if (data != null) {
-		//Parse the omMessageContext to determine what response to send back to client
-		JSONObject message = (JSONObject) result.get("message");
-		JSONObject omMessageContext = (JSONObject) message.get("omMessageContext");
-		JSONArray executeUserImsCommand = (JSONArray) omMessageContext.get("executeUserImsCommand");
-		JSONObject messageElement = (JSONObject) executeUserImsCommand.get(0);
-		String status = (String) messageElement.get("status");
-
-		if (status.equals("success")) {
-			logger.debug("IMS Command Successful");
-			return Response.ok(result.get("commandExecutedGrid"), MediaType.APPLICATION_JSON).build();
-		} else if (status.equals("warning")) {
-			logger.debug("OM returned non zero return code: " + data.toString() + " " + (String) messageElement.get("message"));
-			return Response.status(Status.BAD_REQUEST).entity(messageElement).build();
+			if (status.equals("success")) {
+				logger.debug("IMS Command Successful");
+				return Response.ok(result).build();
+			} else if (status.equals("warning")) {
+				logger.debug("OM returned non zero return code: " + result.toString());
+				return Response.status(Status.BAD_REQUEST).entity(result).build();
+			} else {
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
 		} else {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
-		} else {
-			return Response.status(Status.BAD_REQUEST).entity(result.get("message")).build();
+			return Response.status(Status.BAD_REQUEST).entity(result).build();
 		}
 	}
 }

@@ -29,6 +29,7 @@ import om.message.OmMessageContext;
 import om.result.OmResultSet;
 import om.service.CommandService;
 import om.services.Om;
+import zowe.mc.exceptions.RestException;
 
 @Stateless
 public class OMServlet {
@@ -73,9 +74,10 @@ public class OMServlet {
 	 * @param params
 	 * @param session
 	 * @return
+	 * @throws RestException 
 	 * @throws OmDatastoreException 
 	 */
-	public JSONObject executeUserImsCommand(String command, MCInteraction mcSpec)  //Make our own custom exception
+	public JSONObject executeImsCommand(String command, MCInteraction mcSpec) throws RestException  //Make our own custom exception
 	{
 
 
@@ -85,7 +87,6 @@ public class OMServlet {
 		//OM message contents sent back to UI
 		JSONObject message = new JSONObject();
 		JSONArray  data = new JSONArray(); 
-		JSONObject commandExecutedGrid = new JSONObject();
 		//JSONObject commandExecutedText = new JSONObject();
 
 		ArrayList<String> plexImsMbrs = new ArrayList<String>();
@@ -106,7 +107,7 @@ public class OMServlet {
 			//Figure out how to deal with versioning later.
 			CommandService cService = om.getCommandService();
 
-			OmResultSet plexResultSet= cService.executeImsCommand("executeUserImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
+			OmResultSet plexResultSet= cService.executeImsCommand("executeImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
 			Properties[] response = plexResultSet.getResponseProperties();
 
 
@@ -121,7 +122,7 @@ public class OMServlet {
 
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
-			omResultSet= cService.executeImsCommand("executeUserImsCommand",command);
+			omResultSet= cService.executeImsCommand("executeImsCommand",command);
 
 			//			//Build the columns to be used by the grid:
 			//			Properties[] columnProperties = omResultSet.getResponsePropertiesHeaders();
@@ -147,17 +148,7 @@ public class OMServlet {
 				}
 			}
 
-			//commandExecutedGrid.put("columns",columns);
-			commandExecutedGrid.put("data", data);
-			commandExecutedGrid.put("identity", "resourceId");
-
-			//This result is for displaying a dojo grid
-			result.put("commandExecutedGrid", commandExecutedGrid);
-
-			//This result is for displaying a result as formatted text
-			//commandExecutedText.put("commandRun",omResultSet.toStringAsTable());
-
-			//result.put("commandExecutedText", commandExecutedText);
+			result.put("data", data);
 
 			//Type of command Type1 or Type2
 			result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
@@ -175,20 +166,20 @@ public class OMServlet {
 				message.put("msgDataFromType2", msgData);
 			}
 
-			message.put("omInteractionContexts", omInteractionContextsToJSON(om));
-			message.put("omMessageContext", omMessageContextToJSON(om));
 		}catch (OmConnectionException e) {
 			JSONObject omConnectionExceptionJSON = omConnectionExceptionToJSON(e);
-			message.put("errorMessage", omConnectionExceptionJSON.get("message"));
+			result.put("messages", omConnectionExceptionJSON);
+			throw new RestException("Servlet has thrown exception", result);
 		} catch (OmException e) {
 			JSONObject omExceptionJSON = omExceptionToJSON(e);
-			message.put("errorMessage", omExceptionJSON.get("message"));
+			result.put("messages", omExceptionJSON);
+			throw new RestException("Servlet has thrown exception", result);
 		}finally{
 			if(om != null){
 				om.releaseConnection();
 			}
 		}
-		result.put("message", message);
+		result.put("messages", omMessageContextToJSON(om));
 		return result;
 	}
 
@@ -264,7 +255,10 @@ public class OMServlet {
 			omExceptionJson.put(COMMAND, e.getOmCommandExecuted());
 		}
 
-		return omExceptionJson;
+		JSONObject exception = new JSONObject();
+		exception.put("OmException", omExceptionJson);
+		
+		return exception;
 	}
 
 	/**
@@ -327,7 +321,11 @@ public class OMServlet {
 		omConnectionExceptionJson.put(MESSAGE, msg);
 		omConnectionExceptionJson.put(COMMAND, "N/A");
 
-		return omConnectionExceptionJson;
+		
+		JSONObject exception = new JSONObject();
+		exception.put("OmConnectionException", omConnectionExceptionJson);
+		
+		return exception;
 	}
 
 }

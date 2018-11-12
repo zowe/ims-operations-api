@@ -20,8 +20,8 @@ import io.swagger.annotations.ApiResponses;
 import json.java.JSONObject;
 
 @Stateless
-@Path("/region")
-@Api(tags = {"region"})
+@Path("/")
+@Api(tags = {"Region"})
 @CheckHeader
 public class Region {
 

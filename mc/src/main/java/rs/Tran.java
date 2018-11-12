@@ -6,6 +6,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,7 +28,7 @@ import zowe.mc.servlet.OMServlet;
 
 @Stateless
 @Path("/tran")
-@Api(tags = {"tran"})
+@Api(tags = {"Transaction"})
 @CheckHeader
 public class Tran {
 	
@@ -36,7 +37,7 @@ public class Tran {
 
 	private static final Logger logger = LoggerFactory.getLogger(Tran.class);
 	
-	@Path("/query")
+	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from QUERY TRAN IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Query Tran' IMS command and returns the output", response = JSONObject.class)
@@ -74,10 +75,10 @@ public class Tran {
 		return Response.ok().build();
 	}
 	
-	@Path("/create")
-	@PUT
+	@Path("/")
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(produces="application/json", value = "Return data from CREATE TRAN IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Create TRAN' IMS command and returns the output", response = JSONObject.class)
+	@ApiOperation(produces="application/json", value = "Return data from CREATE TRAN IMS command", httpMethod="POST", notes = "<br>This service submits a 'Create TRAN' IMS command and returns the output", response = JSONObject.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
 							@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
 							@ApiResponse(code = 500, message = "Internal Server Error")
