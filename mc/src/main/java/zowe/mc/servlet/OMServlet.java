@@ -22,7 +22,6 @@ import om.exception.OmConnectionException;
 import om.exception.OmException;
 import om.exception.message.OM_CONNECTION;
 import om.exception.message.OM_EXCEPTION;
-import om.message.IQEO;
 import om.message.OmCommandErrorMbr;
 import om.message.OmInteractionContext;
 import om.message.OmMessageContext;
@@ -115,10 +114,10 @@ public class OMServlet {
 				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
 			}
 
-//			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
-//				OmException e = new OmException("Invalid datastores. Check your datastores are part of the: " + mcSpec.getImsPlexName());
-//				
-//			} 
+			//			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
+			//				OmException e = new OmException("Invalid datastores. Check your datastores are part of the: " + mcSpec.getImsPlexName());
+			//				
+			//			} 
 
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
@@ -243,9 +242,12 @@ public class OMServlet {
 
 		//Log the exception since we have been called to process one.
 		if (logger.isErrorEnabled()) {
-			String logMsg = IQEO.IQEO0015E.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
-			logger.error(logMsg);
+			logger.error(e.getMessage());
 		}
+//		if (logger.isDebugEnabled()) {
+//			String logMsg = IQEO.IQEO0015E.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
+//			logger.error(logMsg);
+//		}
 
 		if (e != null) {
 			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
@@ -257,7 +259,7 @@ public class OMServlet {
 
 		JSONObject exception = new JSONObject();
 		exception.put("OmException", omExceptionJson);
-		
+
 		return exception;
 	}
 
@@ -305,12 +307,14 @@ public class OMServlet {
 
 		//Log the exception since we have been called to process one.
 		if (logger.isErrorEnabled()) {
-			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
-			logger.error(logMsg);
 			logger.error(e.getMessage());
 		}
+//		if (logger.isDebugEnabled()) {
+//			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
+//			logger.error(logMsg);
+//		}
 
-		String msg = "A";
+		String msg = "";
 		if (e != null) {
 
 			msg = e.getMessage();
@@ -321,10 +325,10 @@ public class OMServlet {
 		omConnectionExceptionJson.put(MESSAGE, msg);
 		omConnectionExceptionJson.put(COMMAND, "N/A");
 
-		
+
 		JSONObject exception = new JSONObject();
 		exception.put("OmConnectionException", omConnectionExceptionJson);
-		
+
 		return exception;
 	}
 

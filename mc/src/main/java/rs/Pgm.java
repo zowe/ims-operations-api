@@ -95,6 +95,7 @@ public class Pgm {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
 					.build();
 		} catch (RestException e) {
+			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
@@ -135,6 +136,7 @@ public class Pgm {
 		try {
 			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
 		} catch (RestException e) {
+			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		}
 
@@ -184,6 +186,7 @@ public class Pgm {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
 					.build();
 		} catch (RestException e) {
+			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
