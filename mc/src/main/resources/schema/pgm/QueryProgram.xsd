@@ -53,6 +53,18 @@
 				</xs:simpleType>
 			</xs:element>
 			
+			<xs:element name="SHOW3" minOccurs="0" maxOccurs="1">
+				<xs:simpleType>
+ 					<xs:annotation><xs:appinfo><jxb:typesafeEnumClass name="show3Options"/></xs:appinfo></xs:annotation>
+					    <xs:restriction base="xs:string">
+							<xs:enumeration value="DB" />
+							<xs:enumeration value="RTC" />
+							<xs:enumeration value="TRAN" />
+							<xs:enumeration value="WORK" />
+						</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			
 			<xs:element name="STATUS" minOccurs="0" maxOccurs="unbounded">
 				<xs:simpleType>
  					<xs:annotation><xs:appinfo><jxb:typesafeEnumClass name="statusOptions"/></xs:appinfo></xs:annotation>

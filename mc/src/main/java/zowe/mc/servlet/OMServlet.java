@@ -114,10 +114,10 @@ public class OMServlet {
 				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
 			}
 
-			//			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
-			//				OmException e = new OmException("Invalid datastores. Check your datastores are part of the: " + mcSpec.getImsPlexName());
-			//				
-			//			} 
+//			if (!plexImsMbrs.containsAll(mcSpec.getDatastores())) {
+//				throw new OmException("Invalid datastores. Check your datastores are part of the: " + mcSpec.getImsPlexName());
+//
+//			} 
 
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
@@ -244,10 +244,10 @@ public class OMServlet {
 		if (logger.isErrorEnabled()) {
 			logger.error(e.getMessage());
 		}
-//		if (logger.isDebugEnabled()) {
-//			String logMsg = IQEO.IQEO0015E.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
-//			logger.error(logMsg);
-//		}
+		//		if (logger.isDebugEnabled()) {
+		//			String logMsg = IQEO.IQEO0015E.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
+		//			logger.error(logMsg);
+		//		}
 
 		if (e != null) {
 			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
@@ -309,10 +309,10 @@ public class OMServlet {
 		if (logger.isErrorEnabled()) {
 			logger.error(e.getMessage());
 		}
-//		if (logger.isDebugEnabled()) {
-//			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
-//			logger.error(logMsg);
-//		}
+		//		if (logger.isDebugEnabled()) {
+		//			String logMsg = IQEO.IQEO0014E.msg(new Object[] {e.getConnectionType(), e.getEnvironmentId(), e.getImsplexName(), e.getConnectionReturnCode(), e.getConnectionReasonCode(), e.getErrorNumber()});
+		//			logger.error(logMsg);
+		//		}
 
 		String msg = "";
 		if (e != null) {
