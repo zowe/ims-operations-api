@@ -68,7 +68,7 @@ public class Pgm {
 			@ApiParam(allowMultiple = true, collectionFormat = "csv")
 			@QueryParam("names") String names, 
 			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
+			@ApiParam(allowMultiple = true, collectionFormat = "csv", example = "show1=DEFN,DOPT", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
 			@QueryParam("show1") String show, 
 			
 			@ApiParam(allowMultiple = false, allowableValues = "EXPORTNEEDED")
@@ -79,7 +79,7 @@ public class Pgm {
 			@QueryParam("show3") 
 			String show3,
 			
-			@ApiParam(allowMultiple = true, allowableValues = "DB_NOTAVL, IOPREV, LOCK, NOTINIT, STOSCHD, TRACE")
+			@ApiParam(allowMultiple = true, collectionFormat = "csv", example = "status=IOPREV,LOCK", allowableValues = "DB-NOTAVL, IOPREV, LOCK, NOTINIT, STOSCHD, TRACE")
 			@QueryParam("status") 
 			String status,
 			

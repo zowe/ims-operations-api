@@ -201,7 +201,9 @@ public class Type2CommandSerializable {
 				}
 
 			}
-			return cmd.toString();
+			String str = cmd.toString();
+			String newstr = str.replace('_', '-');
+			return newstr;
 
 		} catch (SecurityException e) {
 			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();

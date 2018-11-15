@@ -106,7 +106,7 @@ public class Tran {
 			allowableValues = "AFFIN, ALL, AOCMD, CLASS, CMTMODE, CONV, CPRI, DCLWA, DEFN, DEFNTYPE, DIRROUTE, EDITRTN, EDITUC, EMHBSZ,"
 					+ "EXPRTIME, FP, GLOBAL, IMSID, INQ, LCT, LOCAL, LPRI, MAXRGN, MODEL, MSGTYPE, MSNAME, NPRI, PARLIM, PGM, PLCT, PLCTTIME,"
 					+ "PSB, QCNT, RECOVER, REMOTE, RESP, RGC, SEGNO, SEGSZ, SERIAL, SPASZ, SPATRUNC, STATUS, TIMESTAMP, TRANSTAT, WFI",
-					example = "show1=CLASS, CONV, DEFN")
+					example = "show1=CLASS,CONV,DEFN")
 			@QueryParam("show1")
 			String show,
 
@@ -183,7 +183,12 @@ public class Tran {
 			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
-	public Response start(@QueryParam("names") List<String> name,
+	public Response start(
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@QueryParam("names") 
+			List<String> name,
+			
+			
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
@@ -200,7 +205,15 @@ public class Tran {
 			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
-	public Response create(@QueryParam("names") List<String> name, @QueryParam("set") List<String> set, @QueryParam("pgm") String pgm,
+	public Response create(
+			@QueryParam("names") 
+			List<String> name, 
+			
+			@QueryParam("set") 
+			List<String> set, 
+			
+			@QueryParam("pgm") 
+			String pgm,
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
