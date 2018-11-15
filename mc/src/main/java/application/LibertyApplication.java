@@ -29,6 +29,8 @@ public class LibertyApplication extends Application{
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet();
 		resources.add(rs.Pgm.class);
+		resources.add(rs.Tran.class);
+		resources.add(rs.Region.class);
 		resources.add(HeaderRequestFilter.class);
 		resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
 		resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);

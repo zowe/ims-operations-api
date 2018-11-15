@@ -6,7 +6,7 @@
 //
 
 
-package commands.create.pgm;
+package commands.create.tran;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRegistry;
 /**
  * This object contains factory methods for each 
  * Java content interface and Java element interface 
- * generated in the commands.create.pgm package. 
+ * generated in the commands.create.tran package. 
  * <p>An ObjectFactory allows you to programatically 
  * construct new instances of the Java representation 
  * for XML content. The Java representation of XML 
@@ -30,34 +30,34 @@ public class ObjectFactory {
 
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: commands.create.pgm
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: commands.create.tran
      * 
      */
     public ObjectFactory() {
     }
 
     /**
-     * Create an instance of {@link CreatePgm }
+     * Create an instance of {@link CreateTran }
      * 
      */
-    public CreatePgm createCreatePgm() {
-        return new CreatePgm();
+    public CreateTran createCreateTran() {
+        return new CreateTran();
     }
 
     /**
-     * Create an instance of {@link CreatePgm.SET }
+     * Create an instance of {@link CreateTran.SET }
      * 
      */
-    public CreatePgm.SET createCreatePgmSET() {
-        return new CreatePgm.SET();
+    public CreateTran.SET createCreateTranSET() {
+        return new CreateTran.SET();
     }
 
     /**
-     * Create an instance of {@link CreatePgm.LIKE }
+     * Create an instance of {@link CreateTran.LIKE }
      * 
      */
-    public CreatePgm.LIKE createCreatePgmLIKE() {
-        return new CreatePgm.LIKE();
+    public CreateTran.LIKE createCreateTranLIKE() {
+        return new CreateTran.LIKE();
     }
 
 }

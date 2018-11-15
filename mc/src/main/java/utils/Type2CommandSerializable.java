@@ -1,7 +1,7 @@
 /*********************************************************************************
  * Licensed Materials - Property of IBM
  * 5655-TAC
- * (C) Copyright IBM Corp. 2014 All Rights Reserved.
+ * (C) Copyright IBM Corp. 2018 All Rights Reserved.
  * US Government Users Restricted Rights - Use, duplication or
  * disclosure restricted by GSA ADP Schedule Contract with
  * IBM Corp.               
@@ -26,6 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import om.exception.OmCommandGenerationException;
 
+/**
+ * Parses Type2Command json objects into a string submittable IMS command
+ * @author jerryli
+ *
+ */
 public class Type2CommandSerializable {
 
 	public static final Logger logger = LoggerFactory.getLogger(Type2CommandSerializable.class);
@@ -213,7 +218,16 @@ public class Type2CommandSerializable {
 		}
 	}
 
-
+	
+	/**
+	 * Parses nested objects within the java command objects. For example, within CreatePgm, there is a SET object with it's own fields and values. 
+	 * Parses nested objects into a string.
+	 * Ex: CREATE PGM SET(GPSB(N))
+	 * @param prefix
+	 * @param object
+	 * @param cmd
+	 * @throws OmCommandGenerationException
+	 */
 	private void retrieveCommand(String prefix, Object object, StringBuilder cmd) throws OmCommandGenerationException {
 		if (prefix.equalsIgnoreCase("SET") && commandType.equals("DB")) {
 			cmd.append(retrieveSetSingle(object));
@@ -233,12 +247,16 @@ public class Type2CommandSerializable {
 		}else if (prefix.equalsIgnoreCase("SET") && commandType.equals("PGM")) {
 			cmd.append(retrieveSetSingle(object));
 			return;
+		}else if (prefix.equalsIgnoreCase("QCNT") && commandType.equals("TRAN")) {
+			cmd.append(retrieveQCNT(object));
+			return;
 		}
 
 		if (object != null) {
 			cmd.append(prefix).append(PARAOP).append(object).append(PARAC).append(SPACE);
 		}
 	}
+
 
 	/**
 	 * Loops through the list, getting all attributes and appends them
@@ -338,6 +356,54 @@ public class Type2CommandSerializable {
 //	}
 
 
+	private String retrieveQCNT(Object qcnt) throws OmCommandGenerationException {
+		StringBuilder cmd = new StringBuilder();
+		boolean setPopulated = false;
+		cmd.append("QCNT").append(PARAOP);
+		try {
+			Class<?> dbSET = qcnt.getClass();
+			Field[] fields = dbSET.getDeclaredFields();
+			for (Field field: fields) {
+				if (field.isAnnotationPresent(XmlElement.class)) {
+					Annotation[] annotations = field.getDeclaredAnnotations();
+					field.setAccessible(true);
+					for (Annotation annotateField: annotations) {
+						XmlElement anno = (XmlElement) annotateField;
+						Object obj = field.get(qcnt);
+						if (obj != null) {
+							setPopulated = true;
+							cmd.append(obj);
+							cmd.append(COMMA);
+						}
+					}
+				}
+			}
+		}
+		catch (SecurityException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		} catch (IllegalArgumentException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		} catch (IllegalAccessException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		}
+
+		if (!setPopulated) {
+			cmd.append(PARAC);
+			return cmd.toString();
+		}
+
+		format(cmd);
+		cmd.append(PARAC).append(SPACE);
+		return cmd.toString();
+	}
+	
+	
 	/**
 	 * Loops through SET objects retrieving all attributes. A SET can be thought of as a 
 	 * sub-subcommand, it in itself contains lists of attributes. 

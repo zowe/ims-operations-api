@@ -5,5 +5,5 @@
 // Generated on: 2018.11.14 at 03:33:25 PM PST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "commands/query/pgm", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package commands.query.pgm;
+@javax.xml.bind.annotation.XmlSchema(namespace = "commands/create/tran")
+package commands.create.tran;

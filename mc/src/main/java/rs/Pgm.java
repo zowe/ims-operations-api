@@ -69,7 +69,7 @@ public class Pgm {
 			@QueryParam("names") String names, 
 			
 			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
-			@QueryParam("show") String show, 
+			@QueryParam("show1") String show, 
 			
 			@ApiParam(allowMultiple = false, allowableValues = "EXPORTNEEDED")
 			@QueryParam("show2") 
@@ -227,7 +227,49 @@ public class Pgm {
 			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
-	public Response create(@QueryParam("names") List<String> name, @QueryParam("route") List<String> imsmbr, @QueryParam("set") List<String> set,
+	public Response create(
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@QueryParam("names") 
+			String names, 
+			
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@QueryParam("route") 
+			String imsmbr, 
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("bmptype") 
+			String bmptype,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("dopt") 
+			String dopt,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, E")
+			@QueryParam("fp") 
+			String fp,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("gpsb") 
+			String gpsb,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "ASSEM, COBOL, JAVA, PASCAL, PLI")
+			@QueryParam("lang") 
+			String lang,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("resident") 
+			String resident,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "PARALLEL, SERIAL")
+			@QueryParam("schdtype") 
+			String schdtype,
+			
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("transtat") 
+			String transtat,
+			
+			
+			
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
@@ -238,15 +280,49 @@ public class Pgm {
 		mcSpec.setImsPlexName(plex);
 
 		CreatePgm pgm = new CreatePgm();
-		pgm.getNAME().addAll(name);
+		if (names != null) {
+			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+			pgm.getNAME().addAll(nameList);
+		}
+		
+		CreatePgm.SET set = new CreatePgm.SET();
+		if (bmptype != null) {
+			set.setBMPTYPE(CreatePgm.SET.BmptypeOptions.fromValue(bmptype));
+		}
+		if (dopt != null) {
+			set.setDOPT(CreatePgm.SET.DoptOptions.fromValue(dopt));
+		}
+		if (fp != null) {
+			set.setFP(CreatePgm.SET.FpOptions.fromValue(fp));
+		}
+		if (gpsb != null) {
+			set.setGPSB(CreatePgm.SET.GpsbOptions.fromValue(gpsb));
+		}
+		if (lang != null) {
+			set.setLANG(CreatePgm.SET.LangOptions.fromValue(lang));
+		}
+		if (resident != null) {
+			set.setRESIDENT(CreatePgm.SET.ResidentOptions.fromValue(resident));
+		}
+		if (schdtype != null) {
+			set.setSCHDTYPE(CreatePgm.SET.SchdtypeOptions.fromValue(schdtype));
+		} 
+		if (transtat != null) {
+			set.setTRANSTAT(CreatePgm.SET.TranstatOptions.fromValue(transtat));
+		}
+		
+		pgm.setSET(set);
 
 		Type2Command type2Command = new Type2Command();
 		type2Command.setCreatePgm(pgm);
 		type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
 		type2Command.setResource(Type2Command.ResourceOptions.PGM);
-		type2Command.getRoute().addAll(imsmbr);
 
-		mcSpec.getDatastores().addAll(imsmbr);
+		if (imsmbr != null) {
+			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+			type2Command.getRoute().addAll(imsmbrList);
+			mcSpec.getDatastores().addAll(imsmbrList);
+		}
 
 		JSONObject result = new JSONObject();
 

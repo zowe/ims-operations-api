@@ -35,7 +35,7 @@
 	        xmlns:urtcns="/update/rtc"
             xmlns:urtcdns="/update/rtcdesc"
 	        xmlns:qrtcdns="/query/rtcdesc"
-	        xmlns:qtrns="/query/tran"
+	        xmlns:qtrns="commands/query/tran"
 			xmlns:utrns="/update/tran"
 	        xmlns:utrdns="/update/trandesc"
 	        xmlns:qtrdns="/query/trandesc"
@@ -51,7 +51,7 @@
 	        xmlns:drtcns="/delete/rtc"
 	        xmlns:crtcdns="/create/rtcdesc"
 	        xmlns:drtcdns="/delete/rtcdesc"
-			xmlns:ctrns="/create/tran"
+			xmlns:ctrns="commands/create/tran"
 	        xmlns:dtrns="/delete/tran"
 	        xmlns:ctrdns="/create/trandesc"
 	        xmlns:dtrdns="/delete/trandesc"
@@ -107,8 +107,8 @@
 	<xs:import schemaLocation="../rtc/UpdateRoutingCode.xsd" namespace="/update/rtc"/>
 	<xs:import schemaLocation="../rtcdesc/UpdateRtcDesc.xsd" namespace="/update/rtcdesc"/>
 	<xs:import schemaLocation="../rtcdesc/QueryRtcDesc.xsd" namespace="/query/rtcdesc"/>
-	<xs:import schemaLocation="../tran/QueryTransaction.xsd" namespace="/query/tran"/>
-	<xs:import schemaLocation="../tran/UpdateTransaction.xsd" namespace="/update/tran"/>
+	--><xs:import schemaLocation="../tran/QueryTransaction.xsd" namespace="commands/query/tran"/>
+	<!-- <xs:import schemaLocation="../tran/UpdateTransaction.xsd" namespace="/update/tran"/>
 	<xs:import schemaLocation="../trandesc/QueryTranDesc.xsd" namespace="/query/trandesc"/>
 	<xs:import schemaLocation="../trandesc/UpdateTranDesc.xsd" namespace="/update/trandesc"/>
 	<xs:import schemaLocation="../db/CreateDatabase.xsd" namespace="/create/db"/>
@@ -117,8 +117,8 @@
 	<!-- <xs:import schemaLocation="../pgm/DeleteProgram.xsd" namespace="/delete/pgm"/>
 	<xs:import schemaLocation="../rtc/CreateRoutingCode.xsd" namespace="/create/rtc"/>
 	<xs:import schemaLocation="../rtc/DeleteRoutingcode.xsd" namespace="/delete/rtc"/>
-	<xs:import schemaLocation="../tran/CreateTransaction.xsd" namespace="/create/tran"/>
-	<xs:import schemaLocation="../tran/DeleteTransaction.xsd" namespace="/delete/tran"/>
+	--><xs:import schemaLocation="../tran/CreateTransaction.xsd" namespace="commands/create/tran"/>
+	<!-- <xs:import schemaLocation="../tran/DeleteTransaction.xsd" namespace="/delete/tran"/>
 	<xs:import schemaLocation="../trandesc/CreateTranDesc.xsd" namespace="/create/trandesc"/>
 	<xs:import schemaLocation="../trandesc/DeleteTranDesc.xsd" namespace="/delete/trandesc"/>
 	<xs:import schemaLocation="../pgmdesc/CreatePgmDesc.xsd" namespace="/create/pgmdesc"/>
@@ -175,8 +175,8 @@
 				<xs:element name="QueryRtcDesc" type="qrtcdns:QueryRtcDesc" minOccurs="0" maxOccurs="1" />
 		        <xs:element name="UpdateRtcDesc" type="urtcdns:UpdateRtcDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="UpdateTran" type="utrns:UpdateTran" minOccurs="0" maxOccurs="1" />
-				<xs:element name="QueryTran" type="qtrns:QueryTran" minOccurs="0" maxOccurs="1" />
-		        <xs:element name="UpdateTranDesc" type="utrdns:UpdateTranDesc" minOccurs="0" maxOccurs="1" />
+				--><xs:element name="QueryTran" type="qtrns:QueryTran" minOccurs="0" maxOccurs="1" />
+		        <!-- <xs:element name="UpdateTranDesc" type="utrdns:UpdateTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="QueryTranDesc" type="qtrdns:QueryTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="CreateDb" type="cdbns:CreateDb" minOccurs="0" maxOccurs="1" />
 				<xs:element name="DeleteDb" type="ddbns:DeleteDb" minOccurs="0" maxOccurs="1" /> -->
@@ -184,8 +184,8 @@
 				<!--  <xs:element name="DeletePgm" type="dpgmns:DeletePgm" minOccurs="0" maxOccurs="1" />
 				<xs:element name="CreateRtc" type="crtcns:CreateRtc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="DeleteRtc" type="drtcns:DeleteRtc" minOccurs="0" maxOccurs="1" />
-				<xs:element name="CreateTran" type="ctrns:CreateTran" minOccurs="0" maxOccurs="1" />
-				<xs:element name="DeleteTran" type="dtrns:DeleteTran" minOccurs="0" maxOccurs="1" />
+				--><xs:element name="CreateTran" type="ctrns:CreateTran" minOccurs="0" maxOccurs="1" />
+				<!-- <xs:element name="DeleteTran" type="dtrns:DeleteTran" minOccurs="0" maxOccurs="1" />
 				<xs:element name="CreateTranDesc" type="ctrdns:CreateTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="DeleteTranDesc" type="dtrdns:DeleteTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="CreatePgmDesc" type="cpgmdns:CreatePgmDesc" minOccurs="0" maxOccurs="1" />
