@@ -25,17 +25,38 @@ import json.java.JSONObject;
 @CheckHeader
 public class Region {
 
-	
-	
+
+
 	@Path("/stop")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from STOP REGION IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Stop Region' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-							@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
-							@ApiResponse(code = 500, message = "Internal Server Error")
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
+			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
-	public Response stop(@QueryParam("jobnames") List<String> name,
+	public Response stop(
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("regNum") 
+			Integer regNumber,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("jobnames") 
+			List<String> name,
+
+			@ApiParam(allowMultiple = false, value = "abnormal termination of specified transaction")
+			@QueryParam("abdump") 
+			String abdump,
+
+			@ApiParam(allowMultiple = false, value = "stops a message processing program in WFI mode from processing within the specified region")
+			@QueryParam("transaction") 
+			String transaction,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("cancel") 
+			boolean cancel,
+
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
@@ -43,9 +64,9 @@ public class Region {
 
 		return Response.ok().build();
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 }

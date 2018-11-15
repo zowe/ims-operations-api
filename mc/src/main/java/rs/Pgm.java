@@ -60,15 +60,15 @@ public class Pgm {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from Query PGM IMS command", httpMethod="GET", notes = "<br>This service submits a 'Query PGM' IMS command and returns the output.", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
 	public Response query(
 			@ApiParam(allowMultiple = true, collectionFormat = "csv")
 			@QueryParam("names") String names, 
 			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv", example = "show1=DEFN,DOPT", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
+			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
 			@QueryParam("show1") String show, 
 			
 			@ApiParam(allowMultiple = false, allowableValues = "EXPORTNEEDED")
@@ -79,7 +79,7 @@ public class Pgm {
 			@QueryParam("show3") 
 			String show3,
 			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv", example = "status=IOPREV,LOCK", allowableValues = "DB-NOTAVL, IOPREV, LOCK, NOTINIT, STOSCHD, TRACE")
+			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "DB-NOTAVL, IOPREV, LOCK, NOTINIT, STOSCHD, TRACE")
 			@QueryParam("status") 
 			String status,
 			
@@ -162,8 +162,8 @@ public class Pgm {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from START PGM IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Start PGM' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
 	public Response start(
@@ -223,8 +223,8 @@ public class Pgm {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from CREATE PGM IMS command", httpMethod="POST", notes = "<br>This service submits a 'Create PGM' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
 	public Response create(
@@ -235,6 +235,14 @@ public class Pgm {
 			@ApiParam(allowMultiple = true, collectionFormat = "csv")
 			@QueryParam("route") 
 			String imsmbr, 
+			
+			@ApiParam(allowMultiple = false)
+			@QueryParam("desc")
+			String desc,
+			
+			@ApiParam(allowMultiple = false)
+			@QueryParam("rsc")
+			String rsc,
 			
 			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
 			@QueryParam("bmptype") 

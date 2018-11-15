@@ -54,8 +54,8 @@ public class Tran {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from QUERY TRAN IMS command", httpMethod="GET", notes = "<br>This service submits a 'Query Tran' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 400, message = "Error connecting to IMS"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
@@ -64,7 +64,7 @@ public class Tran {
 			@QueryParam("names") 
 			String names, 
 
-			@ApiParam(allowMultiple = true, example = "class=3&class=4")
+			@ApiParam(allowMultiple = true)
 			@QueryParam("class") 
 			List<Integer> clazz,
 
@@ -81,8 +81,7 @@ public class Tran {
 			String imsmbr, 
 
 			@ApiParam(allowMultiple = true, collectionFormat = "csv", 
-			allowableValues = "AFFIN, BAL, CONV, CPIC, DYN, IOPREV, LCK, NOTINIT, QERR, QSTP, SUSPEND, STOQ, STOSCHD, TRACE, USTO",
-			example = "status=AFFIN,CPIC,QERR")
+			allowableValues = "AFFIN, BAL, CONV, CPIC, DYN, IOPREV, LCK, NOTINIT, QERR, QSTP, SUSPEND, STOQ, STOSCHD, TRACE, USTO")
 			@QueryParam("status")
 			String status,
 
@@ -105,8 +104,7 @@ public class Tran {
 			@ApiParam(allowMultiple = true, collectionFormat="csv", 
 			allowableValues = "AFFIN, ALL, AOCMD, CLASS, CMTMODE, CONV, CPRI, DCLWA, DEFN, DEFNTYPE, DIRROUTE, EDITRTN, EDITUC, EMHBSZ,"
 					+ "EXPRTIME, FP, GLOBAL, IMSID, INQ, LCT, LOCAL, LPRI, MAXRGN, MODEL, MSGTYPE, MSNAME, NPRI, PARLIM, PGM, PLCT, PLCTTIME,"
-					+ "PSB, QCNT, RECOVER, REMOTE, RESP, RGC, SEGNO, SEGSZ, SERIAL, SPASZ, SPATRUNC, STATUS, TIMESTAMP, TRANSTAT, WFI",
-					example = "show1=CLASS,CONV,DEFN")
+					+ "PSB, QCNT, RECOVER, REMOTE, RESP, RGC, SEGNO, SEGSZ, SERIAL, SPASZ, SPATRUNC, STATUS, TIMESTAMP, TRANSTAT, WFI")
 			@QueryParam("show1")
 			String show,
 
@@ -180,15 +178,30 @@ public class Tran {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from START TRAN IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Start TRAN' IMS command and returns the output", response = JSONObject.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
 	public Response start(
 			@ApiParam(allowMultiple = true, collectionFormat = "csv")
 			@QueryParam("names") 
 			List<String> name,
-			
-			
+
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@QueryParam("route") 
+			String imsmbr, 
+
+			@ApiParam(allowMultiple = true)
+			@QueryParam("class") 
+			List<Integer> clazz,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("affinity") 
+			boolean affinity,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("all") 
+			boolean all,
+
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
@@ -201,19 +214,164 @@ public class Tran {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(produces="application/json", value = "Return data from CREATE TRAN IMS command", httpMethod="POST", notes = "<br>This service submits a 'Create TRAN' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Om returned non zero return code"),
+	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
+			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
 			@ApiResponse(code = 500, message = "Internal Server Error")
 	})
 	public Response create(
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
 			@QueryParam("names") 
-			List<String> name, 
-			
-			@QueryParam("set") 
-			List<String> set, 
-			
-			@QueryParam("pgm") 
+			List<String> names, 
+
+			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@QueryParam("route") 
+			String imsmbr, 
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("desc")
+			String desc,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("rsc")
+			String rsc,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, CMD, TRAN, Y, -1")
+			@QueryParam("aocmd") 
+			String aocmd,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[1,999]")
+			@QueryParam("class")
+			Integer clazz,
+
+			@ApiParam(allowMultiple = false, allowableValues = "SNGL, MULT")
+			@QueryParam("cmtmode")
+			String cmtmode,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("conv")
+			String conv,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("dclwa")
+			String dclwa,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("dirroute")
+			String dirroute,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("editrtn")
+			String editrtn,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("edituc")
+			String edituc,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,30720]")
+			@QueryParam("emhbsz")
+			Integer emhbsz,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,65535]")
+			@QueryParam("exprtime")
+			Integer exprtime,
+
+			@ApiParam(allowMultiple = false, allowableValues = "E, N, P")
+			@QueryParam("fp")
+			String fp,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("inq")
+			String inq,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[1,65535]")
+			@QueryParam("lct")
+			Integer lct,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,14]")
+			@QueryParam("lpri")
+			Integer lpri,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0, infinity]")
+			@QueryParam("maxrgn")
+			Integer maxrgn,
+
+			@ApiParam(allowMultiple = false, allowableValues = "MULTSEG, SNGLSEG")
+			@QueryParam("msgtype")
+			String msgtype,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("msname")
+			String msname,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,14]")
+			@QueryParam("npri")
+			Integer npri,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,65535]")
+			@QueryParam("parlim")
+			Integer parlim,
+
+			@ApiParam(allowMultiple = false)
+			@QueryParam("pgm")
 			String pgm,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,65535]")
+			@QueryParam("plct")
+			Integer plct,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[1,6553500]")
+			@QueryParam("plcttime")
+			Integer plcttime,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("recover")
+			String recover,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("remote")
+			String remote,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("resp")
+			String resp,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,65535]")
+			@QueryParam("segno")
+			Integer segno,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[0,65535]")
+			@QueryParam("segsz")
+			Integer segsz,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("serial")
+			String serial,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[1,2036]")
+			@QueryParam("sidl")
+			Integer sidl,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[1,2036]")
+			@QueryParam("sidr")
+			Integer sidr,
+
+			@ApiParam(allowMultiple = false, allowableValues = "range[16,32767]")
+			@QueryParam("spasz")
+			Integer spasz,
+
+			@ApiParam(allowMultiple = false, allowableValues = "S, R")
+			@QueryParam("spatrunc")
+			String spatrunc,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("transtat")
+			String transtat,
+
+			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+			@QueryParam("wfi")
+			String wfi,
+
+
 			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
