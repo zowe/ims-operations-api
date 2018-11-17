@@ -376,7 +376,8 @@ public class QueryPgm {
         TIMESTAMP,
         TRAN,
         TRANSTAT,
-        WORK;
+        WORK,
+        EXPORTNEEDED;
 
         public String value() {
             return name();

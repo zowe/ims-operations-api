@@ -23,17 +23,22 @@ import org.slf4j.LoggerFactory;
 import annotations.CheckHeader;
 import commands.create.pgm.CreatePgm;
 import commands.query.pgm.QueryPgm;
-import commands.query.pgm.QueryPgm.Show2Options;
-import commands.query.pgm.QueryPgm.Show3Options;
 import commands.query.pgm.QueryPgm.ShowOptions;
 import commands.query.pgm.QueryPgm.StatusOptions;
 import commands.type2.Type2Command;
 import icon.helpers.MCInteraction;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
 import utils.Type2CommandSerializable;
@@ -45,9 +50,17 @@ import zowe.mc.servlet.OMServlet;
  * @author jerryli
  *
  */
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Management Console for Zowe",
+				version = "1.0.0",
+				description = "Management Console for Zowe allows users to use RESTFul APIs to submit IMS commmands"),
+		tags = {@Tag(name="Program"), @Tag(name="Region")},
+		servers = {@Server(url = "http://localhost:9080/mc/")}
+)
 @Stateless
 @Path("/pgm")
-@Api(tags = {"Program"})
+@Tag(name = "Program")
 @CheckHeader
 public class Pgm {
 
@@ -59,37 +72,36 @@ public class Pgm {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(produces="application/json", value = "Return data from Query PGM IMS command", httpMethod="GET", notes = "<br>This service submits a 'Query PGM' IMS command and returns the output.", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@Operation(summary = "Returns data from a 'QUERY PGM' IMS command",
+	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "400", description = "Request Error"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
-			@QueryParam("names") String names, 
 			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "ALL, BMPTYPE, DEFN, DEFNTYPE, DOPT, FP, GLOBAL, IMSID, GPSB, LANG, LOCAL, MODEL, RESIDENT, SCHDTYPE, STATUS, TIMESTAMP, TRANSTAT")
-			@QueryParam("show1") String show, 
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@QueryParam("names") 
+			String names, 
+
+			@Parameter(style = ParameterStyle.FORM, 
+							array=@ArraySchema(schema = 
+									@Schema(maxLength = 8, allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
+											"IMSID", "GPSB", "LANG", "LOCAL", "MODEL", "RESIDENT", "SCHDTYPE", "STATUS", 
+												"TIMESTAMP", "TRANSTAT", "EXPORTNEEDED", "DB", "RTC", "TRAN", "WORK"})))
+			@QueryParam("show") String show, 
 			
-			@ApiParam(allowMultiple = false, allowableValues = "EXPORTNEEDED")
-			@QueryParam("show2") 
-			String show2,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "DB, RTC, TRAN, WORK")
-			@QueryParam("show3") 
-			String show3,
-			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv", allowableValues = "DB-NOTAVL, IOPREV, LOCK, NOTINIT, STOSCHD, TRACE")
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+					@Schema(maxLength = 8, allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})))
 			@QueryParam("status") 
 			String status,
-			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr, 
-			
-			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
-			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -110,12 +122,6 @@ public class Pgm {
 			}
 			pgm.getSHOW().addAll(showOptions);
 		}
-		if (show2 != null) {
-			pgm.setSHOW2(Show2Options.fromValue(show2));
-		}
-		if (show3 != null) {
-			pgm.setSHOW3(Show3Options.fromValue(show3));
-		}
 		
 		ArrayList<StatusOptions> statusOptions = new ArrayList();
 		if (status != null) {
@@ -125,7 +131,7 @@ public class Pgm {
 			}
 			pgm.getSTATUS().addAll(statusOptions);
 		}
-		
+
 
 		Type2Command type2Command = new Type2Command();
 		type2Command.setQueryPgm(pgm);
@@ -161,23 +167,23 @@ public class Pgm {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(produces="application/json", value = "Return data from START PGM IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Start PGM' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@Operation(summary = "Returns data from a 'START PGM' IMS command",
+	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "400", description = "Request Error"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("name") 
 			String name,
-			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr,
-			
-			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
-			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -192,7 +198,7 @@ public class Pgm {
 		sb.append(")");
 		sb.append(" OPTION=AOPOUTPUT");
 		sb.append(")");
-		
+
 		if (imsmbr != null) {
 			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
 			mcSpec.getDatastores().addAll(imsmbrList);
@@ -222,65 +228,63 @@ public class Pgm {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(produces="application/json", value = "Return data from CREATE PGM IMS command", httpMethod="POST", notes = "<br>This service submits a 'Create PGM' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
+	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "400", description = "Request Error"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names, 
-			
-			@ApiParam(allowMultiple = true, collectionFormat = "csv")
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
-			
-			@ApiParam(allowMultiple = false)
+
+			@Parameter()
 			@QueryParam("desc")
 			String desc,
-			
-			@ApiParam(allowMultiple = false)
+
+			@Parameter()
 			@QueryParam("rsc")
 			String rsc,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("bmptype") 
 			String bmptype,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("dopt") 
 			String dopt,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, E")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "E"}))
 			@QueryParam("fp") 
 			String fp,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("gpsb") 
 			String gpsb,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "ASSEM, COBOL, JAVA, PASCAL, PLI")
+
+			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}))
 			@QueryParam("lang") 
 			String lang,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("resident") 
 			String resident,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "PARALLEL, SERIAL")
+
+			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}))
 			@QueryParam("schdtype") 
 			String schdtype,
-			
-			@ApiParam(allowMultiple = false, allowableValues = "N, Y")
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("transtat") 
 			String transtat,
-			
-			
-			
-			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
-			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -292,7 +296,7 @@ public class Pgm {
 			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
 			pgm.getNAME().addAll(nameList);
 		}
-		
+
 		CreatePgm.SET set = new CreatePgm.SET();
 		if (bmptype != null) {
 			set.setBMPTYPE(CreatePgm.SET.BmptypeOptions.fromValue(bmptype));
@@ -318,7 +322,7 @@ public class Pgm {
 		if (transtat != null) {
 			set.setTRANSTAT(CreatePgm.SET.TranstatOptions.fromValue(transtat));
 		}
-		
+
 		pgm.setSET(set);
 
 		Type2Command type2Command = new Type2Command();

@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import icon.helpers.MCInteraction;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import json.java.JSONArray;
 import json.java.JSONObject;
 import om.connection.IconOmConnection;
@@ -30,6 +33,12 @@ import om.service.CommandService;
 import om.services.Om;
 import zowe.mc.exceptions.RestException;
 
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Management Console for Zowe",
+				version = "1.0.0",
+				description = "Management Console for Zowe allows users to use RESTFul APIs to submit IMS commmands"),
+				servers = {@Server(url = "http://localhost:9080/mc/")})
 @Stateless
 public class OMServlet {
 

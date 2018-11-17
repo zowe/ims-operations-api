@@ -1,40 +1,50 @@
 package application;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import javax.servlet.ServletConfig;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Context;
+
+import org.glassfish.jersey.server.ResourceConfig;
 
 import filters.HeaderRequestFilter;
-import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.models.OpenAPI;
+//import rs.Tran;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.License;
+import rs.Pgm;
+import rs.Region;
 
-@ApplicationPath("/services/*")
-public class LibertyApplication extends Application{
 
-	public LibertyApplication() {
-		BeanConfig beanConfig = new BeanConfig();
-		beanConfig.setVersion("1.0.2");
-		beanConfig.setSchemes(new String[]{"http"});
-		beanConfig.setHost("localhost:9080");
-		beanConfig.setBasePath("/mc/services");
-		beanConfig.setResourcePackage("rs");
-		beanConfig.setScan(true);
-		beanConfig.setTitle("Management Console for Zowe");
-		beanConfig.setVersion("1.0.0");
-		beanConfig.setDescription("Restful API for submitting IMS commands");
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Management Console for Zowe",
+				version = "1.0.0",
+				description = "Management Console for Zowe allows users to use RESTFul APIs to submit IMS commmands"),
+		tags = {@Tag(name="Program"), @Tag(name="Region")},
+		servers = {@Server(url = "http://localhost:9080/mc/")}
+)
+@ApplicationPath("/services/")
+public class LibertyApplication extends ResourceConfig{
+
+	public LibertyApplication(@Context ServletConfig servletConfig) {
+		register(OpenApiResource.class);
+		register(AcceptHeaderOpenApiResource.class);
+		register(Region.class);
+		register(Pgm.class);
+		register(HeaderRequestFilter.class);
 	}
 
-	@Override
-	public Set<Class<?>> getClasses() {
-		Set<Class<?>> resources = new HashSet();
-		resources.add(rs.Pgm.class);
-		resources.add(rs.Tran.class);
-		resources.add(rs.Region.class);
-		resources.add(HeaderRequestFilter.class);
-		resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-		resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-
-		return resources;
-	}
+	//	@Override
+	//	public Set<Class<?>> getClasses() {
+	//		 return Stream.of(Region.class, HeaderRequestFilter.class, 
+	//				 OpenApiResource.class, AcceptHeaderOpenApiResource.class).collect(Collectors.toSet());
+	//		    
+	//
+	//	}
 }

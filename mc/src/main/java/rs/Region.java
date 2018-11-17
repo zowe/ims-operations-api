@@ -1,7 +1,5 @@
 package rs;
 
-import java.util.List;
-
 import javax.ejb.Stateless;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -12,54 +10,57 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import annotations.CheckHeader;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import json.java.JSONObject;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Stateless
-@Path("/")
-@Api(tags = {"Region"})
+@Path("/region")
+@Tag(name = "Region")
 @CheckHeader
 public class Region {
 
 
 
-	@Path("/stop")
+	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(produces="application/json", value = "Return data from STOP REGION IMS command", httpMethod="PUT", notes = "<br>This service submits a 'Stop Region' IMS command and returns the output", response = JSONObject.class)
-	@ApiResponses(value = { @ApiResponse(code = 200, response = JSONObject.class, message = "Successful Operation"),
-			@ApiResponse(code = 400, response = JSONObject.class, message = "Request Error"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@Operation(summary = "Return data from 'STOP REGION' IMS command",
+			responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+					@ApiResponse(responseCode = "200", description = "Successful Request"),
+					@ApiResponse(responseCode = "400", description = "Request Error"),
+					@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response stop(
 
-			@ApiParam(allowMultiple = false)
+			@Parameter(description = "Region Number Identifier")
 			@QueryParam("regNum") 
 			Integer regNumber,
 
-			@ApiParam(allowMultiple = false)
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("jobnames") 
-			List<String> name,
+			String names,
 
-			@ApiParam(allowMultiple = false, value = "abnormal termination of specified transaction")
+			@Parameter(description = "Specify a transaction to abnormally terminate")
 			@QueryParam("abdump") 
 			String abdump,
 
-			@ApiParam(allowMultiple = false, value = "stops a message processing program in WFI mode from processing within the specified region")
+			@Parameter(description = "Specify a program in WFI mode to stop its message processing within the specified region")
 			@QueryParam("transaction") 
 			String transaction,
 
-			@ApiParam(allowMultiple = false)
+			@Parameter()
 			@QueryParam("cancel") 
 			boolean cancel,
 
-			@ApiParam(value = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
-			@ApiParam(value = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@ApiParam(value = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
 
 
 		return Response.ok().build();
