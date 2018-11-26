@@ -57,7 +57,7 @@ import zowe.mc.servlet.OMServlet;
 				description = "Management Console for Zowe allows users to use RESTFul APIs to submit IMS commmands"),
 		tags = {@Tag(name="Program"), @Tag(name="Region")},
 		servers = {@Server(url = "http://localhost:9080/mc/")}
-)
+		)
 @Stateless
 @Path("/pgm")
 @Tag(name = "Program")
@@ -78,20 +78,23 @@ public class Pgm {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
-			
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+					description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
 			@Parameter(style = ParameterStyle.FORM, 
-							array=@ArraySchema(schema = 
-									@Schema(maxLength = 8, allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
-											"IMSID", "GPSB", "LANG", "LOCAL", "MODEL", "RESIDENT", "SCHDTYPE", "STATUS", 
-												"TIMESTAMP", "TRANSTAT", "EXPORTNEEDED", "DB", "RTC", "TRAN", "WORK"})))
+			array=@ArraySchema(schema = 
+			@Schema(maxLength = 8, allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
+					"IMSID", "GPSB", "LANG", "LOCAL", "MODEL", "RESIDENT", "SCHDTYPE", "STATUS", 
+					"TIMESTAMP", "TRANSTAT", "EXPORTNEEDED", "DB", "RTC", "TRAN", "WORK"})), 
+					description = "Specifies the program output fields to be returned. The program name is always returned, along with the name of the IMS™ that created the output, the region type, and the completion code.")
 			@QueryParam("show") String show, 
-			
+
 			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
-					@Schema(maxLength = 8, allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})))
+			@Schema(maxLength = 8, allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})),
+					description = "Selects programs for display that possess at least one of the specified program status. This selection allows for additional filtering by program status. The program status is returned as output, even if the SHOW(STATUS) was not specified.")
 			@QueryParam("status") 
 			String status,
 
@@ -122,7 +125,7 @@ public class Pgm {
 			}
 			pgm.getSHOW().addAll(showOptions);
 		}
-		
+
 		ArrayList<StatusOptions> statusOptions = new ArrayList();
 		if (status != null) {
 			List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
@@ -173,9 +176,11 @@ public class Pgm {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
-			@QueryParam("name") 
-			String name,
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+					description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
+			@QueryParam("names") 
+			String names, 
+
 
 			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
@@ -190,8 +195,8 @@ public class Pgm {
 		mcSpec.setPort(Integer.parseInt(port));
 		mcSpec.setImsPlexName(plex);
 		StringBuilder sb = new StringBuilder("CMD((STA PGM");
-		if (name != null) {
-			sb.append(" " + name);
+		if (names != null) {
+			sb.append(" " + names);
 		} else {
 			sb.append(" ALL");
 		}
@@ -234,51 +239,59 @@ public class Pgm {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+				description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
+
 
 			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
-			@Parameter()
+			@Parameter(description = "Specifies the name of the descriptor to use as a model to define this resource.")
 			@QueryParam("desc")
 			String desc,
 
-			@Parameter()
+			@Parameter(description = "Specifies the name of the resource to use as a model to define this resource.")
 			@QueryParam("rsc")
 			String rsc,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), 
+				description = "BMP type option. Specifies whether the program executes in a BMP type region or not. A BMP type region can be a BMP region or a JBP region. PSBs scheduled by DB2® stored procedures, by programs running under WebSphere® Application Server, and by other users of the ODBA interface may be defined with BMPTYPE Y or N.")
 			@QueryParam("bmptype") 
 			String bmptype,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies the dynamic option.")
 			@QueryParam("dopt") 
 			String dopt,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "E"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "E"}), description = "Specifies the Fast Path option.")
 			@QueryParam("fp") 
 			String fp,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies the generated PSB option.")
 			@QueryParam("gpsb") 
 			String gpsb,
 
-			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}))
+			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}), 
+					description = "Specifies the language interface of the program for a GPSB, or defines a DOPT(Y) program as using the Java™ language.\n" + 
+							"In order to define a DOPT program using the Java language, the program must be defined with DOPT(Y) and LANG(JAVA). DOPT PSBs are not loaded at IMS restart, they are loaded every time the program is scheduled. When the program is scheduled for the first time, IMS does not know the language until after the program is scheduled in a region and the PSB is loaded. Unless LANG(JAVA) is defined for the DOPT(Y) program, the program is incorrectly scheduled in a non-Java region.")
 			@QueryParam("lang") 
 			String lang,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), 
+						description = "Specifies the resident option. The RESIDENT(N) option takes effect right away. The RESIDENT(Y) option takes effect at the next restart, unless an error is encountered such as no PSB in ACBLIB for the program, or if the program was created as RESIDENT(Y) after the checkpoint from which this IMS is performing emergency restart")
 			@QueryParam("resident") 
 			String resident,
 
-			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}))
+			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}),
+						description = "Specifies whether this program can be scheduled into more than one message region or batch message region simultaneously.")
 			@QueryParam("schdtype") 
 			String schdtype,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}),
+						description = "Specifies whether transaction level statistics should be logged. The value specified has meaning only if the program is a JBP or a non-message driven BMP. If Y is specified, transaction level statistics are written to the log in a X'56FA' log record.")
 			@QueryParam("transtat") 
 			String transtat,
 
