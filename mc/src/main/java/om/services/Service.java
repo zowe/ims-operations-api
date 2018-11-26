@@ -411,6 +411,7 @@ public class Service extends ThreadHelper{
 					commandErrorMbr.setOmMemberStyp(cmderrMbr.getStyp());
 					commandErrorMbr.setOmMemberVsn(cmderrMbr.getVsn());
 					commandErrorMbr.setOmMemberJobname(cmderrMbr.getJobname());
+					commandErrorMbr.setOmMemberName(cmderrMbr.getElementText().trim());
 
 					//Start to build the summary of a command error
 					omMemberMessageSummaryBuffer.append(OM_MESSAGE.OM_MBR_NAME.msg(new Object[]{cmderrMbr.getElementText()})).append(OM_MESSAGE.FORMAT_DELIMITER.msg());

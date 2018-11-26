@@ -27,6 +27,7 @@ public final class OmCommandErrorMbr {
     private static final String omMemberRsn         = "omMemberRsn";        // "rsn";
     private static final String omMemberRsntxt      = "omMemberRsntxt";     // "rsntxt";
     private static final String omMemberMsg         = "omMemberMsg";        // "msg";
+    private static final String omMemberName 		= "omMemberName";		// "name"
     private static final String omMemberMessageSummary  = "omMemberMessageSummary";
     private final static String omMemberMessageTittle    = "omMemberMessageTittle";
     
@@ -46,6 +47,15 @@ public final class OmCommandErrorMbr {
         mbr.put(OmCommandErrorMbr.omMemberMsg, msgs);
         mbr.put(OmCommandErrorMbr.omMemberMessageSummary, "");
         mbr.put(OmCommandErrorMbr.omMemberMessageTittle, "");
+        mbr.put(OmCommandErrorMbr.omMemberName, "");
+    }
+    
+    public String getOmMemberName() {
+    	return this.mbr.get(omMemberName).toString();
+    }
+    
+    public void setOmMemberName(String name) {
+    	this.mbr.put(OmCommandErrorMbr.omMemberName, name);
     }
     
     public String getOmMemberTyp() {
