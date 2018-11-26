@@ -192,7 +192,7 @@ public class OMServlet {
 				omMessage.put("RSN", omCommandErrorMbr.getOmMemberRsn());
 				omMessage.put("RSNTXT", omCommandErrorMbr.getOmMemberRsntxt());
 				omMessage.put("RC", omCommandErrorMbr.getOmMemberRc());
-				omMessage.put("COMMAND", omMessageContext.getOmCommandExecuted());
+				omMessage.put("COMMAND", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 				omMessage.put("MESSAGE_TITLE", omCommandErrorMbr.getOmMemberMessageTittle());
 				omMessage.put("MESSAGE", omCommandErrorMbr.getOmMemberMessageSummary());
 
@@ -202,9 +202,12 @@ public class OMServlet {
 		} else if (omMessageContext != null) { //non-zero case, something went wrong
 			JSONObject omMessage = new JSONObject();
 
-			omMessage.put("COMMAND", omMessageContext.getOmCommandExecuted());
+			omMessage.put("COMMAND", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 			omMessage.put("MESSAGE_TITLE", omMessageContext.getOmMessageTittle());
 			omMessage.put("MESSAGE", omMessageContext.getOmMessageSummary());
+			omMessage.put("RC", omMessageContext.getOmReturnCode());
+			omMessage.put("RSN", omMessageContext.getOmReasonCode());
+			omMessage.put("RSNTXT", omMessageContext.getOmReasonText());
 
 			omMessages.put(omMessageContext.getOmName(), omMessage);
 		}
@@ -231,7 +234,7 @@ public class OMServlet {
 			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
 			omExceptionJson.put("MESSAGE_TITLE", OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
 			omExceptionJson.put("MESSAGE", msg);
-			omExceptionJson.put("COMMAND", e.getOmCommandExecuted());
+			omExceptionJson.put("COMMAND", extractEssentialCommand(e.getOmCommandExecuted()));
 			omExceptionJson.put("RC", e.getOmReturnCode());
 			omExceptionJson.put("RSN", e.getOmReasonCode());
 			omExceptionJson.put("RSNTXT", e.getOmReasonText());
@@ -268,6 +271,26 @@ public class OMServlet {
 		exception.put("OmConnectionException", omConnectionExceptionJson);
 
 		return exception;
+	}
+	
+	public String extractEssentialCommand(String cmd) {
+		char[] seq = cmd.toCharArray();
+		int count = 1;
+		for (int i = 4; i<seq.length; i++) {
+			if (seq[i] == '(') {
+				count++;
+			}
+			if (seq[i] == ')') {
+				count--;
+			}
+			if (count == 0) {
+				return cmd.substring(4, i);
+			}
+		}
+		
+		return cmd;
+		
+		
 	}
 
 }
