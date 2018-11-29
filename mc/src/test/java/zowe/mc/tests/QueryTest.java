@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import rs.responses.pgm.QueryProgramResponses;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for QUERY IMS rest services
@@ -53,9 +54,9 @@ public class QueryTest
 		
 		
 
-		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "ec32016a.vmec.svl.ibm.com")
-				.header("port", "9999")
-				.header("plex", "IM00P").accept(MediaType.APPLICATION_JSON);
+		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
 		
 		Response responses = builder.get();
 		
@@ -78,9 +79,9 @@ public class QueryTest
 		
 		
 
-		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "ec32016a.vmec.svl.ibm.com")
-				.header("port", "9999")
-				.header("plex", "IM00").accept(MediaType.APPLICATION_JSON);
+		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
 		
 		Response responses = builder.get();
 		

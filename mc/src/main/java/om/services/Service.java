@@ -40,6 +40,7 @@ import om.result.OmResultSet;
 import om.version.Version;
 import utils.ArrayUtils;
 import utils.ThreadHelper;
+import utils.TraceUtil;
 
 /**
  * Abstract class providing a foundation for creating new IMS Resource service interactions.
@@ -174,6 +175,7 @@ public class Service extends ThreadHelper{
 
 		inputStream.reset(); //Reset the stream because it surely is read prior to this use
 		byte[] byteArrayResponse = inputStreamToByteArray(inputStream); //convert inputstream to byte array 
+		TraceUtil.dumpBytesInHex(byteArrayResponse);
 
 		try {      
 			//startTime = System.nanoTime();

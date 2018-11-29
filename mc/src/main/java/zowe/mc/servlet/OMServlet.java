@@ -1,6 +1,5 @@
 package zowe.mc.servlet;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -38,30 +37,30 @@ import zowe.mc.exceptions.RestException;
 		servers = {@Server(url = "http://localhost:9080/mc/")})
 @Stateless
 public class OMServlet {
-	
+
 	static final Logger logger = LoggerFactory.getLogger(OMServlet.class);
 
 	//Message status sent to the client for interpretation
-//	private static enum OM_MESSAGE_STATUS_TYPE {
-//		ERROR("error"), 
-//		WARNING("warning"), 
-//		SUCCESS("success"), 
-//		INFORMATION("information"), 
-//		CRITICAL("critical"), 
-//		ATTENTION("attention"), 
-//		COMPLIANCE("compliance");
-//
-//		private String value;
-//
-//		private OM_MESSAGE_STATUS_TYPE(String val) {
-//			this.value = val;
-//		}
-//
-//		@Override
-//		public String toString() {
-//			return value;
-//		}
-//	}
+	//	private static enum OM_MESSAGE_STATUS_TYPE {
+	//		ERROR("error"), 
+	//		WARNING("warning"), 
+	//		SUCCESS("success"), 
+	//		INFORMATION("information"), 
+	//		CRITICAL("critical"), 
+	//		ATTENTION("attention"), 
+	//		COMPLIANCE("compliance");
+	//
+	//		private String value;
+	//
+	//		private OM_MESSAGE_STATUS_TYPE(String val) {
+	//			this.value = val;
+	//		}
+	//
+	//		@Override
+	//		public String toString() {
+	//			return value;
+	//		}
+	//	}
 
 	/**
 	 * Method will execute an IMS Type1/2 command orginating from the command console in the E4A UI. This method is 
@@ -84,7 +83,7 @@ public class OMServlet {
 		JSONObject message = new JSONObject();
 		//JSONObject commandExecutedText = new JSONObject();
 
-		ArrayList<String> plexImsMbrs = new ArrayList<String>();
+		//ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
 		IconOmConnection omConnection = null;
 		Om om = null;
@@ -101,13 +100,18 @@ public class OMServlet {
 			//Figure out how to deal with versioning later.
 			CommandService cService = om.getCommandService();
 
-			OmResultSet plexResultSet= cService.executeImsCommand("executeImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
-			Properties[] response = plexResultSet.getResponseProperties();
+			//OmResultSet plexResultSet= cService.executeImsCommand("executeImsCommand","CMD(QUERY IMSPLEX TYPE(IMS) SHOW(STATUS))");
+			//Properties[] response = plexResultSet.getResponseProperties();
 
 
-			for (int i = 0; i<response.length; i++) {
-				plexImsMbrs.add(response[i].getProperty("IMSMBR"));
-			}
+			//Possible IMS error. When specifying single incorrect route empty data is returned. It should be
+			//returning an error message. Discuss with Kevin. 
+//			for (int i = 0; i<response.length; i++) {
+//				if (mcSpec.getDatastores().contains(response[i].getProperty("IMSMBR"))) {
+//					plexImsMbrs.add(response[i].getProperty("IMSMBR"));
+//				} else {
+//				}
+//			}
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
 			omResultSet= cService.executeImsCommand("executeImsCommand",command);
@@ -115,15 +119,18 @@ public class OMServlet {
 
 			//Response Properties is the results as a map from connect api
 			Properties[] dataProperties = omResultSet.getResponseProperties();
-			if(dataProperties != null){
+			if(dataProperties != null && dataProperties.length > 0){
 				for(Properties p : dataProperties) {
 					//prop.put("resourceId", counter++);
 					JSONObject responseJSON = new JSONObject();
 					responseJSON.putAll(p);
-					omMessageContextToJSON(om, responseJSON);
 					responseJSONArray.add(responseJSON);
 				}
+			} else {
+				JSONObject responseJSON = new JSONObject();
+				responseJSONArray.add(responseJSON);
 			}
+			omMessageContextToJSON(om, result);
 
 			//Type of command Type1 or Type2
 			//result.put("imsCommandType",  omResultSet.getOmMessageContext().getOmCommandType());
@@ -213,6 +220,7 @@ public class OMServlet {
 
 			omMessages.put(omMessageContext.getOmName(), omMessage);
 		}
+		
 		result.put("messages", omMessages);
 	}
 
@@ -255,7 +263,7 @@ public class OMServlet {
 		if (logger.isErrorEnabled()) {
 			logger.error(e.getMessage());
 		}
-		
+
 		String msg = "";
 		if (e != null) {
 
@@ -274,7 +282,7 @@ public class OMServlet {
 
 		return exception;
 	}
-	
+
 	public String extractEssentialCommand(String cmd) {
 		char[] seq = cmd.toCharArray();
 		int count = 1;
@@ -289,10 +297,10 @@ public class OMServlet {
 				return cmd.substring(4, i);
 			}
 		}
-		
+
 		return cmd;
-		
-		
+
+
 	}
 
 }

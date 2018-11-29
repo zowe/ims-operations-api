@@ -11,7 +11,7 @@ public class CreateProgramResponse {
 	String cctxt;
 	String mbr;
 	String pgm;
-	HashMap<String, Message> messages;
+	
 	
 	public String getCc() {
 		return cc;
@@ -36,12 +36,6 @@ public class CreateProgramResponse {
 	}
 	public void setPgm(String pgm) {
 		this.pgm = pgm;
-	}
-	public HashMap<String, Message> getMessages() {
-		return messages;
-	}
-	public void setMessages(HashMap<String, Message> messages) {
-		this.messages = messages;
 	}
 	
 	@Override

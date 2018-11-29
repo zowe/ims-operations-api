@@ -1,10 +1,8 @@
 package rs.responses.pgm;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import rs.responses.Message;
 
 public class QueryProgramResponse {
 
@@ -23,7 +21,6 @@ public class QueryProgramResponse {
 	String tls;
 	String mbr;
 	String rgnt;
-	HashMap<String, Message> messages;
 
 	public String getCc() {
 		return cc;
@@ -103,12 +100,7 @@ public class QueryProgramResponse {
 	public void setRgnt(String rgnt) {
 		this.rgnt = rgnt;
 	}
-	public HashMap<String, Message> getMessages() {
-		return messages;
-	}
-	public void setMessages(HashMap<String, Message> messages) {
-		this.messages = messages;
-	}
+	
 
 	@Override
 	public String toString() {

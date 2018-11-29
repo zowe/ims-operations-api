@@ -41,7 +41,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
+import rs.responses.pgm.CreateProgramResponses;
 import rs.responses.pgm.QueryProgramResponses;
+import rs.responses.pgm.StartProgramResponses;
 import utils.Type2CommandSerializable;
 import zowe.mc.exceptions.RestException;
 import zowe.mc.servlet.OMServlet;
@@ -173,7 +175,8 @@ public class Pgm {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'START PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = StartProgramResponses.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
@@ -236,7 +239,8 @@ public class Pgm {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = CreateProgramResponses.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
