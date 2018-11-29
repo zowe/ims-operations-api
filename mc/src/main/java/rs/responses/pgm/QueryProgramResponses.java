@@ -1,4 +1,4 @@
-package rs.responses;
+package rs.responses.pgm;
 
 import java.util.List;
 

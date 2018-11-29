@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
-import rs.responses.QueryProgramResponse;
+import rs.responses.pgm.QueryProgramResponses;
 import utils.Type2CommandSerializable;
 import zowe.mc.exceptions.RestException;
 import zowe.mc.servlet.OMServlet;
@@ -76,7 +76,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
-						content = @Content(schema = @Schema(implementation = QueryProgramResponse.class))),
+						content = @Content(schema = @Schema(implementation = QueryProgramResponses.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(

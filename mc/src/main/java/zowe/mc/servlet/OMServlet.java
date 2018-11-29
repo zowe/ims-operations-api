@@ -6,9 +6,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.resource.cci.ConnectionFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +77,6 @@ public class OMServlet {
 
 
 
-		JSONObject responseJSON = new JSONObject();
 		JSONArray responseJSONArray = new JSONArray();
 		JSONObject result = new JSONObject();
 
@@ -116,11 +113,12 @@ public class OMServlet {
 			omResultSet= cService.executeImsCommand("executeImsCommand",command);
 
 
-			//Responseproperties is the results as a map from connect api
+			//Response Properties is the results as a map from connect api
 			Properties[] dataProperties = omResultSet.getResponseProperties();
 			if(dataProperties != null){
 				for(Properties p : dataProperties) {
 					//prop.put("resourceId", counter++);
+					JSONObject responseJSON = new JSONObject();
 					responseJSON.putAll(p);
 					omMessageContextToJSON(om, responseJSON);
 					responseJSONArray.add(responseJSON);
@@ -145,12 +143,18 @@ public class OMServlet {
 
 		}catch (OmConnectionException e) {
 			JSONObject omConnectionExceptionJSON = omConnectionExceptionToJSON(e);
+			JSONObject responseJSON = new JSONObject();
 			responseJSON.put("messages", omConnectionExceptionJSON);
-			throw new RestException("Servlet has thrown exception", responseJSON);
+			responseJSONArray.add(responseJSON);
+			result.put("data", responseJSONArray);
+			throw new RestException("Servlet has thrown exception", result);
 		} catch (OmException e) {
 			JSONObject omExceptionJSON = omExceptionToJSON(e);
+			JSONObject responseJSON = new JSONObject();
 			responseJSON.put("messages", omExceptionJSON);
-			throw new RestException("Servlet has thrown exception", responseJSON);
+			responseJSONArray.add(responseJSON);
+			result.put("data", responseJSONArray);
+			throw new RestException("Servlet has thrown exception", result);
 		}finally{
 			if(om != null){
 				om.releaseConnection();
@@ -169,7 +173,6 @@ public class OMServlet {
 		//Loop through the OM message context and set it in the response
 		Set<Entry<String, OmMessageContext>> omMessages = om.getOmMessageContexts().entrySet();
 		for (Entry<String, OmMessageContext> omMessage : omMessages) {
-			result.put("method", omMessage.getKey());
 			this.omMessageContextToJSON(omMessage.getValue(), result);
 		}
 	}

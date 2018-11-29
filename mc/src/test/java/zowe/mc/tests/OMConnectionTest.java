@@ -1,4 +1,4 @@
-package zowe.mc;
+package zowe.mc.tests;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -12,16 +12,17 @@ import icon.helpers.MCInteraction;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for IMS connections
  * @author jerryli
  *
  */
-public class ConnectionTest {
+public class OMConnectionTest {
 
 	private static MCInteraction mcSpec = new MCInteraction();
-	private static final Logger logger = LoggerFactory.getLogger(ConnectionTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(OMConnectionTest.class);
 
 	@BeforeAll
 	public static void setUp() {

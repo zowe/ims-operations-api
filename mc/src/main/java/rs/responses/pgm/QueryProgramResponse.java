@@ -1,15 +1,19 @@
-package rs.responses;
+package rs.responses.pgm;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import rs.responses.Message;
+
 public class QueryProgramResponse {
 
+	@Schema(description = "Completion Code")
 	String cc;
+	@Schema(description = "Local runtime value of the resident option. Indicates whether the program PSB resides in local storage.")
 	String lrsdnt;
 	String fp;
 	String schd;
-	String method;
 	String tmcr;
 	String dopt;
 	String bmpt;
@@ -44,12 +48,6 @@ public class QueryProgramResponse {
 	}
 	public void setSchd(String schd) {
 		this.schd = schd;
-	}
-	public String getMethod() {
-		return method;
-	}
-	public void setMethod(String method) {
-		this.method = method;
 	}
 	public String getTmcr() {
 		return tmcr;
