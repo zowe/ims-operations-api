@@ -13,12 +13,9 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.models.OpenAPI;
-//import rs.Tran;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.info.License;
-import rs.Pgm;
-import rs.Region;
+import rs.services.Pgm;
+import rs.services.Region;
+import rs.services.Tran;
 
 
 @OpenAPIDefinition(
@@ -37,6 +34,7 @@ public class LibertyApplication extends ResourceConfig{
 		register(AcceptHeaderOpenApiResource.class);
 		register(Region.class);
 		register(Pgm.class);
+		register(Tran.class);
 		register(HeaderRequestFilter.class);
 	}
 

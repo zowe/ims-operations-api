@@ -66,9 +66,9 @@ public class OmResultSet implements OmResult {
 
 		/*
 		 * Some keys in the responseProperties have random spacing. We want to trim the spaces to prevent 
-		 * confusion. Values are untouched.
+		 * confusion. We also want to make them lower case. Values are untouched.
 		 */
-		return trimKeys(responseProperties);
+		return modifyKeys(responseProperties);
 	}
 
 	public void setResponseProperties(Properties[] props) {
@@ -115,7 +115,7 @@ public class OmResultSet implements OmResult {
 	    return this.imsplex;
 	}
 	
-	private Properties[] trimKeys (Properties[] properties) {
+	private Properties[] modifyKeys (Properties[] properties) {
 
 		//We loop through the properties array
 		for (int i = 0; i < properties.length; i++) {
@@ -130,7 +130,8 @@ public class OmResultSet implements OmResult {
 			for ( Object obj : keySet) {
 				String key = (String) obj;
 				String trimmedKey = key.trim();
-				trimmmedResponse.put((Object) trimmedKey, properties[i].get(obj));
+				String lowerCaseKey = trimmedKey.toLowerCase();
+				trimmmedResponse.put((Object) lowerCaseKey, properties[i].get(obj));
 			}
 			properties[i] = trimmmedResponse;
 		}

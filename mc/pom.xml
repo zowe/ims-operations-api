@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.0.1</version>
+			<version>2.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>j2ee</groupId>
@@ -90,18 +90,43 @@
 			<version>2.27</version>
 		</dependency>
 
-	
-		
 		<!-- Spring Boot -Keeping this here in case we go Spring -->
 		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-jersey</artifactId> 
 			<version>2.1.0.RELEASE</version> </dependency> -->
 
-		<!-- Jackson <dependency> <groupId>com.fasterxml.jackson.jaxrs</groupId> 
-			<artifactId>jackson-jaxrs-json-provider</artifactId> <version>2.9.7</version> 
-			</dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
-			<artifactId>jackson-annotations</artifactId> <version>2.9.7</version> </dependency> 
-			<dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-databind</artifactId> 
-			<version>2.9.7</version> </dependency> -->
+		<!-- Jars for testing -->
+
+		<!-- Jersey client Notes: use RESTeasy for our jax-rs client because glassfish 
+			was too cumbersome to figure out. The jboss jackson provider is necessary -->
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-client</artifactId> 
+			<version>3.6.2.Final</version> </dependency> <dependency> <groupId>org.jboss.resteasy</groupId> 
+			<artifactId>resteasy-jackson-provider</artifactId> <version>3.6.2.Final</version> 
+			</dependency> -->
+
+
+
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.26</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>2.26</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-processing</artifactId>
+			<version>2.26</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-binding</artifactId>
+			<version>2.26</version>
+		</dependency>
+
+
 	</dependencies>
 	<build>
 		<finalName>${project.name}</finalName>

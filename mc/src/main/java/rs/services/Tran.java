@@ -1,4 +1,4 @@
-package rs;
+package rs.services;
 
 import java.util.Arrays;
 import java.util.List;

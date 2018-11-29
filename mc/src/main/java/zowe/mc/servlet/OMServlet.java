@@ -40,10 +40,7 @@ import zowe.mc.exceptions.RestException;
 		servers = {@Server(url = "http://localhost:9080/mc/")})
 @Stateless
 public class OMServlet {
-
-	@Resource (name = "mc_cf")
-	private ConnectionFactory mcCF;
-
+	
 	static final Logger logger = LoggerFactory.getLogger(OMServlet.class);
 
 	//Message status sent to the client for interpretation
@@ -82,6 +79,8 @@ public class OMServlet {
 
 
 
+		JSONObject responseJSON = new JSONObject();
+		JSONArray responseJSONArray = new JSONArray();
 		JSONObject result = new JSONObject();
 
 		//OM message contents sent back to UI
@@ -122,8 +121,9 @@ public class OMServlet {
 			if(dataProperties != null){
 				for(Properties p : dataProperties) {
 					//prop.put("resourceId", counter++);
-					result.putAll(p);
-					//data.add(prop);
+					responseJSON.putAll(p);
+					omMessageContextToJSON(om, responseJSON);
+					responseJSONArray.add(responseJSON);
 				}
 			}
 
@@ -145,19 +145,18 @@ public class OMServlet {
 
 		}catch (OmConnectionException e) {
 			JSONObject omConnectionExceptionJSON = omConnectionExceptionToJSON(e);
-			result.put("Messages", omConnectionExceptionJSON);
-			throw new RestException("Servlet has thrown exception", result);
+			responseJSON.put("messages", omConnectionExceptionJSON);
+			throw new RestException("Servlet has thrown exception", responseJSON);
 		} catch (OmException e) {
 			JSONObject omExceptionJSON = omExceptionToJSON(e);
-			result.put("Messages", omExceptionJSON);
-			throw new RestException("Servlet has thrown exception", result);
+			responseJSON.put("messages", omExceptionJSON);
+			throw new RestException("Servlet has thrown exception", responseJSON);
 		}finally{
 			if(om != null){
 				om.releaseConnection();
 			}
 		}
-		omMessageContextToJSON(om, result);
-
+		result.put("data", responseJSONArray);
 		return result;
 	}
 
@@ -170,7 +169,7 @@ public class OMServlet {
 		//Loop through the OM message context and set it in the response
 		Set<Entry<String, OmMessageContext>> omMessages = om.getOmMessageContexts().entrySet();
 		for (Entry<String, OmMessageContext> omMessage : omMessages) {
-			result.put("Method", omMessage.getKey());
+			result.put("method", omMessage.getKey());
 			this.omMessageContextToJSON(omMessage.getValue(), result);
 		}
 	}
@@ -189,12 +188,12 @@ public class OMServlet {
 			Collection<OmCommandErrorMbr> omCommandErrorMbrs = omMessageContext.getOmCommandErrorMbrs();
 			for (OmCommandErrorMbr omCommandErrorMbr : omCommandErrorMbrs) {
 				JSONObject omMessage = new JSONObject();
-				omMessage.put("RSN", omCommandErrorMbr.getOmMemberRsn());
-				omMessage.put("RSNTXT", omCommandErrorMbr.getOmMemberRsntxt());
-				omMessage.put("RC", omCommandErrorMbr.getOmMemberRc());
-				omMessage.put("COMMAND", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
-				omMessage.put("MESSAGE_TITLE", omCommandErrorMbr.getOmMemberMessageTittle());
-				omMessage.put("MESSAGE", omCommandErrorMbr.getOmMemberMessageSummary());
+				omMessage.put("rsn", omCommandErrorMbr.getOmMemberRsn());
+				omMessage.put("rsntxt", omCommandErrorMbr.getOmMemberRsntxt());
+				omMessage.put("rc", omCommandErrorMbr.getOmMemberRc());
+				omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
+				omMessage.put("message_title", omCommandErrorMbr.getOmMemberMessageTittle());
+				omMessage.put("message", omCommandErrorMbr.getOmMemberMessageSummary());
 
 				omMessages.put(omCommandErrorMbr.getOmMemberName(), omMessage);
 
@@ -202,16 +201,16 @@ public class OMServlet {
 		} else if (omMessageContext != null) { //non-zero case, something went wrong
 			JSONObject omMessage = new JSONObject();
 
-			omMessage.put("COMMAND", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
-			omMessage.put("MESSAGE_TITLE", omMessageContext.getOmMessageTittle());
-			omMessage.put("MESSAGE", omMessageContext.getOmMessageSummary());
-			omMessage.put("RC", omMessageContext.getOmReturnCode());
-			omMessage.put("RSN", omMessageContext.getOmReasonCode());
-			omMessage.put("RSNTXT", omMessageContext.getOmReasonText());
+			omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
+			omMessage.put("message_title", omMessageContext.getOmMessageTittle());
+			omMessage.put("message", omMessageContext.getOmMessageSummary());
+			omMessage.put("rc", omMessageContext.getOmReturnCode());
+			omMessage.put("rsn", omMessageContext.getOmReasonCode());
+			omMessage.put("rsntxt", omMessageContext.getOmReasonText());
 
 			omMessages.put(omMessageContext.getOmName(), omMessage);
 		}
-		result.put("Messages", omMessages);
+		result.put("messages", omMessages);
 	}
 
 
@@ -232,12 +231,12 @@ public class OMServlet {
 
 		if (e != null) {
 			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
-			omExceptionJson.put("MESSAGE_TITLE", OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
-			omExceptionJson.put("MESSAGE", msg);
-			omExceptionJson.put("COMMAND", extractEssentialCommand(e.getOmCommandExecuted()));
-			omExceptionJson.put("RC", e.getOmReturnCode());
-			omExceptionJson.put("RSN", e.getOmReasonCode());
-			omExceptionJson.put("RSNTXT", e.getOmReasonText());
+			omExceptionJson.put("message_title", OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
+			omExceptionJson.put("message", msg);
+			omExceptionJson.put("command", extractEssentialCommand(e.getOmCommandExecuted()));
+			omExceptionJson.put("rc", e.getOmReturnCode());
+			omExceptionJson.put("rsn", e.getOmReasonCode());
+			omExceptionJson.put("rsntxt", e.getOmReasonText());
 		}
 
 		JSONObject exception = new JSONObject();
@@ -260,11 +259,11 @@ public class OMServlet {
 			msg = e.getMessage();
 		}
 
-		omConnectionExceptionJson.put("MESSAGE_TITLE", OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
-		omConnectionExceptionJson.put("MESSAGE", msg);
-		omConnectionExceptionJson.put("COMMAND", "N/A");
-		omConnectionExceptionJson.put("RC", e.getConnectionReturnCode());
-		omConnectionExceptionJson.put("RSN", e.getConnectionReasonCode());
+		omConnectionExceptionJson.put("message_title", OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
+		omConnectionExceptionJson.put("message", msg);
+		omConnectionExceptionJson.put("command", "N/A");
+		omConnectionExceptionJson.put("rc", e.getConnectionReturnCode());
+		omConnectionExceptionJson.put("rsn", e.getConnectionReasonCode());
 
 
 		JSONObject exception = new JSONObject();

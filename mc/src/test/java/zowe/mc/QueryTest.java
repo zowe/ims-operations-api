@@ -1,24 +1,18 @@
 package zowe.mc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import rs.responses.QueryProgramResponses;
 
 /**
  * Tests for QUERY IMS rest services
@@ -38,6 +32,7 @@ public class QueryTest
 	@BeforeAll
 	public static void setUp() {
 		
+		//ResteasyClient client = new ResteasyClientBuilder().build();
 		Client client = ClientBuilder.newClient();
 		webTarget = client.target("http://localhost:9080/mc/services/");
 
@@ -51,26 +46,16 @@ public class QueryTest
 	@Test
 	public void testQueryPgm() throws Exception {
 		logger.info("TESTING Query PGM");
-		String path = "/pgm/query";
+		String path = "/pgm/";
 
-		Response response =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "ec32016a.vmec.svl.ibm.com")
+		QueryProgramResponses responses =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "ec32016a.vmec.svl.ibm.com")
 				.header("port", "9999")
-				.header("plex", "IM00P").get();
+				.header("plex", "IM00P").accept(MediaType.APPLICATION_JSON).get(QueryProgramResponses.class);
 		System.out.println("getting response");
-
-		InputStream in = (InputStream) response.getEntity();
-		BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8")); 
-		StringBuilder responseStrBuilder = new StringBuilder();
-
-		String inputStr;
-		while ((inputStr = streamReader.readLine()) != null) {
-			responseStrBuilder.append(inputStr);
-		}
-
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode result = mapper.readTree(responseStrBuilder.toString());
-		logger.debug(result.toString());
-		assertEquals(200, response.getStatus());
+		
+		
+		logger.info(responses.toString());
+		assertNotEquals(null, responses);
 		
 
 	}

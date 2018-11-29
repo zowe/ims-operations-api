@@ -1,4 +1,4 @@
-package rs;
+package rs.services;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.HeaderParam;
