@@ -7,10 +7,10 @@ import org.junit.runner.RunWith;
 //import org.junit.runners.Suite.SuiteClasses;
 
 import zowe.mc.tests.OMConnectionTest;
-import zowe.mc.tests.QueryTest;
+import zowe.mc.tests.QueryPgmTest;
 
 @RunWith(JUnitPlatform.class)
-@SelectClasses( { OMConnectionTest.class, QueryTest.class } )
+@SelectClasses( { OMConnectionTest.class, QueryPgmTest.class } )
 public class MCSuiteTest {
 
 }

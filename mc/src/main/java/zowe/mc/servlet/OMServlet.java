@@ -150,17 +150,11 @@ public class OMServlet {
 
 		}catch (OmConnectionException e) {
 			JSONObject omConnectionExceptionJSON = omConnectionExceptionToJSON(e);
-			JSONObject responseJSON = new JSONObject();
-			responseJSON.put("messages", omConnectionExceptionJSON);
-			responseJSONArray.add(responseJSON);
-			result.put("data", responseJSONArray);
+			result.put("messages", omConnectionExceptionJSON);
 			throw new RestException("Servlet has thrown exception", result);
 		} catch (OmException e) {
 			JSONObject omExceptionJSON = omExceptionToJSON(e);
-			JSONObject responseJSON = new JSONObject();
-			responseJSON.put("messages", omExceptionJSON);
-			responseJSONArray.add(responseJSON);
-			result.put("data", responseJSONArray);
+			result.put("messages", omExceptionJSON);
 			throw new RestException("Servlet has thrown exception", result);
 		}finally{
 			if(om != null){

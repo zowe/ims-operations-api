@@ -1,9 +1,6 @@
 package rs.responses.pgm;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-
-import rs.responses.Message;
 
 public class CreateProgramResponse {
 	

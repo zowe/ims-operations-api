@@ -33,27 +33,22 @@ public class OMConnectionTest {
 
 	private static MCInteraction mcSpec = new MCInteraction();
 	private static final Logger logger = LoggerFactory.getLogger(OMConnectionTest.class);
-	private static WebTarget webTarget = null;
-
-
+	private static Client client;
 	@BeforeAll
 	public static void setUp() {
-		
+
 		mcSpec.setHostname(TestProperties.hostname);
 		mcSpec.setPort(TestProperties.port);
 		mcSpec.setImsPlexName(TestProperties.plex);
 		
-		//ResteasyClient client = new ResteasyClientBuilder().build();
-		Client client = ClientBuilder.newClient();
-		webTarget = client.target("http://localhost:9080/mc/services/");
+		client = ClientBuilder.newClient();
 	}
 
 	/**
 	 * Test connection to IMS
-	 * @throws Exception
 	 */
 	@Test
-	public void testImsConnection() throws Exception
+	public void testOmConnection()
 	{
 		logger.info("TESTING MC Connection");
 		try {
@@ -71,31 +66,86 @@ public class OMConnectionTest {
 		}
 
 	}
-	
+
 
 	/**
+	 * Negative test for bad PLEX
+	 */
+	@Test
+	public void testBadPlex() {
+		logger.info("TESTING Bad Connection");
+		String path = "/pgm/";
+		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+			
+		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
+
+		Response responses = builder.get();
+
+		QueryProgramResponses queryProgramResponses= responses.readEntity(QueryProgramResponses.class);
+
+		//logger.info(queryProgramResponses.toString());
+		assertNotEquals(null, queryProgramResponses);
+		assertEquals(400, responses.getStatus());	
+
+		for (String key : queryProgramResponses.getMessages().keySet()) {
+			assertEquals("4", queryProgramResponses.getMessages().get(key).getRc());
+		}
+	}
+	
+	/**
 	 * Negative test for bad connection
-	 * @throws Exception
 	 */
 	@Test
 	public void testBadConnection() {
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
-		
-		
-
-		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "FOO")
 				.header("port", TestProperties.port)
-				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
-		
+				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+
 		Response responses = builder.get();
-		
+
 		QueryProgramResponses queryProgramResponses= responses.readEntity(QueryProgramResponses.class);
-		
+
 		//logger.info(queryProgramResponses.toString());
 		assertNotEquals(null, queryProgramResponses);
 		assertEquals(400, responses.getStatus());	
 
+		for (String key : queryProgramResponses.getMessages().keySet()) {
+			assertEquals("-1", queryProgramResponses.getMessages().get(key).getRc());
+		}
 	}
+	
+	
+	
+	/**
+	 * Helper method for testing failed 400 rest requests. Specific to this class.
+	 * @param queryParams
+	 * @return
+	 */
+//	private QueryProgramResponses request400(List<String[]> queryParams) {
+//		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+//		String path = "/pgm/";
+//
+//		for (String[] sArray : queryParams) {
+//			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
+//		}
+//
+//		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+//				.header("port", TestProperties.port)
+//				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+//
+//		Response responses = builder.get();
+//		QueryProgramResponses queryProgramResponses = responses.readEntity(QueryProgramResponses.class);
+//
+//		/*Check if request is successful*/
+//		assertNotEquals(null, queryProgramResponses);
+//		assertEquals(400, responses.getStatus());
+//
+//		return queryProgramResponses;
+//	}
 
 }
