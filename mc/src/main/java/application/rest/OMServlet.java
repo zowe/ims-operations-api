@@ -22,7 +22,6 @@ import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
 import om.exception.OmException;
-import om.exception.message.OM_CONNECTION;
 import om.exception.message.OM_EXCEPTION;
 import om.message.OmCommandErrorMbr;
 import om.message.OmMessageContext;

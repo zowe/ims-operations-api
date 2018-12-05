@@ -8,6 +8,7 @@ public class QueryProgramResponse {
 
 	@Schema(description = "Completion Code")
 	String cc;
+	String cctxt;
 	@Schema(description = "Local runtime value of the resident option. Indicates whether the program PSB resides in local storage.")
 	String lrsdnt;
 	String fp;
@@ -27,6 +28,12 @@ public class QueryProgramResponse {
 	}
 	public void setCc(String cc) {
 		this.cc = cc;
+	}
+	public String getCctxt() {
+		return cctxt;
+	}
+	public void setCctxt(String cctxt) {
+		this.cctxt = cctxt;
 	}
 	public String getLrsdnt() {
 		return lrsdnt;

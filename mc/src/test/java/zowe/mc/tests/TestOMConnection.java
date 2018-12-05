@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import icon.helpers.MCInteraction;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
+import zowe.mc.SuiteExtension;
 import zowe.mc.TestProperties;
 
 /**
@@ -29,18 +31,19 @@ import zowe.mc.TestProperties;
  * @author jerryli
  *
  */
-public class OMConnectionTest {
+@ExtendWith({SuiteExtension.class})
+public class TestOMConnection {
 
 	private static MCInteraction mcSpec = new MCInteraction();
-	private static final Logger logger = LoggerFactory.getLogger(OMConnectionTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(TestOMConnection.class);
 	private static Client client;
+	
 	@BeforeAll
 	public static void setUp() {
 
 		mcSpec.setHostname(TestProperties.hostname);
 		mcSpec.setPort(TestProperties.port);
 		mcSpec.setImsPlexName(TestProperties.plex);
-		
 		client = ClientBuilder.newClient();
 	}
 
@@ -75,7 +78,7 @@ public class OMConnectionTest {
 	public void testBadPlex() {
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
-		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+		WebTarget webTarget = client.target("http://localhost:8080/");
 			
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -101,7 +104,7 @@ public class OMConnectionTest {
 	public void testBadConnection() {
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
-		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+		WebTarget webTarget = client.target("http://localhost:8080/");
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "FOO")
 				.header("port", TestProperties.port)
 				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);

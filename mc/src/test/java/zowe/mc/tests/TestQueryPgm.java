@@ -16,11 +16,13 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import application.rest.responses.pgm.QueryProgramResponse;
 import application.rest.responses.pgm.QueryProgramResponses;
+import zowe.mc.SuiteExtension;
 import zowe.mc.TestProperties;
 
 /**
@@ -28,19 +30,19 @@ import zowe.mc.TestProperties;
  * @author jerryli
  *
  */
-public class QueryPgmTest 
+@ExtendWith({SuiteExtension.class})
+public class TestQueryPgm 
 {
 
-	private static final Logger logger = LoggerFactory.getLogger(QueryPgmTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(TestQueryPgm.class);
 	private static Client client;
 
 
 	/**
-	 * Setup rest client and webtarget address
+	 * Setup rest client
 	 */
 	@BeforeAll
 	public static void setUp() {
-
 		client = ClientBuilder.newClient();
 	}
 
@@ -54,7 +56,7 @@ public class QueryPgmTest
 		
 		//SHOW=TIMESTAMP
 		List<String[]> queryParams = new ArrayList<>();
-		String[] show = new String[] {"show", "TIMESTAMP"};
+		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
 		QueryProgramResponses queryProgramResponses= request200(queryParams);
 		/*Check if data is correct*/
@@ -69,7 +71,7 @@ public class QueryPgmTest
 
 		//SHOW=DOPT
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] show2 = new String[] {"show", "DOPT"};
+		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
 		QueryProgramResponses queryProgramResponses2= request200(queryParams2);
 		/*Check if data is correct*/
@@ -84,7 +86,7 @@ public class QueryPgmTest
 
 		//SHOW=SCHDTYPE
 		List<String[]> queryParams3 = new ArrayList<>();
-		String[] show3 = new String[] {"show", "SCHDTYPE"};
+		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
 		QueryProgramResponses queryProgramResponses3= request200(queryParams3);
 		/*Check if data is correct*/
@@ -166,7 +168,7 @@ public class QueryPgmTest
 	 * @return
 	 */
 	private QueryProgramResponses request200(List<String[]> queryParams) {
-		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
+		WebTarget webTarget = client.target("http://localhost:8080");
 		String path = "/pgm/";
 
 		for (String[] sArray : queryParams) {
