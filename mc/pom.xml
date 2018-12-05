@@ -115,6 +115,7 @@
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
 		</dependency>
+		
 
 		<!-- Spring Boot (for testing) -->
 		<dependency>

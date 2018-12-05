@@ -6,25 +6,21 @@ import java.util.List;
 
 import application.rest.responses.Message;
 
-public class StartProgramResponses {
-
-	List<StartProgramResponse> data;
+public class UpdatePgmResponses {
+	List<UpdateProgramsResponse> data;
 	HashMap<String, Message> messages;
-
+	
+	public List<UpdateProgramsResponse> getData() {
+		return data;
+	}
+	public void setData(List<UpdateProgramsResponse> data) {
+		this.data = data;
+	}
 	public HashMap<String, Message> getMessages() {
 		return messages;
 	}
-
 	public void setMessages(HashMap<String, Message> messages) {
 		this.messages = messages;
-	}
-
-	public List<StartProgramResponse> getData() {
-		return data;
-	}
-
-	public void setData(List<StartProgramResponse> data) {
-		this.data = data;
 	}
 	
 	@Override
@@ -52,5 +48,6 @@ public class StartProgramResponses {
 		}
 		return result.toString();
 	}
+	
 	
 }

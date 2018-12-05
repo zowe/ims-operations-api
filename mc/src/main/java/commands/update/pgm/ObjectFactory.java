@@ -6,18 +6,15 @@
 //
 
 
-package commands.type2;
+package commands.update.pgm;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**
  * This object contains factory methods for each 
  * Java content interface and Java element interface 
- * generated in the commands.type2 package. 
+ * generated in the commands.update.pgm package. 
  * <p>An ObjectFactory allows you to programatically 
  * construct new instances of the Java representation 
  * for XML content. The Java representation of XML 
@@ -31,30 +28,36 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _OmType2Command_QNAME = new QName("commands/type2", "OmType2Command");
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: commands.type2
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: commands.update.pgm
      * 
      */
     public ObjectFactory() {
     }
 
     /**
-     * Create an instance of {@link Type2Command }
+     * Create an instance of {@link UpdatePgm }
      * 
      */
-    public Type2Command createType2Command() {
-        return new Type2Command();
+    public UpdatePgm createUpdatePgm() {
+        return new UpdatePgm();
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Type2Command }{@code >}}
+     * Create an instance of {@link UpdatePgm.SET }
      * 
      */
-    @XmlElementDecl(namespace = "commands/type2", name = "OmType2Command")
-    public JAXBElement<Type2Command> createOmType2Command(Type2Command value) {
-        return new JAXBElement<Type2Command>(_OmType2Command_QNAME, Type2Command.class, null, value);
+    public UpdatePgm.SET createUpdatePgmSET() {
+        return new UpdatePgm.SET();
+    }
+
+    /**
+     * Create an instance of {@link UpdatePgm.STARTSTOP }
+     * 
+     */
+    public UpdatePgm.STARTSTOP createUpdatePgmSTARTSTOP() {
+        return new UpdatePgm.STARTSTOP();
     }
 
 }

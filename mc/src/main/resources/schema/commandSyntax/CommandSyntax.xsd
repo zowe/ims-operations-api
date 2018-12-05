@@ -28,7 +28,7 @@
 	        xmlns:uplxns="/update/imsplex"
 	        xmlns:qplxns="/query/imsplex"
 	        xmlns:qpgmns="commands/query/pgm"
-	        xmlns:upgmns="/update/pgm"
+	        xmlns:upgmns="commands/update/pgm"
 	        xmlns:qpgmdns="/query/pgmdesc"
 	        xmlns:upgmdns="/update/pgmdesc"
 	        xmlns:qrtcns="/query/rtc"
@@ -36,7 +36,7 @@
             xmlns:urtcdns="/update/rtcdesc"
 	        xmlns:qrtcdns="/query/rtcdesc"
 	        xmlns:qtrns="commands/query/tran"
-			xmlns:utrns="/update/tran"
+			xmlns:utrns="commands/update/tran"
 	        xmlns:utrdns="/update/trandesc"
 	        xmlns:qtrdns="/query/trandesc"
 	        xmlns:cdbns="/create/db"
@@ -100,16 +100,16 @@
 	<xs:import schemaLocation="../imsplex/QueryImsPlex.xsd" namespace="/query/imsplex"/> -->
 	<!--  <xs:import schemaLocation="../imsplex/UpdateImsPlex.xsd" namespace="http://www.ibm.com/ims/ea/om/cmd/V14/update/imsplex"/>-->
 	<xs:import schemaLocation="../pgm/QueryProgram.xsd" namespace="commands/query/pgm"/>
-<!-- 	<xs:import schemaLocation="../pgm/UpdateProgram.xsd" namespace="/update/pgm"/>
-	<xs:import schemaLocation="../pgmdesc/QueryPgmDesc.xsd" namespace="/query/pgmdesc"/>
+ 	<xs:import schemaLocation="../pgm/UpdateProgram.xsd" namespace="commands/update/pgm"/>
+<!-- <xs:import schemaLocation="../pgmdesc/QueryPgmDesc.xsd" namespace="/query/pgmdesc"/>
 	<xs:import schemaLocation="../pgmdesc/UpdatePgmDesc.xsd" namespace="/update/pgmdesc"/>
 	<xs:import schemaLocation="../rtc/QueryRoutingCode.xsd" namespace="/query/rtc"/>
 	<xs:import schemaLocation="../rtc/UpdateRoutingCode.xsd" namespace="/update/rtc"/>
 	<xs:import schemaLocation="../rtcdesc/UpdateRtcDesc.xsd" namespace="/update/rtcdesc"/>
 	<xs:import schemaLocation="../rtcdesc/QueryRtcDesc.xsd" namespace="/query/rtcdesc"/>
 	--><xs:import schemaLocation="../tran/QueryTransaction.xsd" namespace="commands/query/tran"/>
-	<!-- <xs:import schemaLocation="../tran/UpdateTransaction.xsd" namespace="/update/tran"/>
-	<xs:import schemaLocation="../trandesc/QueryTranDesc.xsd" namespace="/query/trandesc"/>
+	<xs:import schemaLocation="../tran/UpdateTransaction.xsd" namespace="commands/update/tran"/>
+	<!-- <xs:import schemaLocation="../trandesc/QueryTranDesc.xsd" namespace="/query/trandesc"/>
 	<xs:import schemaLocation="../trandesc/UpdateTranDesc.xsd" namespace="/update/trandesc"/>
 	<xs:import schemaLocation="../db/CreateDatabase.xsd" namespace="/create/db"/>
 	<xs:import schemaLocation="../db/DeleteDatabase.xsd" namespace="/delete/db"/> -->
@@ -165,8 +165,8 @@
 	<!-- 		        <xs:element name="UpdateImsPlex" type="uplxns:UpdateImsPlex" minOccurs="0" maxOccurs="1" /> -->
 	<!-- 			<xs:element name="UpdateOdbmStartConnection" type="uostcns:UpdateOdbmStartConnection" minOccurs="0" maxOccurs="1" />
 				<xs:element name="UpdateOdbmStopConnection" type="uospcns:UpdateOdbmStopConnection" minOccurs="0" maxOccurs="1" />
-				<xs:element name="QueryImsPlex" type="qplxns:QueryImsPlex" minOccurs="0" maxOccurs="1" />
-		        <xs:element name="UpdatePgm" type="upgmns:UpdatePgm" minOccurs="0" maxOccurs="1" />-->
+				<xs:element name="QueryImsPlex" type="qplxns:QueryImsPlex" minOccurs="0" maxOccurs="1" />-->
+		        <xs:element name="UpdatePgm" type="upgmns:UpdatePgm" minOccurs="0" maxOccurs="1" />
 				<xs:element name="QueryPgm" type="qpgmns:QueryPgm" minOccurs="0" maxOccurs="1" />
 		      <!--   <xs:element name="UpdatePgmDesc" type="upgmdns:UpdatePgmDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="QueryPgmDesc" type="qpgmdns:QueryPgmDesc" minOccurs="0" maxOccurs="1" />
@@ -174,8 +174,8 @@
 		        <xs:element name="UpdateRtc" type="urtcns:UpdateRtc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="QueryRtcDesc" type="qrtcdns:QueryRtcDesc" minOccurs="0" maxOccurs="1" />
 		        <xs:element name="UpdateRtcDesc" type="urtcdns:UpdateRtcDesc" minOccurs="0" maxOccurs="1" />
-				<xs:element name="UpdateTran" type="utrns:UpdateTran" minOccurs="0" maxOccurs="1" />
-				--><xs:element name="QueryTran" type="qtrns:QueryTran" minOccurs="0" maxOccurs="1" />
+				--><xs:element name="UpdateTran" type="utrns:UpdateTran" minOccurs="0" maxOccurs="1" />
+				<xs:element name="QueryTran" type="qtrns:QueryTran" minOccurs="0" maxOccurs="1" />
 		        <!-- <xs:element name="UpdateTranDesc" type="utrdns:UpdateTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="QueryTranDesc" type="qtrdns:QueryTranDesc" minOccurs="0" maxOccurs="1" />
 				<xs:element name="CreateDb" type="cdbns:CreateDb" minOccurs="0" maxOccurs="1" />

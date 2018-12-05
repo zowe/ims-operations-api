@@ -204,7 +204,7 @@ public class Tran {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 	}
 
@@ -256,6 +256,8 @@ public class Tran {
 					sb.append(" AFFINITY");
 				}
 			}
+		} else {
+			sb.append(" ALL");
 		}
 		sb.append(")");
 		sb.append(" OPTION=AOPOUTPUT");
@@ -281,7 +283,7 @@ public class Tran {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		}
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 	}
 
@@ -461,117 +463,159 @@ public class Tran {
 			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
 			tran.getNAME().addAll(nameList);
 		}
+
+		boolean isLike = false;
 		CreateTran.LIKE like = new CreateTran.LIKE();
 		if (desc != null) {
 			like.setDESC(desc);
+			isLike = true;
 		}
 		if (rsc != null) {
 			like.setRSC(rsc);
+			isLike = true;
 		}
-		tran.setLIKE(like);
+		if (isLike) {
+			tran.setLIKE(like);
+		}
 
+		boolean isSet = false;
 		CreateTran.SET set = new CreateTran.SET();
 		if (aocmd != null) {
 			set.setAOCMD(CreateTran.SET.AocmdOptions.fromValue(aocmd));
+			isSet = true;
 		}
 		if (clazz != null) {
 			set.setCLASS(clazz);
+			isSet = true;
 		}
 		if (cmtmode != null) {
 			set.setCMTMODE(CreateTran.SET.CmtmodeOptions.fromValue(cmtmode));
+			isSet = true;
 		}
 		if (conv != null) {
 			set.setCONV(CreateTran.SET.ConvOptions.fromValue(conv));
+			isSet = true;
 		}
 		if (dclwa != null) {
 			set.setDCLWA(CreateTran.SET.DclwaOptions.fromValue(dclwa));
+			isSet = true;
 		}
 		if (dirroute != null) {
 			set.setDIRROUTE(CreateTran.SET.DirrouteOptions.fromValue(dirroute));
+			isSet = true;
 		}
 		if (editrtn != null) {
 			set.setEDITRTN(editrtn);
+			isSet = true;
 		}
 		if (edituc != null) {
 			set.setEDITUC(CreateTran.SET.EditucOptions.fromValue(edituc));
+			isSet = true;
 		}
 		if (exprtime != null) {
 			set.setEXPRTIME(exprtime);
+			isSet = true;
 		}
 		if (fp != null) {
 			set.setFP(CreateTran.SET.FpOptions.fromValue(fp));
+			isSet = true;
 		}
 		if (inq != null) {
 			set.setINQ(CreateTran.SET.InqOptions.fromValue(inq));
+			isSet = true;
 		}
 		if (lct != null) {
 			set.setLCT(lct);
+			isSet = true;
 		}
 		if (lpri != null) {
 			set.setLPRI(lpri);
+			isSet = true;
 		}
 		if (maxrgn != null) {
 			set.setMAXRGN(maxrgn);
+			isSet = true;
 		}
 		if (msgtype != null) {
 			set.setMSGTYPE(CreateTran.SET.MsgtypeOptions.fromValue(msgtype));
+			isSet = true;
 		}
 		if (msname != null) {
 			set.setMSNAME(msname);
+			isSet = true;
 		}
 		if (npri != null) {
 			set.setNPRI(npri);
+			isSet = true;
 		}
 		if (parlim != null) {
 			set.setPARLIM(parlim);
+			isSet = true;
 		}
 		if (pgm != null) {
 			set.setPGM(pgm);
+			isSet = true;
 		}
 		if (plct != null) {
 			set.setPLCT(plcttime);
+			isSet = true;
 		}
 		if (plcttime != null) {
 			set.setPLCTTIME(plcttime);
+			isSet = true;
 		}
 		if (recover != null) {
 			set.setRECOVER(CreateTran.SET.RecoverOptions.fromValue(recover));
+			isSet = true;
 		}
 		if (remote != null) {
 			set.setREMOTE(CreateTran.SET.RemoteOptions.fromValue(remote));
+			isSet = true;
 		}
 		if (resp != null) {
 			set.setRESP(CreateTran.SET.RespOptions.fromValue(resp));
+			isSet = true;
 		}
 		if (segno != null) {
 			set.setSEGNO(segno);
+			isSet = true;
 		}
 		if (segsz != null) {
 			set.setSEGSZ(segsz);
+			isSet = true;
 		}
 		if (serial != null) {
 			set.setSERIAL(CreateTran.SET.SerialOptions.fromValue(serial));
+			isSet = true;
 		}
 		if (sidl != null) {
 			set.setSIDL(sidl);
+			isSet = true;
 		}
 		if (sidr != null) {
 			set.setSIDR(sidr);
+			isSet = true;
 		}
 		if (spasz != null) {
 			set.setSPASZ(spasz);
+			isSet = true;
 		}
 		if (spatrunc != null) {
 			set.setSPATRUNC(CreateTran.SET.SpatruncOptions.fromValue(spatrunc));
+			isSet = true;
 		}
 		if (transtat != null) {
 			set.setTRANSTAT(CreateTran.SET.TranstatOptions.fromValue(transtat));
+			isSet = true;
 		}
 		if (wfi != null) {
 			set.setWFI(CreateTran.SET.WfiOptions.fromValue(wfi));
+			isSet = true;
 		}
-		tran.setSET(set);
-
+		if (isSet) {
+			tran.setSET(set);
+		}
+		
 		Type2Command type2Command = new Type2Command();
 		type2Command.setCreateTran(tran);
 		type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
@@ -598,7 +642,7 @@ public class Tran {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 
 	}
@@ -623,12 +667,12 @@ public class Tran {
 			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}), description = "Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values.")
 			@QueryParam("option") 
 			String option,
-			
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
 
-		
+
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
 		mcSpec.setPort(Integer.parseInt(port));
@@ -639,11 +683,11 @@ public class Tran {
 			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
 			tran.getNAME().addAll(nameList);
 		}
-		
+
 		if (option != null) {
 			tran.setOPTION(DeleteTran.OptionOptions.fromValue(option));
 		}
-		
+
 		Type2Command type2Command = new Type2Command();
 		type2Command.setDeleteTran(tran);
 		type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
@@ -670,7 +714,7 @@ public class Tran {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 	}
 

@@ -22,7 +22,14 @@ public class QueryProgramResponse {
 	String tls;
 	String mbr;
 	String rgnt;
+	String lstt;
 
+	public String getLstt() {
+		return lstt;
+	}
+	public void setLstt(String lstt) {
+		this.lstt = lstt;
+	}
 	public String getCc() {
 		return cc;
 	}

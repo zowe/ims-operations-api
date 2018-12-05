@@ -131,7 +131,7 @@ public class OmResultSet implements OmResult {
 				String key = (String) obj;
 				String trimmedKey = key.trim();
 				String lowerCaseKey = trimmedKey.toLowerCase();
-				trimmmedResponse.put((Object) lowerCaseKey, properties[i].get(obj));
+				trimmmedResponse.put(lowerCaseKey, properties[i].get(obj));
 			}
 			properties[i] = trimmmedResponse;
 		}
@@ -257,7 +257,7 @@ public class OmResultSet implements OmResult {
 					//	                      //We can flag this empty and if when printing if skipb=y and empty we can not print it else if empty and skipb=n we print empty
 					//	                  }
 
-					String value =  (String) p.getProperty(header.columnName);
+					String value =  p.getProperty(header.columnName);
 					if(value != null && !value.trim().isEmpty()){
 						value = value.trim();
 						int valueLenth = value.length();
@@ -419,7 +419,7 @@ public class OmResultSet implements OmResult {
 					//	                      //We can flag this empty and if when printing if skipb=y and empty we can not print it else if empty and skipb=n we print empty
 					//	                  }
 
-					String value =  (String) p.getProperty(header.columnName);
+					String value =  p.getProperty(header.columnName);
 					if(value != null && !value.trim().isEmpty()){
 						value = value.trim();
 						int valueLenth = value.length();
@@ -512,8 +512,11 @@ public class OmResultSet implements OmResult {
 		String columnDisplayName = "";
 		String columnName = "";
 		String columnWidth = "";
+		@SuppressWarnings("unused")
 		String sort = "";
+		@SuppressWarnings("unused")
 		String key      = "";
+		@SuppressWarnings("unused")
 		String skipb    = "";
 		Boolean isColumnEmpty = true;
 	}

@@ -26,12 +26,26 @@ import application.rest.OMServlet;
 import application.rest.responses.pgm.CreateProgramResponses;
 import application.rest.responses.pgm.QueryProgramResponses;
 import application.rest.responses.pgm.StartProgramResponses;
+import application.rest.responses.pgm.UpdateProgramsResponse;
 import commands.create.pgm.CreatePgm;
 import commands.delete.pgm.DeletePgm;
 import commands.query.pgm.QueryPgm;
 import commands.query.pgm.QueryPgm.ShowOptions;
 import commands.query.pgm.QueryPgm.StatusOptions;
 import commands.type2.Type2Command;
+import commands.update.pgm.UpdatePgm;
+import commands.update.pgm.UpdatePgm.OptionOptions;
+import commands.update.pgm.UpdatePgm.SET.BmptypeOptions;
+import commands.update.pgm.UpdatePgm.SET.DoptOptions;
+import commands.update.pgm.UpdatePgm.SET.FpOptions;
+import commands.update.pgm.UpdatePgm.SET.GpsbOptions;
+import commands.update.pgm.UpdatePgm.SET.LangOptions;
+import commands.update.pgm.UpdatePgm.SET.LockOptions;
+import commands.update.pgm.UpdatePgm.SET.ResidentOptions;
+import commands.update.pgm.UpdatePgm.SET.SchdtypeOptions;
+import commands.update.pgm.UpdatePgm.SET.TranstatOptions;
+import commands.update.pgm.UpdatePgm.StartOptions;
+import commands.update.pgm.UpdatePgm.StopOptions;
 import exceptions.RestException;
 import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,14 +97,14 @@ public class Pgm {
 
 			@Parameter(style = ParameterStyle.FORM, 
 			array=@ArraySchema(schema = 
-			@Schema(maxLength = 8, allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
+			@Schema(allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
 					"IMSID", "GPSB", "LANG", "LOCAL", "MODEL", "RESIDENT", "SCHDTYPE", "STATUS", 
 					"TIMESTAMP", "TRANSTAT", "EXPORTNEEDED", "DB", "RTC", "TRAN", "WORK"})), 
 			description = "Specifies the program output fields to be returned. The program name is always returned, along with the name of the IMS™ that created the output, the region type, and the completion code.")
 			@QueryParam("attributes") String show, 
 
 			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
-			@Schema(maxLength = 8, allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})),
+			@Schema(allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})),
 			description = "Selects programs for display that possess at least one of the specified program status. This selection allows for additional filtering by program status. The program status is returned as output, even if the SHOW(STATUS) was not specified.")
 			@QueryParam("status") 
 			String status,
@@ -132,7 +146,6 @@ public class Pgm {
 			pgm.getSTATUS().addAll(statusOptions);
 		}
 
-
 		Type2Command type2Command = new Type2Command();
 		type2Command.setQueryPgm(pgm);
 		type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
@@ -159,7 +172,7 @@ public class Pgm {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 	}
 
@@ -221,7 +234,7 @@ public class Pgm {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		}
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 
 	}
@@ -307,33 +320,44 @@ public class Pgm {
 			pgm.getNAME().addAll(nameList);
 		}
 
+		boolean isSet = false;
 		CreatePgm.SET set = new CreatePgm.SET();
 		if (bmptype != null) {
 			set.setBMPTYPE(CreatePgm.SET.BmptypeOptions.fromValue(bmptype));
+			isSet=true;
 		}
 		if (dopt != null) {
 			set.setDOPT(CreatePgm.SET.DoptOptions.fromValue(dopt));
+			isSet=true;
 		}
 		if (fp != null) {
 			set.setFP(CreatePgm.SET.FpOptions.fromValue(fp));
+			isSet=true;
 		}
 		if (gpsb != null) {
 			set.setGPSB(CreatePgm.SET.GpsbOptions.fromValue(gpsb));
+			isSet=true;
 		}
 		if (lang != null) {
 			set.setLANG(CreatePgm.SET.LangOptions.fromValue(lang));
+			isSet=true;
 		}
 		if (resident != null) {
 			set.setRESIDENT(CreatePgm.SET.ResidentOptions.fromValue(resident));
+			isSet=true;
 		}
 		if (schdtype != null) {
 			set.setSCHDTYPE(CreatePgm.SET.SchdtypeOptions.fromValue(schdtype));
+			isSet=true;
 		} 
 		if (transtat != null) {
 			set.setTRANSTAT(CreatePgm.SET.TranstatOptions.fromValue(transtat));
+			isSet=true;
 		}
 
-		pgm.setSET(set);
+		if (isSet) {
+			pgm.setSET(set);
+		}
 
 		Type2Command type2Command = new Type2Command();
 		type2Command.setCreatePgm(pgm);
@@ -361,7 +385,7 @@ public class Pgm {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 
 	}
@@ -384,7 +408,7 @@ public class Pgm {
 			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
-			
+
 			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}), description = "Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values.")
 			@QueryParam("option") 
 			String option,
@@ -403,11 +427,11 @@ public class Pgm {
 			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
 			pgm.getNAME().addAll(nameList);
 		}
-		
+
 		if (option != null) {
 			pgm.setOPTION(DeletePgm.OptionOptions.fromValue(option));
 		}
-		
+
 		Type2Command type2Command = new Type2Command();
 		type2Command.setDeletePgm(pgm);
 		type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
@@ -434,11 +458,188 @@ public class Pgm {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		} 
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 
 	}
 
+	@Path("/")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Returns data from a 'UPDATE PGM' IMS command",
+	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+			content = @Content(schema = @Schema(implementation = UpdateProgramsResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Request Error"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+	public Response update(
+			@Parameter(style = ParameterStyle.FORM, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
+			@QueryParam("names") 
+			String names, 
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
+			@QueryParam("route") 
+			String imsmbr,
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Schema(allowableValues = {"SCHD", "TRACE", "REFRESH"})))
+			@QueryParam("start") 
+			String start,
+
+			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Schema(allowableValues = {"SCHD", "TRACE"})))
+			@QueryParam("stop") 
+			String stop,
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@QueryParam("bmptype") 
+			String bmptype,
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies the dynamic option.")
+			@QueryParam("dopt") 
+			String dopt,
+
+			@Parameter(schema = @Schema(allowableValues = {"E", "N"}), description = "Specifies the dynamic option.")
+			@QueryParam("fp") 
+			String fp,
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@QueryParam("gpsb") 
+			String gpsb,
+
+			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}))
+			@QueryParam("lang") 
+			String lang,
+
+			@Parameter(schema = @Schema(allowableValues = {"ON", "OFF"}))
+			@QueryParam("lock") 
+			String lock,
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@QueryParam("resident") 
+			String resident,
+
+			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}))
+			@QueryParam("schdtype") 
+			String schdtype,
+
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@QueryParam("transtat") 
+			String transtat,
+
+			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}))
+			@QueryParam("option") 
+			String option,
+
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+
+		{
+
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			UpdatePgm pgm = new UpdatePgm();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				pgm.getNAME().addAll(nameList);
+			}
+			ArrayList<UpdatePgm.StartOptions> startOptions = new ArrayList();
+			if (start != null) {
+				List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
+				for (String s : startList) {
+					startOptions.add(StartOptions.fromValue(s));
+				}
+				pgm.getSTART().addAll(startOptions);
+			}
+			ArrayList<UpdatePgm.StopOptions> stopOptions = new ArrayList();
+			if (stop != null) {
+				List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
+				for (String s : stopList) {
+					stopOptions.add(StopOptions.fromValue(s));
+				}
+				pgm.getSTOP().addAll(stopOptions);
+			}
+
+			boolean isSet = false;
+			UpdatePgm.SET set = new UpdatePgm.SET();
+			if (bmptype != null) {
+				set.setBMPTYPE(BmptypeOptions.fromValue(bmptype));
+				isSet=true;
+			}
+			if (dopt != null) {
+				set.setDOPT(DoptOptions.fromValue(dopt));
+				isSet=true;
+			}
+			if (fp != null) {
+				set.setFP(FpOptions.fromValue(fp));
+				isSet=true;
+			}
+			if (gpsb != null) {
+				set.setGPSB(GpsbOptions.fromValue(gpsb));
+				isSet=true;
+			}
+			if (lang != null) {
+				set.setLANG(LangOptions.fromValue(lang));
+				isSet=true;
+			}
+			if (lock != null) {
+				set.setLOCK(LockOptions.fromValue(lock));
+				isSet=true;
+			}
+			if (resident != null) {
+				set.setRESIDENT(ResidentOptions.fromValue(resident));
+				isSet=true;
+			}
+			if (schdtype != null) {
+				set.setSCHDTYPE(SchdtypeOptions.fromValue(schdtype));
+				isSet=true;
+			}
+			if (transtat != null) {
+				set.setTRANSTAT(TranstatOptions.fromValue(transtat));
+				isSet=true;
+			}
+			if (isSet) {
+				pgm.setSET(set);
+			}
+			if (option != null) {
+				pgm.setOPTION(OptionOptions.fromValue(option));
+			}
 
 
+			Type2Command type2Command = new Type2Command();
+			type2Command.setUpdatePgm(pgm);
+			type2Command.setVerb(Type2Command.VerbOptions.UPDATE); 
+			type2Command.setResource(Type2Command.ResourceOptions.PGM);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+			try {
+				String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
+				result = omServlet.executeImsCommand(cmd, mcSpec);
+			} catch (OmCommandGenerationException e1) {
+				logger.error("Unable to generate IMS command", e1);
+				return Response.status(Status.INTERNAL_SERVER_ERROR)
+						.build();
+			} catch (RestException e) {
+				logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
+				return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
+			} 
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
+		}
+
+	}
 }

@@ -76,10 +76,10 @@ public class TestOMConnection {
 	 */
 	@Test
 	public void testBadPlex() {
+		
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
 		WebTarget webTarget = client.target("http://localhost:8080/");
-			
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
@@ -87,7 +87,6 @@ public class TestOMConnection {
 		Response responses = builder.get();
 
 		QueryProgramResponses queryProgramResponses= responses.readEntity(QueryProgramResponses.class);
-
 		//logger.info(queryProgramResponses.toString());
 		assertNotEquals(null, queryProgramResponses);
 		assertEquals(400, responses.getStatus());	
@@ -122,33 +121,4 @@ public class TestOMConnection {
 		}
 	}
 	
-	
-	
-	/**
-	 * Helper method for testing failed 400 rest requests. Specific to this class.
-	 * @param queryParams
-	 * @return
-	 */
-//	private QueryProgramResponses request400(List<String[]> queryParams) {
-//		WebTarget webTarget = client.target("http://localhost:9080/mc/services/");
-//		String path = "/pgm/";
-//
-//		for (String[] sArray : queryParams) {
-//			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
-//		}
-//
-//		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
-//				.header("port", TestProperties.port)
-//				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
-//
-//		Response responses = builder.get();
-//		QueryProgramResponses queryProgramResponses = responses.readEntity(QueryProgramResponses.class);
-//
-//		/*Check if request is successful*/
-//		assertNotEquals(null, queryProgramResponses);
-//		assertEquals(400, responses.getStatus());
-//
-//		return queryProgramResponses;
-//	}
-
 }

@@ -1,7 +1,6 @@
 package zowe.mc.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
@@ -9,9 +8,6 @@ import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -22,11 +18,11 @@ import org.slf4j.LoggerFactory;
 
 import application.rest.responses.pgm.QueryProgramResponse;
 import application.rest.responses.pgm.QueryProgramResponses;
+import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
-import zowe.mc.TestProperties;
 
 /**
- * Tests for QUERY IMS rest services
+ * Tests for "QUERY PGM" IMS rest services
  * @author jerryli
  *
  */
@@ -58,45 +54,48 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		QueryProgramResponses queryProgramResponses= request200(queryParams);
+		Response response = RequestUtils.getRequest(queryParams, "/pgm/", client);
+		QueryProgramResponses qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
-		logger.info(queryProgramResponses.toString());
-		for (QueryProgramResponse q : queryProgramResponses.getData()) {
+		logger.info(qpr.toString());
+		for (QueryProgramResponse q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getTmcr());
 		}
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("00000000", queryProgramResponses.getMessages().get(key).getRc());
+		for (String key : qpr.getMessages().keySet()) {
+			assertEquals("00000000", qpr.getMessages().get(key).getRc());
 		}
 
 		//SHOW=DOPT
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
-		QueryProgramResponses queryProgramResponses2= request200(queryParams2);
+		Response response2= RequestUtils.getRequest(queryParams2, "/pgm/", client);
+		QueryProgramResponses qpr2 = RequestUtils.validateQPRSuccess(response2);
 		/*Check if data is correct*/
-		logger.info(queryProgramResponses2.toString());
-		for (QueryProgramResponse q : queryProgramResponses2.getData()) {
+		logger.info(qpr2.toString());
+		for (QueryProgramResponse q : qpr2.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getDopt());
 		}
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("00000000", queryProgramResponses.getMessages().get(key).getRc());
+		for (String key : qpr2.getMessages().keySet()) {
+			assertEquals("00000000", qpr2.getMessages().get(key).getRc());
 		}
 
 		//SHOW=SCHDTYPE
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
-		QueryProgramResponses queryProgramResponses3= request200(queryParams3);
+		Response response3= RequestUtils.getRequest(queryParams3, "/pgm/", client);
+		QueryProgramResponses qpr3 = RequestUtils.validateQPRSuccess(response3);
 		/*Check if data is correct*/
-		logger.info(queryProgramResponses3.toString());
-		for (QueryProgramResponse q : queryProgramResponses3.getData()) {
+		logger.info(qpr3.toString());
+		for (QueryProgramResponse q : qpr3.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getSchd());
 		}
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("00000000", queryProgramResponses.getMessages().get(key).getRc());
+		for (String key : qpr3.getMessages().keySet()) {
+			assertEquals("00000000", qpr3.getMessages().get(key).getRc());
 		}
 
 	}
@@ -111,14 +110,15 @@ public class TestQueryPgm
 		logger.info("TESTING Query PGM");
 		
 		//QUERY PGM
-		QueryProgramResponses queryProgramResponses = request200(new ArrayList<String[]>());
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/pgm/", client);
+		QueryProgramResponses qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
-		logger.info(queryProgramResponses.toString());
-		for (QueryProgramResponse q : queryProgramResponses.getData()) {
+		logger.info(qpr.toString());
+		for (QueryProgramResponse q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 		}
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("00000000", queryProgramResponses.getMessages().get(key).getRc());
+		for (String key : qpr.getMessages().keySet()) {
+			assertEquals("00000000", qpr.getMessages().get(key).getRc());
 		}
 	}
 
@@ -133,14 +133,15 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		QueryProgramResponses queryProgramResponses= request200(queryParams);
+		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
+		QueryProgramResponses qpr = response.readEntity(QueryProgramResponses.class);
 		/*Check if data is correct*/
-		logger.info(queryProgramResponses.toString());
-		for (QueryProgramResponse q : queryProgramResponses.getData()) {
+		logger.info(qpr.toString());
+		for (QueryProgramResponse q : qpr.getData()) {
 			assertEquals("10", q.getCc());
 		}
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("0000000C", queryProgramResponses.getMessages().get(key).getRc());
+		for (String key : qpr.getMessages().keySet()) {
+			assertEquals("0000000C", qpr.getMessages().get(key).getRc());
 		}
 	}
 	
@@ -155,38 +156,13 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] route = new String[] {"route", "FOO"};
 		queryParams.add(route);
-		QueryProgramResponses queryProgramResponses = request200(queryParams);
-		for (String key : queryProgramResponses.getMessages().keySet()) {
-			assertEquals("02000010", queryProgramResponses.getMessages().get(key).getRc());
+		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
+		QueryProgramResponses qpr = response.readEntity(QueryProgramResponses.class);
+		/*Check if data is correct*/
+		logger.info(qpr.toString());
+		for (String key : qpr.getMessages().keySet()) {
+			assertEquals("02000010", qpr.getMessages().get(key).getRc());
 		}
 		
 	}
-
-	/**
-	 * Helper method for testing successful 200 rest requests. Specific to this class
-	 * @param queryParams
-	 * @return
-	 */
-	private QueryProgramResponses request200(List<String[]> queryParams) {
-		WebTarget webTarget = client.target("http://localhost:8080");
-		String path = "/pgm/";
-
-		for (String[] sArray : queryParams) {
-			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
-		}
-
-		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
-				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
-
-		Response responses = builder.get();
-		QueryProgramResponses queryProgramResponses = responses.readEntity(QueryProgramResponses.class);
-
-		/*Check if request is successful*/
-		assertNotEquals(null, queryProgramResponses);
-		assertEquals(200, responses.getStatus());
-
-		return queryProgramResponses;
-	}
-
 }

@@ -123,7 +123,7 @@ public class Region {
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
 		}
 
-		logger.debug("IMS Command Successful");
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
 		return Response.ok(result).build();
 
 	}

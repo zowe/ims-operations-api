@@ -198,7 +198,7 @@ public class OMServlet {
 				omMessage.put("rc", omCommandErrorMbr.getOmMemberRc());
 				omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 				//omMessage.put("message_title", omCommandErrorMbr.getOmMemberMessageTittle());
-				omMessage.put("message", omCommandErrorMbr.getOmMemberMessageSummary());
+				//omMessage.put("message", omCommandErrorMbr.getOmMemberMessageSummary());
 
 				omMessages.put(omCommandErrorMbr.getOmMemberName(), omMessage);
 
@@ -208,7 +208,7 @@ public class OMServlet {
 
 			omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 		//	omMessage.put("message_title", omMessageContext.getOmMessageTittle());
-			omMessage.put("message", omMessageContext.getOmMessageSummary());
+		//	omMessage.put("message", omMessageContext.getOmMessageSummary());
 			omMessage.put("rc", omMessageContext.getOmReturnCode());
 			omMessage.put("rsn", omMessageContext.getOmReasonCode());
 			omMessage.put("rsntxt", omMessageContext.getOmReasonText());
@@ -289,11 +289,11 @@ public class OMServlet {
 				count--;
 			}
 			if (count == 0) {
-				return cmd.substring(4, i);
+				return cmd.substring(4, i).trim();
 			}
 		}
 
-		return cmd;
+		return cmd.trim();
 
 
 	}

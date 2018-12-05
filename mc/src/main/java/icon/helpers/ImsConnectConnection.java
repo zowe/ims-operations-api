@@ -109,20 +109,6 @@ public class ImsConnectConnection implements ApiProperties{  //Note: This might 
 		connectionFactory.setSocketConnectTimeout(connectionFactoryProperties.getSocketConnectTimeout());
 	}
 	
-//	private InputStream copyIS(InputStream in){
-//	       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//	        byte[] buf = new byte[1024];
-//	        int n = 0;
-//	        try {
-//                while ((n = in.read(buf)) >= 0)
-//                    baos.write(buf, 0, n);
-//            } catch (IOException e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
-//	        return new ByteArrayInputStream(baos.toByteArray());
-//	}
-	
 	/**
 	 * Method executes a command and returns a {@link OutputMessage} containing the payload and return connection return codes
 	 * @param command represented by a String

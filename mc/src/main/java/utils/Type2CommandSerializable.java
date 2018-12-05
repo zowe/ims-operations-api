@@ -367,16 +367,12 @@ public class Type2CommandSerializable {
 			Field[] fields = dbSET.getDeclaredFields();
 			for (Field field: fields) {
 				if (field.isAnnotationPresent(XmlElement.class)) {
-					Annotation[] annotations = field.getDeclaredAnnotations();
 					field.setAccessible(true);
-					for (Annotation annotateField: annotations) {
-						XmlElement anno = (XmlElement) annotateField;
-						Object obj = field.get(qcnt);
-						if (obj != null) {
-							setPopulated = true;
-							cmd.append(obj);
-							cmd.append(COMMA);
-						}
+					Object obj = field.get(qcnt);
+					if (obj != null) {
+						setPopulated = true;
+						cmd.append(obj);
+						cmd.append(COMMA);
 					}
 				}
 			}
@@ -461,7 +457,7 @@ public class Type2CommandSerializable {
 		cmd.append(PARAC).append(SPACE);
 		return cmd.toString();
 	}
-	
+
 	/**
 	 * Loops through LIKE objects retrieving all attributes. A SET can be thought of as a 
 	 * sub-subcommand, it in itself contains lists of attributes. 
@@ -514,6 +510,7 @@ public class Type2CommandSerializable {
 
 		format(cmd);
 		format(cmd);
+		format(cmd);
 		cmd.append(PARAC).append(SPACE);
 		return cmd.toString();
 	}
@@ -551,7 +548,6 @@ public class Type2CommandSerializable {
 	//
 	//		} catch (IllegalArgumentException e) {
 	//		} catch (IllegalAccessException e) {
-	//			// TODO Auto-generated catch block
 	//			e.printStackTrace();
 	//		}
 	//		format(cmd);
@@ -560,7 +556,7 @@ public class Type2CommandSerializable {
 	//	}
 
 	public void format(StringBuilder cmd) {
-		if (cmd.charAt(cmd.length()-1) == ',') {
+		if (cmd.charAt(cmd.length()-1) == ',' || cmd.charAt(cmd.length()-1) == ' ') {
 			cmd.deleteCharAt(cmd.length()-1);
 		}
 	}

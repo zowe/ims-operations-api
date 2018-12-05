@@ -140,37 +140,11 @@
 						<xs:enumeration value="TIMESTAMP" />
 						<xs:enumeration value="TRANSTAT" />
 						<xs:enumeration value="WFI" />
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-
-			<xs:element name="SHOW2" minOccurs="0" maxOccurs="1">
-				<xs:simpleType>
-					<xs:annotation>
-						<xs:appinfo>
-							<jxb:typesafeEnumClass name="show2Options" />
-						</xs:appinfo>
-					</xs:annotation>
-					<xs:restriction base="xs:string">
 						<xs:enumeration value="EXPORTNEEDED" />
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-
-			<xs:element name="SHOWWORK" minOccurs="0" maxOccurs="1">
-				<xs:simpleType>
-					<xs:annotation>
-						<xs:appinfo>
-							<jxb:typesafeEnumClass
-								name="showWorkOptions" />
-						</xs:appinfo>
-					</xs:annotation>
-					<xs:restriction base="xs:string">
 						<xs:enumeration value="WORK" />
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
-
 
 			<xs:element name="CONV" minOccurs="0" maxOccurs="1">
 				<xs:simpleType>
