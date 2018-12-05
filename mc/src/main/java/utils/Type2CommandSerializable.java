@@ -220,7 +220,7 @@ public class Type2CommandSerializable {
 		}
 	}
 
-	
+
 	/**
 	 * Parses nested objects within the java command objects. For example, within CreatePgm, there is a SET object with it's own fields and values. 
 	 * Parses nested objects into a string.
@@ -234,16 +234,16 @@ public class Type2CommandSerializable {
 		if (prefix.equalsIgnoreCase("SET") && commandType.equals("DB")) {
 			cmd.append(retrieveSetSingle(object));
 			return;
-	//	}else if (prefix.equalsIgnoreCase("STARTSETAREA") && commandType.equals("DB"))   {
-	//		cmd.append(retrieveSTARTSETAREA(object));
-	//		return;
+			//	}else if (prefix.equalsIgnoreCase("STARTSETAREA") && commandType.equals("DB"))   {
+			//		cmd.append(retrieveSTARTSETAREA(object));
+			//		return;
 		}else if (prefix.equalsIgnoreCase("SET")&& commandType.equals("TRAN")) {
 			cmd.append(retrieveSetSingle(object));
 			return;
-		}else if (prefix.equalsIgnoreCase("SET") && commandType.equals("RTC")) {
-			cmd.append(retrieveSetSingle(object));
+		}else if (prefix.equalsIgnoreCase("LIKE")&& commandType.equals("TRAN")) {
+			cmd.append(retrieveLikeSingle(object));
 			return;
-		}else if (prefix.equalsIgnoreCase("SET") && commandType.equals("PGM")) {
+		}else if (prefix.equalsIgnoreCase("SET") && commandType.equals("RTC")) {
 			cmd.append(retrieveSetSingle(object));
 			return;
 		}else if (prefix.equalsIgnoreCase("SET") && commandType.equals("PGM")) {
@@ -293,69 +293,69 @@ public class Type2CommandSerializable {
 		}
 	}
 
-/*
- * Commented out because we don't need to implement db commands for zowe yet
- */
-//	private String retrieveSTARTSETAREA(Object set) throws OmCommandGenerationException {
-//		StringBuilder cmd = new StringBuilder();
-//		boolean startSetAreaPopulated = false;
-//
-//		cmd.append("STARTSETAREA").append(PARAOP);
-//
-//		try {
-//			Class<?> SET12 = com.ibm.ims.ea.om.cmd.v12.update.db.UpdateDb.STARTSETAREA.SET.class;
-//			Class<?> SET13 = com.ibm.ims.ea.om.cmd.v13.update.db.UpdateDb.STARTSETAREA.SET.class;
-//			Class<?> SET14 = com.ibm.ims.ea.om.cmd.v14.update.db.UpdateDb.STARTSETAREA.SET.class;
-//			Class<?> startsetarea = set.getClass();
-//			Field[] fields = startsetarea.getDeclaredFields();
-//			for (Field field: fields) {
-//				if (field.isAnnotationPresent(XmlElement.class)) {
-//					Annotation[] annotations = field.getDeclaredAnnotations();
-//					field.setAccessible(true);
-//					for (Annotation annotateField: annotations) {
-//						XmlElement anno = (XmlElement) annotateField;
-//						Object obj =  field.get(set);
-//						if (obj != null && (obj.getClass().equals(SET12) || obj.getClass().equals(SET13) || obj.getClass().equals(SET14))) {
-//							cmd.append(retrieveSetSingle(obj));
-//							format(cmd);
-//							cmd.append(COMMA).append(SPACE);
-//							startSetAreaPopulated = true;
-//						}
-//						else if (obj != null) {
-//							cmd.append(anno.name()).append(PARAOP);
-//							cmd.append(obj.toString());
-//							cmd.append(PARAC).append(COMMA).append(SPACE);
-//							startSetAreaPopulated = true;
-//						}
-//					}
-//				}
-//			}
-//		}
-//		catch (SecurityException e) {
-//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
-//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
-//			throw omCommandGenerationException;
-//		} catch (IllegalArgumentException e) {
-//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
-//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
-//			throw omCommandGenerationException;
-//		} catch (IllegalAccessException e) {
-//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
-//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
-//			throw omCommandGenerationException;
-//		}
-//
-//		if (!startSetAreaPopulated) {
-//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Reason: Empty STARTSETAREA attribute (nothing populated)";
-//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error);
-//			throw omCommandGenerationException;
-//		}
-//
-//		format(cmd);
-//		format(cmd);
-//		cmd.append(PARAC).append(SPACE);
-//		return cmd.toString();
-//	}
+	/*
+	 * Commented out because we don't need to implement db commands for zowe yet
+	 */
+	//	private String retrieveSTARTSETAREA(Object set) throws OmCommandGenerationException {
+	//		StringBuilder cmd = new StringBuilder();
+	//		boolean startSetAreaPopulated = false;
+	//
+	//		cmd.append("STARTSETAREA").append(PARAOP);
+	//
+	//		try {
+	//			Class<?> SET12 = com.ibm.ims.ea.om.cmd.v12.update.db.UpdateDb.STARTSETAREA.SET.class;
+	//			Class<?> SET13 = com.ibm.ims.ea.om.cmd.v13.update.db.UpdateDb.STARTSETAREA.SET.class;
+	//			Class<?> SET14 = com.ibm.ims.ea.om.cmd.v14.update.db.UpdateDb.STARTSETAREA.SET.class;
+	//			Class<?> startsetarea = set.getClass();
+	//			Field[] fields = startsetarea.getDeclaredFields();
+	//			for (Field field: fields) {
+	//				if (field.isAnnotationPresent(XmlElement.class)) {
+	//					Annotation[] annotations = field.getDeclaredAnnotations();
+	//					field.setAccessible(true);
+	//					for (Annotation annotateField: annotations) {
+	//						XmlElement anno = (XmlElement) annotateField;
+	//						Object obj =  field.get(set);
+	//						if (obj != null && (obj.getClass().equals(SET12) || obj.getClass().equals(SET13) || obj.getClass().equals(SET14))) {
+	//							cmd.append(retrieveSetSingle(obj));
+	//							format(cmd);
+	//							cmd.append(COMMA).append(SPACE);
+	//							startSetAreaPopulated = true;
+	//						}
+	//						else if (obj != null) {
+	//							cmd.append(anno.name()).append(PARAOP);
+	//							cmd.append(obj.toString());
+	//							cmd.append(PARAC).append(COMMA).append(SPACE);
+	//							startSetAreaPopulated = true;
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//		catch (SecurityException e) {
+	//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+	//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+	//			throw omCommandGenerationException;
+	//		} catch (IllegalArgumentException e) {
+	//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+	//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+	//			throw omCommandGenerationException;
+	//		} catch (IllegalAccessException e) {
+	//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+	//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+	//			throw omCommandGenerationException;
+	//		}
+	//
+	//		if (!startSetAreaPopulated) {
+	//			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Reason: Empty STARTSETAREA attribute (nothing populated)";
+	//			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error);
+	//			throw omCommandGenerationException;
+	//		}
+	//
+	//		format(cmd);
+	//		format(cmd);
+	//		cmd.append(PARAC).append(SPACE);
+	//		return cmd.toString();
+	//	}
 
 
 	private String retrieveQCNT(Object qcnt) throws OmCommandGenerationException {
@@ -404,8 +404,8 @@ public class Type2CommandSerializable {
 		cmd.append(PARAC).append(SPACE);
 		return cmd.toString();
 	}
-	
-	
+
+
 	/**
 	 * Loops through SET objects retrieving all attributes. A SET can be thought of as a 
 	 * sub-subcommand, it in itself contains lists of attributes. 
@@ -427,6 +427,62 @@ public class Type2CommandSerializable {
 					for (Annotation annotateField: annotations) {
 						XmlElement anno = (XmlElement) annotateField;
 						Object obj = field.get(set);
+						if (obj != null) {
+							setPopulated = true;
+							cmd.append(anno.name()).append(PARAOP);
+							cmd.append(obj);
+							cmd.append(PARAC).append(COMMA).append(SPACE);
+						}
+					}
+				}
+			}
+		}
+		catch (SecurityException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		} catch (IllegalArgumentException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		} catch (IllegalAccessException e) {
+			String error = "Unable to generate IMS Command. Verb: " + this.verb + ", Resource: " + this.resourceType + ", Exception Type: " + e.getClass().getSimpleName();
+			OmCommandGenerationException omCommandGenerationException = new OmCommandGenerationException(error, e);
+			throw omCommandGenerationException;
+		}
+
+		if (!setPopulated) {
+			cmd.append(PARAC);
+			return cmd.toString();
+		}
+
+		format(cmd);
+		format(cmd);
+		cmd.append(PARAC).append(SPACE);
+		return cmd.toString();
+	}
+	
+	/**
+	 * Loops through LIKE objects retrieving all attributes. A SET can be thought of as a 
+	 * sub-subcommand, it in itself contains lists of attributes. 
+	 * @param like
+	 * @return
+	 * @throws OmCommandGenerationException 
+	 */
+	private String retrieveLikeSingle(Object like) throws OmCommandGenerationException {	
+		StringBuilder cmd = new StringBuilder();
+		boolean setPopulated = false;
+		cmd.append("LIKE").append(PARAOP);
+		try {
+			Class<?> dbSET = like.getClass();
+			Field[] fields = dbSET.getDeclaredFields();
+			for (Field field: fields) {
+				if (field.isAnnotationPresent(XmlElement.class)) {
+					Annotation[] annotations = field.getDeclaredAnnotations();
+					field.setAccessible(true);
+					for (Annotation annotateField: annotations) {
+						XmlElement anno = (XmlElement) annotateField;
+						Object obj = field.get(like);
 						if (obj != null) {
 							setPopulated = true;
 							cmd.append(anno.name()).append(PARAOP);
@@ -504,7 +560,9 @@ public class Type2CommandSerializable {
 	//	}
 
 	public void format(StringBuilder cmd) {
-		cmd.deleteCharAt(cmd.length()-1);
+		if (cmd.charAt(cmd.length()-1) == ',') {
+			cmd.deleteCharAt(cmd.length()-1);
+		}
 	}
 
 	//	//************* DON"T FORGET TO REMOVE THE MAIN or Comment it out ***************

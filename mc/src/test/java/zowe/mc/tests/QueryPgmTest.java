@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rs.responses.pgm.QueryProgramResponse;
-import rs.responses.pgm.QueryProgramResponses;
+import application.rest.responses.pgm.QueryProgramResponse;
+import application.rest.responses.pgm.QueryProgramResponses;
 import zowe.mc.TestProperties;
 
 /**

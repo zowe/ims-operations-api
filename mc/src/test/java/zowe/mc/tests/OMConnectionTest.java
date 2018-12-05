@@ -17,11 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import application.rest.responses.pgm.QueryProgramResponses;
 import icon.helpers.MCInteraction;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
 import om.exception.OmConnectionException;
-import rs.responses.pgm.QueryProgramResponses;
 import zowe.mc.TestProperties;
 
 /**

@@ -8,17 +8,19 @@ import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rs.responses.pgm.StartProgramResponses;
+import application.rest.responses.pgm.StartProgramResponses;
 import zowe.mc.TestProperties;
 
 public class StartPgmTest {
@@ -61,11 +63,12 @@ public class StartPgmTest {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 
-		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
-
-		Response responses = builder.get();
+		
+		Response responses = builder.put(Entity.json(null));
 		StartProgramResponses startProgramResponses = responses.readEntity(StartProgramResponses.class);
 
 		/*Check if request is successful*/
