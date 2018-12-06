@@ -1,4 +1,4 @@
-package application.rest.responses.pgm;
+package application.rest.responses.pgm.start;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -7,25 +7,27 @@ import java.util.List;
 import application.rest.responses.Message;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "POJO that represents all the data returned from OM following a Update PGM command")
-public class UpdateProgamOutput {
-	
-	@Schema(description = "A list of UpdateProgram objects. Represents the JSON data output for all programs from the command")
-	List<UpdateProgram> data;
+public class StartProgramOutput {
+
+	@Schema(description = "A list of StartProgram objects. Represents the JSON data output for all programs from the command")
+	List<StartProgram> data;
 	@Schema(description = "A map that represents messages that are returned from OM after submitting the command. The key is either the IMS member or OM that returned the message")
 	HashMap<String, Message> messages;
-	
-	public List<UpdateProgram> getData() {
-		return data;
-	}
-	public void setData(List<UpdateProgram> data) {
-		this.data = data;
-	}
+
 	public HashMap<String, Message> getMessages() {
 		return messages;
 	}
+
 	public void setMessages(HashMap<String, Message> messages) {
 		this.messages = messages;
+	}
+
+	public List<StartProgram> getData() {
+		return data;
+	}
+
+	public void setData(List<StartProgram> data) {
+		this.data = data;
 	}
 	
 	@Override
@@ -53,6 +55,5 @@ public class UpdateProgamOutput {
 		}
 		return result.toString();
 	}
-	
 	
 }

@@ -1,4 +1,4 @@
-package application.rest.responses.pgm;
+package application.rest.responses.pgm.create;
 
 import java.util.HashMap;
 import java.util.List;

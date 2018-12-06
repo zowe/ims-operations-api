@@ -1,4 +1,4 @@
-package zowe.mc.tests;
+package zowe.mc.tests.pgm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.StartProgramOutput;
+import application.rest.responses.pgm.start.StartProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 

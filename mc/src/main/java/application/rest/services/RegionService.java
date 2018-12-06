@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -37,6 +38,7 @@ public class RegionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionService.class);
 	
+	@Autowired
 	@EJB
 	OMServlet omServlet;
 

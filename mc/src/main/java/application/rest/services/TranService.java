@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -59,6 +60,7 @@ import utils.Type2CommandSerializable;
 @CheckHeader
 public class TranService {
 
+	@Autowired
 	@EJB
 	OMServlet omServlet;
 

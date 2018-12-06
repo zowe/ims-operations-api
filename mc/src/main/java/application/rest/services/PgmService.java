@@ -23,10 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
-import application.rest.responses.pgm.CreateProgramOutput;
-import application.rest.responses.pgm.QueryProgramOutput;
-import application.rest.responses.pgm.StartProgramOutput;
-import application.rest.responses.pgm.UpdateProgram;
+import application.rest.responses.pgm.create.CreateProgramOutput;
+import application.rest.responses.pgm.query.QueryProgramOutput;
+import application.rest.responses.pgm.start.StartProgramOutput;
+import application.rest.responses.pgm.update.UpdateProgram;
 import commands.create.pgm.CreatePgm;
 import commands.delete.pgm.DeletePgm;
 import commands.query.pgm.QueryPgm;

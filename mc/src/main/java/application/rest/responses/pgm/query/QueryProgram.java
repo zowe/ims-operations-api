@@ -1,4 +1,4 @@
-package application.rest.responses.pgm;
+package application.rest.responses.pgm.query;
 
 import java.lang.reflect.Field;
 

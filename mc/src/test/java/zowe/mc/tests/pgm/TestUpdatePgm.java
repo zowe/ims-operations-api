@@ -1,4 +1,4 @@
-package zowe.mc.tests;
+package zowe.mc.tests.pgm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.QueryProgram;
-import application.rest.responses.pgm.QueryProgramOutput;
-import application.rest.responses.pgm.UpdateProgamOutput;
+import application.rest.responses.pgm.query.QueryProgram;
+import application.rest.responses.pgm.query.QueryProgramOutput;
+import application.rest.responses.pgm.update.UpdateProgamOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 

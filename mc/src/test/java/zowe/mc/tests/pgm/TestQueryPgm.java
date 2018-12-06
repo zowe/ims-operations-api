@@ -1,4 +1,4 @@
-package zowe.mc.tests;
+package zowe.mc.tests.pgm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,8 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.QueryProgram;
-import application.rest.responses.pgm.QueryProgramOutput;
+import application.rest.responses.pgm.query.QueryProgram;
+import application.rest.responses.pgm.query.QueryProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -40,6 +40,27 @@ public class TestQueryPgm
 	@BeforeAll
 	public static void setUp() {
 		client = ClientBuilder.newClient();
+	}
+
+	/**
+	 * Tests rest service for submitting QUERY PGM IMS command
+	 * @throws Exception
+	 */
+	@Test
+	public void testQueryPgm() {
+		logger.info("TESTING Query PGM");
+		
+		//QUERY PGM
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/pgm/", client);
+		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
+		/*Check if data is correct*/
+		logger.info(qpr.toString());
+		for (QueryProgram q : qpr.getData()) {
+			assertEquals("0", q.getCc());
+		}
+		for (String key : qpr.getMessages().keySet()) {
+			assertEquals("00000000", qpr.getMessages().get(key).getRc());
+		}
 	}
 
 	/**
@@ -100,27 +121,6 @@ public class TestQueryPgm
 
 	}
 
-
-	/**
-	 * Tests rest service for submitting QUERY PGM IMS command
-	 * @throws Exception
-	 */
-	@Test
-	public void testQueryPgm() {
-		logger.info("TESTING Query PGM");
-		
-		//QUERY PGM
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/pgm/", client);
-		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
-		/*Check if data is correct*/
-		logger.info(qpr.toString());
-		for (QueryProgram q : qpr.getData()) {
-			assertEquals("0", q.getCc());
-		}
-		for (String key : qpr.getMessages().keySet()) {
-			assertEquals("00000000", qpr.getMessages().get(key).getRc());
-		}
-	}
 
 	/**
 	 * Tests rest service for submitting QUERY PGM IMS command with incorrect program name

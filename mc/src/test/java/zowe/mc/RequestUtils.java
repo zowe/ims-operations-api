@@ -14,20 +14,31 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientProperties;
 
-import application.rest.responses.pgm.QueryProgramOutput;
-import application.rest.responses.pgm.StartProgramOutput;
-import application.rest.responses.pgm.UpdateProgamOutput;
+import application.rest.responses.pgm.create.CreateProgramOutput;
+import application.rest.responses.pgm.delete.DeleteProgramOutput;
+import application.rest.responses.pgm.query.QueryProgramOutput;
+import application.rest.responses.pgm.start.StartProgramOutput;
+import application.rest.responses.pgm.update.UpdateProgamOutput;
+import application.rest.responses.tran.query.QueryTranOutput;
 
 public class RequestUtils {
+	
+	public static Response postRequest(List<String[]> queryParams, String path, Client client) {
+		WebTarget webTarget = client.target("http://localhost:8080/");
 
-	public static UpdateProgamOutput validateUPRSuccess(Response responses) {
-		UpdateProgamOutput updatePgmResponses = responses.readEntity(UpdateProgamOutput.class);
-		assertNotEquals(null, updatePgmResponses);
-		assertNotEquals(0, updatePgmResponses.getData().size());
-		assertEquals("0", updatePgmResponses.getData().get(0).getCc());
-		assertEquals(200, responses.getStatus());
-		return updatePgmResponses;
+		for (String[] sArray : queryParams) {
+			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
+		}
+		
 
+		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+				.header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+		
+		Response responses = builder.post(Entity.json(null));
+		return responses;
+		
 	}
 
 	public static Response putRequest(List<String[]> queryParams, String path, Client client) {
@@ -65,6 +76,16 @@ public class RequestUtils {
 		return responses;
 	}
 
+	public static UpdateProgamOutput validateUPRSuccess(Response responses) {
+		UpdateProgamOutput updatePgmResponses = responses.readEntity(UpdateProgamOutput.class);
+		assertNotEquals(null, updatePgmResponses);
+		assertNotEquals(0, updatePgmResponses.getData().size());
+		assertEquals("0", updatePgmResponses.getData().get(0).getCc());
+		assertEquals(200, responses.getStatus());
+		return updatePgmResponses;
+	
+	}
+
 	public static QueryProgramOutput validateQPRSuccess(Response responses){
 		QueryProgramOutput queryPgmResponses = responses.readEntity(QueryProgramOutput.class);
 		assertNotEquals(null, queryPgmResponses);
@@ -82,6 +103,36 @@ public class RequestUtils {
 		assertEquals(false, startProgramResponses.getData().get(0).get().isEmpty());
 		assertEquals(200, response.getStatus());
 		return startProgramResponses;
+	}
+	
+	public static CreateProgramOutput validateCPRSuccess(Response response) {
+		CreateProgramOutput createProgramResponses = response.readEntity(CreateProgramOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, createProgramResponses);
+		assertNotEquals(0, createProgramResponses.getData().size());
+		assertEquals("0", createProgramResponses.getData().get(0).getCc());
+		assertEquals(200, response.getStatus());
+		return createProgramResponses;
+	}
+	
+	public static DeleteProgramOutput validateDPRSuccess(Response response) {
+		DeleteProgramOutput deleteProgramResponses = response.readEntity(DeleteProgramOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, deleteProgramResponses);
+		assertNotEquals(0, deleteProgramResponses.getData().size());
+		assertEquals("0", deleteProgramResponses.getData().get(0).getCc());
+		assertEquals(200, response.getStatus());
+		return deleteProgramResponses;
+	}
+	
+	public static QueryTranOutput validateQTRSuccess(Response response) {
+		QueryTranOutput queryTranResponses = response.readEntity(QueryTranOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, queryTranResponses);
+		assertNotEquals(0, queryTranResponses.getData().size());
+		assertEquals("0", queryTranResponses.getData().get(0).getCc());
+		assertEquals(200, response.getStatus());
+		return queryTranResponses;
 	}
 	
 
