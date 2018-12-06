@@ -33,9 +33,9 @@ import json.java.JSONObject;
 @Path("/region")
 @Tag(name = "Region")
 @CheckHeader
-public class Region {
+public class RegionService {
 
-	private static final Logger logger = LoggerFactory.getLogger(Region.class);
+	private static final Logger logger = LoggerFactory.getLogger(RegionService.class);
 	
 	@EJB
 	OMServlet omServlet;

@@ -14,14 +14,14 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientProperties;
 
-import application.rest.responses.pgm.QueryProgramResponses;
-import application.rest.responses.pgm.StartProgramResponses;
-import application.rest.responses.pgm.UpdatePgmResponses;
+import application.rest.responses.pgm.QueryProgramOutput;
+import application.rest.responses.pgm.StartProgramOutput;
+import application.rest.responses.pgm.UpdateProgamOutput;
 
 public class RequestUtils {
 
-	public static UpdatePgmResponses validateUPRSuccess(Response responses) {
-		UpdatePgmResponses updatePgmResponses = responses.readEntity(UpdatePgmResponses.class);
+	public static UpdateProgamOutput validateUPRSuccess(Response responses) {
+		UpdateProgamOutput updatePgmResponses = responses.readEntity(UpdateProgamOutput.class);
 		assertNotEquals(null, updatePgmResponses);
 		assertNotEquals(0, updatePgmResponses.getData().size());
 		assertEquals("0", updatePgmResponses.getData().get(0).getCc());
@@ -65,8 +65,8 @@ public class RequestUtils {
 		return responses;
 	}
 
-	public static QueryProgramResponses validateQPRSuccess(Response responses){
-		QueryProgramResponses queryPgmResponses = responses.readEntity(QueryProgramResponses.class);
+	public static QueryProgramOutput validateQPRSuccess(Response responses){
+		QueryProgramOutput queryPgmResponses = responses.readEntity(QueryProgramOutput.class);
 		assertNotEquals(null, queryPgmResponses);
 		assertNotEquals(0, queryPgmResponses.getData().size());
 		assertEquals("0", queryPgmResponses.getData().get(0).getCc());
@@ -74,8 +74,8 @@ public class RequestUtils {
 		return queryPgmResponses;
 	}
 
-	public static StartProgramResponses validateSPRSuccess(Response response) {
-		StartProgramResponses startProgramResponses = response.readEntity(StartProgramResponses.class);
+	public static StartProgramOutput validateSPRSuccess(Response response) {
+		StartProgramOutput startProgramResponses = response.readEntity(StartProgramOutput.class);
 		/*Check if request is successful*/
 		assertNotEquals(null, startProgramResponses);
 		assertNotEquals(0, startProgramResponses.getData().size());

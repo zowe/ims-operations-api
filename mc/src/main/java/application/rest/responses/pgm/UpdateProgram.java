@@ -2,15 +2,26 @@ package application.rest.responses.pgm;
 
 import java.lang.reflect.Field;
 
-public class UpdateProgramsResponse {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "POJO from a Update PGM command that represents output for one program")
+public class UpdateProgram {
 	
+	@Schema(description = "Completion Code")
 	String cc;
+	@Schema(description = "Completion code text that briefly explains the meaning of the non-zero completion code.")
 	String cctxt;
+	@Schema(description = "Error text with diagnostic information. Error text can be returned for a nonzero completion code and contains information that further explains the completion code.")
 	String errt;
+	@Schema(description = "Job Name of the program that is posted.")
 	String job;
+	@Schema(description = "IMSplex member that built the output line.")
 	String mbr;
+	@Schema(description = "Program name.")
 	String pgm;
+	@Schema(description = "Region Number where the program is scheduled.")
 	String rgnn;
+	@Schema(description = "	Region type where the program is scheduled.")
 	String rgnt;
 	
 	public String getCc() {

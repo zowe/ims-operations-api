@@ -6,8 +6,11 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
-public class StartProgramResponse {
+import io.swagger.v3.oas.annotations.media.Schema;
 
+public class StartProgram {
+
+	@Schema(description = "A map that represents the JSON data response from a START PGM program. The key is the key in the JSON object, usually the IMS mbr. The value is the message")
 	Map<String, String> mbr = new HashMap<>();
 
 	@JsonAnySetter

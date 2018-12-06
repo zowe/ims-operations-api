@@ -16,8 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.QueryProgramResponse;
-import application.rest.responses.pgm.QueryProgramResponses;
+import application.rest.responses.pgm.QueryProgram;
+import application.rest.responses.pgm.QueryProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -55,10 +55,10 @@ public class TestQueryPgm
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
 		Response response = RequestUtils.getRequest(queryParams, "/pgm/", client);
-		QueryProgramResponses qpr = RequestUtils.validateQPRSuccess(response);
+		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryProgramResponse q : qpr.getData()) {
+		for (QueryProgram q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getTmcr());
 		}
@@ -71,10 +71,10 @@ public class TestQueryPgm
 		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
 		Response response2= RequestUtils.getRequest(queryParams2, "/pgm/", client);
-		QueryProgramResponses qpr2 = RequestUtils.validateQPRSuccess(response2);
+		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
-		for (QueryProgramResponse q : qpr2.getData()) {
+		for (QueryProgram q : qpr2.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getDopt());
 		}
@@ -87,10 +87,10 @@ public class TestQueryPgm
 		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
 		Response response3= RequestUtils.getRequest(queryParams3, "/pgm/", client);
-		QueryProgramResponses qpr3 = RequestUtils.validateQPRSuccess(response3);
+		QueryProgramOutput qpr3 = RequestUtils.validateQPRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
-		for (QueryProgramResponse q : qpr3.getData()) {
+		for (QueryProgram q : qpr3.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getSchd());
 		}
@@ -111,10 +111,10 @@ public class TestQueryPgm
 		
 		//QUERY PGM
 		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/pgm/", client);
-		QueryProgramResponses qpr = RequestUtils.validateQPRSuccess(response);
+		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryProgramResponse q : qpr.getData()) {
+		for (QueryProgram q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 		}
 		for (String key : qpr.getMessages().keySet()) {
@@ -134,10 +134,10 @@ public class TestQueryPgm
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
 		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
-		QueryProgramResponses qpr = response.readEntity(QueryProgramResponses.class);
+		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryProgramResponse q : qpr.getData()) {
+		for (QueryProgram q : qpr.getData()) {
 			assertEquals("10", q.getCc());
 		}
 		for (String key : qpr.getMessages().keySet()) {
@@ -157,7 +157,7 @@ public class TestQueryPgm
 		String[] route = new String[] {"route", "FOO"};
 		queryParams.add(route);
 		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
-		QueryProgramResponses qpr = response.readEntity(QueryProgramResponses.class);
+		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
 		for (String key : qpr.getMessages().keySet()) {

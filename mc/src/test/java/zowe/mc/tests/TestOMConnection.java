@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.QueryProgramResponses;
+import application.rest.responses.pgm.QueryProgramOutput;
 import icon.helpers.MCInteraction;
 import om.connection.IconOmConnection;
 import om.connection.IconOmConnectionFactory;
@@ -86,7 +86,7 @@ public class TestOMConnection {
 
 		Response responses = builder.get();
 
-		QueryProgramResponses queryProgramResponses= responses.readEntity(QueryProgramResponses.class);
+		QueryProgramOutput queryProgramResponses= responses.readEntity(QueryProgramOutput.class);
 		//logger.info(queryProgramResponses.toString());
 		assertNotEquals(null, queryProgramResponses);
 		assertEquals(400, responses.getStatus());	
@@ -110,7 +110,7 @@ public class TestOMConnection {
 
 		Response responses = builder.get();
 
-		QueryProgramResponses queryProgramResponses= responses.readEntity(QueryProgramResponses.class);
+		QueryProgramOutput queryProgramResponses= responses.readEntity(QueryProgramOutput.class);
 
 		//logger.info(queryProgramResponses.toString());
 		assertNotEquals(null, queryProgramResponses);

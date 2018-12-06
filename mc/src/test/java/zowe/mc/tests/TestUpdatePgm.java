@@ -13,9 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.QueryProgramResponse;
-import application.rest.responses.pgm.QueryProgramResponses;
-import application.rest.responses.pgm.UpdatePgmResponses;
+import application.rest.responses.pgm.QueryProgram;
+import application.rest.responses.pgm.QueryProgramOutput;
+import application.rest.responses.pgm.UpdateProgamOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -55,7 +55,7 @@ public class TestUpdatePgm {
 		queryParams.add(names);
 		queryParams.add(stop);
 		Response responses = RequestUtils.putRequest(queryParams, "/pgm/", client);
-		UpdatePgmResponses upr = RequestUtils.validateUPRSuccess(responses);
+		UpdateProgamOutput upr = RequestUtils.validateUPRSuccess(responses);
 		logger.info(upr.toString());
 		
 		//Then we verify it's status
@@ -66,8 +66,8 @@ public class TestUpdatePgm {
 		queryParams2.add(names2);
 		queryParams2.add(show);
 		Response responses2 = RequestUtils.getRequest(queryParams2, "/pgm/", client);
-		QueryProgramResponses qpr = RequestUtils.validateQPRSuccess(responses2);
-		for (QueryProgramResponse r : qpr.getData()) {
+		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(responses2);
+		for (QueryProgram r : qpr.getData()) {
 			assertEquals("STOSCHD", r.getLstt());
 		}
 		
@@ -79,7 +79,7 @@ public class TestUpdatePgm {
 		queryParams3.add(names3);
 		queryParams3.add(start);
 		Response responses3 = RequestUtils.putRequest(queryParams3, "/pgm/", client);
-		UpdatePgmResponses upr2 = RequestUtils.validateUPRSuccess(responses3);
+		UpdateProgamOutput upr2 = RequestUtils.validateUPRSuccess(responses3);
 		logger.info(upr2.toString());
 		
 		//Then we verify it's status
@@ -90,8 +90,8 @@ public class TestUpdatePgm {
 		queryParams4.add(names4);
 		queryParams4.add(show2);
 		Response responses4 = RequestUtils.getRequest(queryParams4, "/pgm/", client);
-		QueryProgramResponses qpr2 = RequestUtils.validateQPRSuccess(responses4);
-		for (QueryProgramResponse r : qpr2.getData()) {
+		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(responses4);
+		for (QueryProgram r : qpr2.getData()) {
 			assertEquals(null, r.getLstt());
 		}
 		

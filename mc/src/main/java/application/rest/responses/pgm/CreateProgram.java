@@ -2,11 +2,18 @@ package application.rest.responses.pgm;
 
 import java.lang.reflect.Field;
 
-public class CreateProgramResponse {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "POJO from a Create PGM command that represents output for one program")
+public class CreateProgram {
 	
+	@Schema(description = "Completion Code")
 	String cc;
+	@Schema(description = "Completion code text that briefly explains the meaning of the non-zero completion code.")
 	String cctxt;
+	@Schema(description = "IMSplex member that built the output line.")
 	String mbr;
+	@Schema(description = "Program name.")
 	String pgm;
 	
 	

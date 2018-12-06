@@ -7,6 +7,7 @@ import javax.ws.rs.core.Context;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
+import application.rest.OMServlet;
 import filters.HeaderRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
@@ -19,6 +20,7 @@ public class LibertyConfig extends ResourceConfig{
 		register(OpenApiResource.class);
 		register(AcceptHeaderOpenApiResource.class);
 		register(HeaderRequestFilter.class);
+		register(OMServlet.class);
 		packages("application");
 	}
 

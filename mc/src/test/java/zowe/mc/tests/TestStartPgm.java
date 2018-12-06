@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.pgm.StartProgramResponses;
+import application.rest.responses.pgm.StartProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -44,7 +44,7 @@ public class TestStartPgm {
 		logger.info("TESTING START PGM");
 		
 		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/pgm/start", client);
-		StartProgramResponses spr = RequestUtils.validateSPRSuccess(response);
+		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {
 			assertEquals("00000000", spr.getMessages().get(key).getRc());

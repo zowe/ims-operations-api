@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import application.rest.responses.Message;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public class StartProgramResponses {
+public class StartProgramOutput {
 
-	List<StartProgramResponse> data;
+	@Schema(description = "A list of StartProgram objects. Represents the JSON data output for all programs from the command")
+	List<StartProgram> data;
+	@Schema(description = "A map that represents messages that are returned from OM after submitting the command. The key is either the IMS member or OM that returned the message")
 	HashMap<String, Message> messages;
 
 	public HashMap<String, Message> getMessages() {
@@ -19,11 +22,11 @@ public class StartProgramResponses {
 		this.messages = messages;
 	}
 
-	public List<StartProgramResponse> getData() {
+	public List<StartProgram> getData() {
 		return data;
 	}
 
-	public void setData(List<StartProgramResponse> data) {
+	public void setData(List<StartProgram> data) {
 		this.data = data;
 	}
 	

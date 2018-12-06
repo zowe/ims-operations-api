@@ -2,21 +2,22 @@ package application.rest.responses;
 
 import java.lang.reflect.Field;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "POJO that describes a single message element in the messages portion of the JSON output. Returned by an IMS mbr or OM")
 public class Message {
 
-	String message_title;
+	@Schema(description = "Reason Code Text")
 	String rsntxt;
+	@Schema(description = "Message from OM. Usually returned only when there is an error")
 	String message;
+	@Schema(description = "Return Code")
 	String rc;
+	@Schema(description = "The command executed")
 	String command;
+	@Schema(description = "Reason Code")
 	String rsn;
 	
-	public String getMessage_title() {
-		return message_title;
-	}
-	public void setMessage_title(String message_title) {
-		this.message_title = message_title;
-	}
 	public String getRsntxt() {
 		return rsntxt;
 	}

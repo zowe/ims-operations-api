@@ -23,10 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
-import application.rest.responses.pgm.CreateProgramResponses;
-import application.rest.responses.pgm.QueryProgramResponses;
-import application.rest.responses.pgm.StartProgramResponses;
-import application.rest.responses.pgm.UpdateProgramsResponse;
+import application.rest.responses.pgm.CreateProgramOutput;
+import application.rest.responses.pgm.QueryProgramOutput;
+import application.rest.responses.pgm.StartProgramOutput;
+import application.rest.responses.pgm.UpdateProgram;
 import commands.create.pgm.CreatePgm;
 import commands.delete.pgm.DeletePgm;
 import commands.query.pgm.QueryPgm;
@@ -67,17 +67,16 @@ import utils.Type2CommandSerializable;
  *
  */
 @Stateless
-//@Path("/{parameter: pgm|program}")
 @Path("pgm")
 @Tag(name = "Program")
 @CheckHeader
-public class Pgm {
+public class PgmService {
 
 	@Autowired
 	@EJB
 	OMServlet omServlet;
 
-	private static final Logger logger = LoggerFactory.getLogger(Pgm.class);
+	private static final Logger logger = LoggerFactory.getLogger(PgmService.class);
 
 	@Path("/")
 	@GET
@@ -85,7 +84,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
-			content = @Content(schema = @Schema(implementation = QueryProgramResponses.class))),
+			content = @Content(schema = @Schema(implementation = QueryProgramOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
@@ -182,7 +181,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'START PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-			content = @Content(schema = @Schema(implementation = StartProgramResponses.class))),
+			content = @Content(schema = @Schema(implementation = StartProgramOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
@@ -246,7 +245,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-			content = @Content(schema = @Schema(implementation = CreateProgramResponses.class))),
+			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
@@ -396,7 +395,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-			content = @Content(schema = @Schema(implementation = CreateProgramResponses.class))),
+			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
@@ -469,7 +468,7 @@ public class Pgm {
 	@Operation(summary = "Returns data from a 'UPDATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-			content = @Content(schema = @Schema(implementation = UpdateProgramsResponse.class))),
+			content = @Content(schema = @Schema(implementation = UpdateProgram.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
