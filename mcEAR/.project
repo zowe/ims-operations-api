@@ -3,7 +3,7 @@
 	<name>mcEAR</name>
 	<comment></comment>
 	<projects>
-		<project>mc</project>
+		<project>imscmdapi</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
