@@ -12,6 +12,11 @@ import filters.HeaderRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
+/**
+ * Configuration class for REST endpoint
+ * @author jerryli
+ *
+ */
 @Component
 @ApplicationPath("/services/")
 public class LibertyConfig extends ResourceConfig{
