@@ -31,10 +31,10 @@ import om.services.Om;
 
 @OpenAPIDefinition(
 		info = @Info(
-				title = "Management Console for Zowe",
+				title = "IMS Command Services",
 				version = "1.0.0",
-				description = "Management Console for Zowe allows users to use RESTFul APIs to submit IMS commmands"),
-		servers = {@Server(url = "http://localhost:9080/mc/")})
+				description = "IMS Command Services allows users to use RESTFul APIs to submit IMS commmands"),
+		servers = {@Server(url = "http://localhost:9080/imscmdapi/")})
 @Stateless
 @Service
 public class OMServlet {
