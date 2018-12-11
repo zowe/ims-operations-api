@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class QueryTran {
+public class QueryTransaction {
 	
 	@Schema(description = "Affinity of the transaction messages on the shared queues, or affinity registration of the transactions for this IMS.")
 	String afin;

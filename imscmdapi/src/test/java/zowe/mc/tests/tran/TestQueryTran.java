@@ -16,8 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.tran.query.QueryTran;
-import application.rest.responses.tran.query.QueryTranOutput;
+import application.rest.responses.tran.query.QueryTransaction;
+import application.rest.responses.tran.query.QueryTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -47,10 +47,10 @@ public class TestQueryTran {
 		logger.info("TESTING Query TRAN");
 		
 		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/tran/", client);
-		QueryTranOutput qpr = RequestUtils.validateQTRSuccess(response);
+		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryTran q : qpr.getData()) {
+		for (QueryTransaction q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 		}
 		for (String key : qpr.getMessages().keySet()) {
@@ -71,10 +71,10 @@ public class TestQueryTran {
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
 		Response response = RequestUtils.getRequest(queryParams, "/tran/", client);
-		QueryTranOutput qpr = RequestUtils.validateQTRSuccess(response);
+		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryTran q : qpr.getData()) {
+		for (QueryTransaction q : qpr.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getTmcr());
 		}
@@ -87,10 +87,10 @@ public class TestQueryTran {
 		String[] show2 = new String[] {"attributes", "PGM"};
 		queryParams2.add(show2);
 		Response response2= RequestUtils.getRequest(queryParams2, "/tran/", client);
-		QueryTranOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
+		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
-		for (QueryTran q : qpr2.getData()) {
+		for (QueryTransaction q : qpr2.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getPsb());
 		}
@@ -103,10 +103,10 @@ public class TestQueryTran {
 		String[] show3 = new String[] {"attributes", "AOCMD"};
 		queryParams3.add(show3);
 		Response response3= RequestUtils.getRequest(queryParams3, "/tran/", client);
-		QueryTranOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
+		QueryTransactionOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
-		for (QueryTran q : qpr3.getData()) {
+		for (QueryTransaction q : qpr3.getData()) {
 			assertEquals("0", q.getCc());
 			assertNotNull(q.getAocmd());
 		}
@@ -128,10 +128,10 @@ public class TestQueryTran {
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
 		Response response= RequestUtils.getRequest(queryParams, "/tran/", client);
-		QueryTranOutput qpr = response.readEntity(QueryTranOutput.class);
+		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
-		for (QueryTran q : qpr.getData()) {
+		for (QueryTransaction q : qpr.getData()) {
 			assertEquals("10", q.getCc());
 		}
 		for (String key : qpr.getMessages().keySet()) {

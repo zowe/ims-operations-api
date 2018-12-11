@@ -11,6 +11,7 @@ import zowe.mc.tests.pgm.TestQueryPgm;
 import zowe.mc.tests.pgm.TestStartPgm;
 import zowe.mc.tests.pgm.TestUpdatePgm;
 import zowe.mc.tests.tran.TestQueryTran;
+import zowe.mc.tests.tran.TestUpdateTran;
 
 /**
  * Right now we have to use JUnit 4 runner for test suites because test suites are
@@ -25,7 +26,8 @@ import zowe.mc.tests.tran.TestQueryTran;
 				  TestStartPgm.class, 
 				  TestUpdatePgm.class,
 				  TestCreateDeletePgm.class,
-				  TestQueryTran.class} )
+				  TestQueryTran.class,
+				  TestUpdateTran.class} )
 public class MCSuiteTest {
 
 }

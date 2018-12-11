@@ -1,4 +1,4 @@
-package application.rest.responses.tran.query;
+package application.rest.responses.tran.update;
 
 import java.util.List;
 import java.util.Map;
@@ -6,11 +6,11 @@ import java.util.Map;
 import application.rest.responses.Message;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "POJO that represents all the data returned from OM following a Query TRAN command")
-public class QueryTranOutput {
+@Schema(description = "POJO that represents all the data returned from OM following a Update TRAN command")
+public class UpdateTranOutput {
 
-	@Schema(description = "A list of QueryTran objects. Represents the JSON data output for all programs from the command")
-	List<QueryTran> data;
+	@Schema(description = "A list of UpdateTran objects. Represents the JSON data output for all programs from the command")
+	List<UpdateTran> data;
 	@Schema(description = "A map that represents messages that are returned from OM after submitting the command. The key is either the IMS member or OM that returned the message")
 	Map<String, Message> messages;
 
@@ -21,11 +21,11 @@ public class QueryTranOutput {
 		this.messages = messages;
 	}
 
-	public List<QueryTran> getData() {
+	public List<UpdateTran> getData() {
 		return data;
 	}
 
-	public void setData(List<QueryTran> data) {
+	public void setData(List<UpdateTran> data) {
 		this.data = data;
 	}
 
@@ -33,8 +33,8 @@ public class QueryTranOutput {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
-		sb.append("Query Tran Response Data");
-		for (QueryTran q : data) {
+		sb.append("Update Tran Response Data");
+		for (UpdateTran q : data) {
 			sb.append(q.toString());
 		}
 		sb.append("\n");

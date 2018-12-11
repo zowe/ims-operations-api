@@ -19,7 +19,8 @@ import application.rest.responses.pgm.delete.DeleteProgramOutput;
 import application.rest.responses.pgm.query.QueryProgramOutput;
 import application.rest.responses.pgm.start.StartProgramOutput;
 import application.rest.responses.pgm.update.UpdateProgamOutput;
-import application.rest.responses.tran.query.QueryTranOutput;
+import application.rest.responses.tran.query.QueryTransactionOutput;
+import application.rest.responses.tran.update.UpdateTranOutput;
 
 public class RequestUtils {
 	
@@ -76,6 +77,16 @@ public class RequestUtils {
 		return responses;
 	}
 
+	public static UpdateTranOutput validateUTRSuccess(Response responses) {
+		UpdateTranOutput updateTranResponses = responses.readEntity(UpdateTranOutput.class);
+		assertNotEquals(null, updateTranResponses);
+		assertNotEquals(0, updateTranResponses.getData().size());
+		assertEquals("0", updateTranResponses.getData().get(0).getCc());
+		assertEquals(200, responses.getStatus());
+		return updateTranResponses;
+	
+	}
+	
 	public static UpdateProgamOutput validateUPRSuccess(Response responses) {
 		UpdateProgamOutput updatePgmResponses = responses.readEntity(UpdateProgamOutput.class);
 		assertNotEquals(null, updatePgmResponses);
@@ -125,8 +136,8 @@ public class RequestUtils {
 		return deleteProgramResponses;
 	}
 	
-	public static QueryTranOutput validateQTRSuccess(Response response) {
-		QueryTranOutput queryTranResponses = response.readEntity(QueryTranOutput.class);
+	public static QueryTransactionOutput validateQTRSuccess(Response response) {
+		QueryTransactionOutput queryTranResponses = response.readEntity(QueryTransactionOutput.class);
 		/*Check if request is successful*/
 		assertNotEquals(null, queryTranResponses);
 		assertNotEquals(0, queryTranResponses.getData().size());

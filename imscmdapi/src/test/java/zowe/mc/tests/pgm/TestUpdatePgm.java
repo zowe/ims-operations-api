@@ -41,7 +41,7 @@ public class TestUpdatePgm {
 	}
 
 	/**
-	 * Tests rest service for submitting QUERY PGM IMS command with different SHOW options
+	 * Tests rest service for submitting UPDATE PGM IMS command
 	 * @throws Exception
 	 */
 	@Test
