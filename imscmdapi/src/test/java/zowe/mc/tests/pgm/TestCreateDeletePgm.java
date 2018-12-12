@@ -54,7 +54,7 @@ public class TestCreateDeletePgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"names", "TEST"};
 		queryParams.add(names);
-		Response response = RequestUtils.postRequest(queryParams, "/pgm/create", client);
+		Response response = RequestUtils.postRequest(queryParams, "/program", client);
 		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(cpr.toString());
@@ -69,7 +69,7 @@ public class TestCreateDeletePgm
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] names2 = new String[] {"names", "TEST"};
 		queryParams2.add(names2);
-		Response response2 = RequestUtils.postRequest(queryParams2, "/pgm/delete", client);
+		Response response2 = RequestUtils.deleteRequest(queryParams2, "/program", client);
 		DeleteProgramOutput dpr2 = RequestUtils.validateDPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(dpr2.toString());

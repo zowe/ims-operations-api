@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -65,7 +66,7 @@ import utils.Type2CommandSerializable;
  *
  */
 @Stateless
-@Path("pgm")
+@Path("/program")
 @Tag(name = "Program")
 @CheckHeader
 public class PgmService {
@@ -237,7 +238,7 @@ public class PgmService {
 	}
 
 
-	@Path("/create")
+	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
@@ -387,8 +388,8 @@ public class PgmService {
 
 	}
 
-	@Path("/delete")
-	@POST
+	@Path("/")
+	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),

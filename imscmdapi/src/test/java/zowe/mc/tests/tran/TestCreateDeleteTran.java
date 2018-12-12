@@ -59,7 +59,7 @@ import zowe.mc.SuiteExtension;
 			List<String[]> queryParams = new ArrayList<>();
 			String[] names = new String[] {"names", "TEST"};
 			queryParams.add(names);
-			Response response = RequestUtils.postRequest(queryParams, "/pgm/create", client);
+			Response response = RequestUtils.postRequest(queryParams, "/program", client);
 			CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
 			/*Check if data is correct*/
 			logger.info(cpr.toString());
@@ -77,7 +77,7 @@ import zowe.mc.SuiteExtension;
 			String[] pgm1 = new String[] {"pgm", "TEST"};
 			queryParams1.add(names1);
 			queryParams1.add(pgm1);
-			Response response1 = RequestUtils.postRequest(queryParams1, "/tran/create", client);
+			Response response1 = RequestUtils.postRequest(queryParams1, "/transaction", client);
 			CreateTransactionOutput ctr = RequestUtils.validateCTRSuccess(response1);
 			/*Check if data is correct*/
 			logger.info(ctr.toString());
@@ -92,7 +92,7 @@ import zowe.mc.SuiteExtension;
 			List<String[]> queryParams2 = new ArrayList<>();
 			String[] names2 = new String[] {"names", "TEST"};
 			queryParams2.add(names2);
-			Response response2 = RequestUtils.postRequest(queryParams2, "/tran/delete", client);
+			Response response2 = RequestUtils.deleteRequest(queryParams2, "/transaction", client);
 			DeleteTransactionOutput dtr = RequestUtils.validateDTRSuccess(response2);
 			/*Check if data is correct*/
 			logger.info(dtr.toString());
@@ -107,7 +107,7 @@ import zowe.mc.SuiteExtension;
 			List<String[]> queryParams3 = new ArrayList<>();
 			String[] names3 = new String[] {"names", "TEST"};
 			queryParams3.add(names3);
-			Response response3= RequestUtils.postRequest(queryParams3, "/pgm/delete", client);
+			Response response3= RequestUtils.deleteRequest(queryParams3, "/program", client);
 			DeleteProgramOutput dpr = RequestUtils.validateDPRSuccess(response3);
 			/*Check if data is correct*/
 			logger.info(dpr.toString());

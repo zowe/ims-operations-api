@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -58,7 +59,7 @@ import utils.Type2CommandSerializable;
  *
  */
 @Stateless
-@Path("/tran")
+@Path("/transaction")
 @Tag(name = "Transaction")
 @CheckHeader
 public class TranService {
@@ -295,7 +296,7 @@ public class TranService {
 		return Response.ok(result).build();
 	}
 
-	@Path("/create")
+	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
@@ -656,8 +657,8 @@ public class TranService {
 
 	}
 
-	@Path("/delete")
-	@POST
+	@Path("/")
+	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),

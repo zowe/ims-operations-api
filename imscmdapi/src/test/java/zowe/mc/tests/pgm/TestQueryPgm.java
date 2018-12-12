@@ -51,7 +51,7 @@ public class TestQueryPgm
 		logger.info("TESTING Query PGM");
 		
 		//QUERY PGM
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/pgm/", client);
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/program/", client);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -75,7 +75,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, "/pgm/", client);
+		Response response = RequestUtils.getRequest(queryParams, "/program/", client);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -91,7 +91,7 @@ public class TestQueryPgm
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, "/pgm/", client);
+		Response response2= RequestUtils.getRequest(queryParams2, "/program/", client);
 		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -107,7 +107,7 @@ public class TestQueryPgm
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, "/pgm/", client);
+		Response response3= RequestUtils.getRequest(queryParams3, "/program/", client);
 		QueryProgramOutput qpr3 = RequestUtils.validateQPRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -133,7 +133,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
+		Response response= RequestUtils.getRequest(queryParams, "/program", client);
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -156,7 +156,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] route = new String[] {"route", "FOO"};
 		queryParams.add(route);
-		Response response= RequestUtils.getRequest(queryParams, "/pgm", client);
+		Response response= RequestUtils.getRequest(queryParams, "/program", client);
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

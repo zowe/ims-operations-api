@@ -44,6 +44,24 @@ public class RequestUtils {
 		return responses;
 		
 	}
+	
+	public static Response deleteRequest(List<String[]> queryParams, String path, Client client) {
+		WebTarget webTarget = client.target("http://localhost:8081/");
+
+		for (String[] sArray : queryParams) {
+			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
+		}
+		
+
+		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+				.header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+		
+		Response responses = builder.delete();
+		return responses;
+		
+	}
 
 	public static Response putRequest(List<String[]> queryParams, String path, Client client) {
 		WebTarget webTarget = client.target("http://localhost:8081/");

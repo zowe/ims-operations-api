@@ -18,7 +18,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
  *
  */
 @Component
-@ApplicationPath("/services/")
+@ApplicationPath("/v1/api/")
 public class LibertyConfig extends ResourceConfig{
 
 	public LibertyConfig(@Context ServletConfig servletConfig) {

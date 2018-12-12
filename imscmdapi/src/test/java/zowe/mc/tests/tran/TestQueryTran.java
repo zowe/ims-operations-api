@@ -46,7 +46,7 @@ public class TestQueryTran {
 	public void testQueryTran() {
 		logger.info("TESTING Query TRAN");
 		
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/tran/", client);
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/transaction/", client);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -70,7 +70,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, "/tran/", client);
+		Response response = RequestUtils.getRequest(queryParams, "/transaction/", client);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -86,7 +86,7 @@ public class TestQueryTran {
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "PGM"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, "/tran/", client);
+		Response response2= RequestUtils.getRequest(queryParams2, "/transaction/", client);
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -102,7 +102,7 @@ public class TestQueryTran {
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "AOCMD"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, "/tran/", client);
+		Response response3= RequestUtils.getRequest(queryParams3, "/transaction/", client);
 		QueryTransactionOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -127,7 +127,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, "/tran/", client);
+		Response response= RequestUtils.getRequest(queryParams, "/transaction/", client);
 		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

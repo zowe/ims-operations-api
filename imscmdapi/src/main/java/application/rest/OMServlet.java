@@ -34,7 +34,8 @@ import om.services.Om;
 				title = "IMS Command Services",
 				version = "1.0.0",
 				description = "IMS Command Services allows users to use RESTFul APIs to submit IMS commmands"),
-		servers = {@Server(url = "http://localhost:8080/imscmdapi")})
+		servers = {@Server(url = "http://localhost:8080/ims"),
+				@Server(url = "http://localhost:9080/ims")})
 @Stateless
 @Service
 public class OMServlet {
@@ -107,12 +108,12 @@ public class OMServlet {
 
 			//Possible IMS error. When specifying single incorrect route empty data is returned. It should be
 			//returning an error message. Discuss with Kevin. 
-//			for (int i = 0; i<response.length; i++) {
-//				if (mcSpec.getDatastores().contains(response[i].getProperty("IMSMBR"))) {
-//					plexImsMbrs.add(response[i].getProperty("IMSMBR"));
-//				} else {
-//				}
-//			}
+			//			for (int i = 0; i<response.length; i++) {
+			//				if (mcSpec.getDatastores().contains(response[i].getProperty("IMSMBR"))) {
+			//					plexImsMbrs.add(response[i].getProperty("IMSMBR"));
+			//				} else {
+			//				}
+			//			}
 
 			//We need to proccess the command, prepare it with the PREFIX and ROUTE SUFFIX
 			omResultSet= cService.executeImsCommand("executeImsCommand",command);
@@ -207,15 +208,15 @@ public class OMServlet {
 			JSONObject omMessage = new JSONObject();
 
 			omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
-		//	omMessage.put("message_title", omMessageContext.getOmMessageTittle());
-		//	omMessage.put("message", omMessageContext.getOmMessageSummary());
+			//	omMessage.put("message_title", omMessageContext.getOmMessageTittle());
+			//	omMessage.put("message", omMessageContext.getOmMessageSummary());
 			omMessage.put("rc", omMessageContext.getOmReturnCode());
 			omMessage.put("rsn", omMessageContext.getOmReasonCode());
 			omMessage.put("rsntxt", omMessageContext.getOmReasonText());
 
 			omMessages.put(omMessageContext.getOmName(), omMessage);
 		}
-		
+
 		result.put("messages", omMessages);
 	}
 
@@ -237,7 +238,7 @@ public class OMServlet {
 
 		if (e != null) {
 			String msg = OM_EXCEPTION.OM_EXCEPTION_MESG.msg(new Object[] {e.getOmCommandExecuted(), e.getOmReturnCode(), e.getOmReasonCode(), e.getOmReasonMessage(), e.getOmReasonText(), e.getErrorNumber()});
-		//	omExceptionJson.put("message_title", OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
+			//	omExceptionJson.put("message_title", OM_EXCEPTION.OM_EXCEPTION_TITTLE.msg());
 			omExceptionJson.put("message", msg);
 			omExceptionJson.put("command", extractEssentialCommand(e.getOmCommandExecuted()));
 			omExceptionJson.put("rc", e.getOmReturnCode());
@@ -265,7 +266,7 @@ public class OMServlet {
 			msg = e.getMessage();
 		}
 
-	//	omConnectionExceptionJson.put("message_title", OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
+		//	omConnectionExceptionJson.put("message_title", OM_CONNECTION.OM_CONNECTION_EXCEPTION_TITTLE.msg());
 		omConnectionExceptionJson.put("message", msg);
 		omConnectionExceptionJson.put("command", "N/A");
 		omConnectionExceptionJson.put("rc", e.getConnectionReturnCode());
