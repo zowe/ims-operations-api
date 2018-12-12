@@ -1,4 +1,3 @@
-//Comment for pull request
 openapi: 3.0.1
 info:
   title: IMS Command Services
@@ -11,7 +10,7 @@ servers:
 - url: http://localhost:9080/ims
   variables: {}
 paths:
-  /v1/api/program:
+  /apis/v1/program:
     get:
       tags:
       - Program
@@ -488,7 +487,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/program/start:
+  /apis/v1/program/start:
     put:
       tags:
       - Program
@@ -545,7 +544,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/region/start:
+  /apis/v1/region/start:
     put:
       tags:
       - Region
@@ -600,7 +599,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/region/stop:
+  /apis/v1/region/stop:
     put:
       tags:
       - Region
@@ -664,7 +663,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/transaction:
+  /apis/v1/transaction:
     get:
       tags:
       - Transaction
@@ -1559,7 +1558,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/transaction/start:
+  /apis/v1/transaction/start:
     put:
       tags:
       - Transaction
