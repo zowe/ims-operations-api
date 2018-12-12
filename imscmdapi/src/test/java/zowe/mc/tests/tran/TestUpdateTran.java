@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import application.rest.responses.tran.query.QueryTransaction;
 import application.rest.responses.tran.query.QueryTransactionOutput;
-import application.rest.responses.tran.update.UpdateTranOutput;
+import application.rest.responses.tran.update.UpdateTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
@@ -54,7 +54,7 @@ public class TestUpdateTran {
 		queryParams.add(names);
 		queryParams.add(stop);
 		Response responses = RequestUtils.putRequest(queryParams, "/tran/", client);
-		UpdateTranOutput upr = RequestUtils.validateUTRSuccess(responses);
+		UpdateTransactionOutput upr = RequestUtils.validateUTRSuccess(responses);
 		logger.info(upr.toString());
 		
 		//Then we verify it's status
@@ -78,7 +78,7 @@ public class TestUpdateTran {
 		queryParams3.add(names3);
 		queryParams3.add(start);
 		Response responses3 = RequestUtils.putRequest(queryParams3, "/tran/", client);
-		UpdateTranOutput upr2 = RequestUtils.validateUTRSuccess(responses3);
+		UpdateTransactionOutput upr2 = RequestUtils.validateUTRSuccess(responses3);
 		logger.info(upr2.toString());
 		
 		//Then we verify it's status

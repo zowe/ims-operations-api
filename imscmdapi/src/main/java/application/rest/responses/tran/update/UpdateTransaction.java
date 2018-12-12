@@ -4,7 +4,8 @@ import java.lang.reflect.Field;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class UpdateTran {
+@Schema(description = "POJO from a Update TRAN command that represents output for one transaction")
+public class UpdateTransaction {
 	
 	@Schema(description = "Completion code. The completion code indicates whether IMS was able to process the command for the specified resource. The completion code is always returned. ")
 	String cc;

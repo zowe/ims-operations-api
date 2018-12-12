@@ -79,7 +79,7 @@ public class TestOMConnection {
 		
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
-		WebTarget webTarget = client.target("http://localhost:8080/");
+		WebTarget webTarget = client.target("http://localhost:8081/");
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
@@ -103,7 +103,7 @@ public class TestOMConnection {
 	public void testBadConnection() {
 		logger.info("TESTING Bad Connection");
 		String path = "/pgm/";
-		WebTarget webTarget = client.target("http://localhost:8080/");
+		WebTarget webTarget = client.target("http://localhost:8081/");
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "FOO")
 				.header("port", TestProperties.port)
 				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);

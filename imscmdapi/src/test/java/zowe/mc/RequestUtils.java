@@ -19,13 +19,16 @@ import application.rest.responses.pgm.delete.DeleteProgramOutput;
 import application.rest.responses.pgm.query.QueryProgramOutput;
 import application.rest.responses.pgm.start.StartProgramOutput;
 import application.rest.responses.pgm.update.UpdateProgamOutput;
+import application.rest.responses.tran.create.CreateTransactionOutput;
+import application.rest.responses.tran.delete.DeleteTransactionOutput;
 import application.rest.responses.tran.query.QueryTransactionOutput;
-import application.rest.responses.tran.update.UpdateTranOutput;
+import application.rest.responses.tran.start.StartTransactionOutput;
+import application.rest.responses.tran.update.UpdateTransactionOutput;
 
 public class RequestUtils {
 	
 	public static Response postRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8080/");
+		WebTarget webTarget = client.target("http://localhost:8081/");
 
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
@@ -43,7 +46,7 @@ public class RequestUtils {
 	}
 
 	public static Response putRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8080/");
+		WebTarget webTarget = client.target("http://localhost:8081/");
 
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
@@ -64,7 +67,7 @@ public class RequestUtils {
 	 * @return
 	 */
 	public static Response getRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8080");
+		WebTarget webTarget = client.target("http://localhost:8081");
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
@@ -77,14 +80,44 @@ public class RequestUtils {
 		return responses;
 	}
 
-	public static UpdateTranOutput validateUTRSuccess(Response responses) {
-		UpdateTranOutput updateTranResponses = responses.readEntity(UpdateTranOutput.class);
+	public static UpdateTransactionOutput validateUTRSuccess(Response responses) {
+		UpdateTransactionOutput updateTranResponses = responses.readEntity(UpdateTransactionOutput.class);
 		assertNotEquals(null, updateTranResponses);
 		assertNotEquals(0, updateTranResponses.getData().size());
 		assertEquals("0", updateTranResponses.getData().get(0).getCc());
 		assertEquals(200, responses.getStatus());
 		return updateTranResponses;
 	
+	}
+	
+	public static StartTransactionOutput validateSTRSuccess(Response response) {
+		StartTransactionOutput startTransactionResponses = response.readEntity(StartTransactionOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, startTransactionResponses);
+		assertNotEquals(0, startTransactionResponses.getData().size());
+		assertEquals(false, startTransactionResponses.getData().get(0).get().isEmpty());
+		assertEquals(200, response.getStatus());
+		return startTransactionResponses;
+	}
+	
+	public static CreateTransactionOutput validateCTRSuccess(Response response) {
+		CreateTransactionOutput createTransactionResponses = response.readEntity(CreateTransactionOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, createTransactionResponses);
+		assertNotEquals(0, createTransactionResponses.getData().size());
+		assertEquals("0", createTransactionResponses.getData().get(0).getCc());
+		assertEquals(200, response.getStatus());
+		return createTransactionResponses;
+	}
+	
+	public static DeleteTransactionOutput validateDTRSuccess(Response response) {
+		DeleteTransactionOutput deleteTransactionResponses = response.readEntity(DeleteTransactionOutput.class);
+		/*Check if request is successful*/
+		assertNotEquals(null, deleteTransactionResponses);
+		assertNotEquals(0, deleteTransactionResponses.getData().size());
+		assertEquals("0", deleteTransactionResponses.getData().get(0).getCc());
+		assertEquals(200, response.getStatus());
+		return deleteTransactionResponses;
 	}
 	
 	public static UpdateProgamOutput validateUPRSuccess(Response responses) {

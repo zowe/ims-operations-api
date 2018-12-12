@@ -25,7 +25,7 @@ import com.ibm.ims.connect.InputMessage;
 import com.ibm.ims.connect.OutputMessage;
 import com.ibm.ims.connect.TmInteraction;
 
-import utils.TraceUtil;
+//import utils.TraceUtil;
 
 
 /**

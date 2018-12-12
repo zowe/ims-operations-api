@@ -10,7 +10,9 @@ import zowe.mc.tests.pgm.TestCreateDeletePgm;
 import zowe.mc.tests.pgm.TestQueryPgm;
 import zowe.mc.tests.pgm.TestStartPgm;
 import zowe.mc.tests.pgm.TestUpdatePgm;
+import zowe.mc.tests.tran.TestCreateDeleteTran;
 import zowe.mc.tests.tran.TestQueryTran;
+import zowe.mc.tests.tran.TestStartTran;
 import zowe.mc.tests.tran.TestUpdateTran;
 
 /**
@@ -27,7 +29,9 @@ import zowe.mc.tests.tran.TestUpdateTran;
 				  TestUpdatePgm.class,
 				  TestCreateDeletePgm.class,
 				  TestQueryTran.class,
-				  TestUpdateTran.class} )
+				  TestUpdateTran.class,
+				  TestStartTran.class,
+				  TestCreateDeleteTran.class} )
 public class MCSuiteTest {
 
 }

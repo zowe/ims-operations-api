@@ -23,7 +23,7 @@ import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 
 /**
- * Tests for "QUERY PGM" IMS rest services
+ * Tests for "CREATE/DELETE PGM" IMS rest services
  * @author jerryli
  *
  */
@@ -48,7 +48,7 @@ public class TestCreateDeletePgm
 	 * @throws Exception
 	 */
 	@Test
-	public void testQueryPgm() {
+	public void testCreateDeletePgm() {
 		logger.info("TESTING CREATE and DELETE PGM");
 		
 		List<String[]> queryParams = new ArrayList<>();

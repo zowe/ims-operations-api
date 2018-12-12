@@ -1,6 +1,5 @@
 package application.rest.services;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -13,7 +12,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -38,9 +36,8 @@ public class RegionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionService.class);
 
-	@Autowired
-	@EJB
-	OMServlet omServlet;
+	
+	OMServlet omServlet = new OMServlet();
 
 	@Path("/stop")
 	@PUT
@@ -83,18 +80,6 @@ public class RegionService {
 		mcSpec.setPort(Integer.parseInt(port));
 		mcSpec.setImsPlexName(plex);
 		StringBuilder sb = new StringBuilder("CMD((STOP REGION ");
-		if (jobName != null) {
-			sb.append(jobName + " ");
-			if (abdump != null) {
-				sb.append("ABDUMP " + abdump + " ");
-			}
-			if (transaction != null) {
-				sb.append("TRANSACTION " + transaction + " ");
-			}
-			if (cancel) {
-				sb.append("CANCEL");
-			}
-		} 
 		if (regNumber != null) {
 			String[] regNumbers = regNumber.split("\\s*,\\s*");
 			for (String n : regNumbers) {
@@ -110,7 +95,19 @@ public class RegionService {
 				sb.append("CANCEL");
 			}
 		}
-
+		if (jobName != null) {
+			sb.append("JOBNAME ").append(jobName + " ");
+			if (abdump != null) {
+				sb.append("ABDUMP " + abdump + " ");
+			}
+			if (transaction != null) {
+				sb.append("TRANSACTION " + transaction + " ");
+			}
+			if (cancel) {
+				sb.append("CANCEL");
+			}
+		} 
+		sb.deleteCharAt(sb.length()-1);
 		sb.append(")");
 		sb.append(" OPTION=AOPOUTPUT");
 		sb.append(")");
@@ -179,6 +176,7 @@ public class RegionService {
 			}
 			if (jobName != null) {
 				String[] jobNameArr = jobName.split("\\s*,\\s*");
+				sb.append("JOBNAME ");
 				for (String n : jobNameArr) {
 					sb.append(n + " ");
 				}

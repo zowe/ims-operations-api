@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -19,10 +18,14 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
+import application.rest.responses.tran.create.CreateTransactionOutput;
+import application.rest.responses.tran.delete.DeleteTransactionOutput;
+import application.rest.responses.tran.query.QueryTransactionOutput;
+import application.rest.responses.tran.start.StartTransactionOutput;
+import application.rest.responses.tran.update.UpdateTransactionOutput;
 import commands.create.tran.CreateTran;
 import commands.delete.tran.DeleteTran;
 import commands.query.tran.QueryTran;
@@ -60,9 +63,8 @@ import utils.Type2CommandSerializable;
 @CheckHeader
 public class TranService {
 
-	@Autowired
-	@EJB
-	OMServlet omServlet;
+	
+	OMServlet omServlet = new OMServlet();
 
 	private static final Logger logger = LoggerFactory.getLogger(TranService.class);
 
@@ -71,7 +73,8 @@ public class TranService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'QUERY TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = QueryTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
@@ -218,7 +221,8 @@ public class TranService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'START TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = StartTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
@@ -296,7 +300,8 @@ public class TranService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = CreateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
@@ -656,7 +661,8 @@ public class TranService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
@@ -727,7 +733,8 @@ public class TranService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Returns data from a 'Update TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
-			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "200", description = "Successful Request",
+					content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
@@ -848,7 +855,7 @@ public class TranService {
 			@QueryParam("parlim")
 			Integer parlim,
 
-			@Parameter(required = true)
+			@Parameter()
 			@QueryParam("pgm")
 			String pgm,
 

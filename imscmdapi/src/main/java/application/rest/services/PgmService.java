@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -19,7 +18,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -72,9 +70,9 @@ import utils.Type2CommandSerializable;
 @CheckHeader
 public class PgmService {
 
-	@Autowired
-	@EJB
-	OMServlet omServlet;
+	//@Autowired
+	//@EJB
+	OMServlet omServlet = new OMServlet();
 
 	private static final Logger logger = LoggerFactory.getLogger(PgmService.class);
 

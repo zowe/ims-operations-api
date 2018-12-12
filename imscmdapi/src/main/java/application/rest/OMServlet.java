@@ -34,7 +34,7 @@ import om.services.Om;
 				title = "IMS Command Services",
 				version = "1.0.0",
 				description = "IMS Command Services allows users to use RESTFul APIs to submit IMS commmands"),
-		servers = {@Server(url = "http://localhost:9080/imscmdapi/")})
+		servers = {@Server(url = "http://localhost:8080/imscmdapi")})
 @Stateless
 @Service
 public class OMServlet {
