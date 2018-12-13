@@ -47,6 +47,7 @@ import commands.update.pgm.UpdatePgm.StartOptions;
 import commands.update.pgm.UpdatePgm.StopOptions;
 import exceptions.RestException;
 import icon.helpers.MCInteraction;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -177,6 +178,7 @@ public class PgmService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@Hidden
 	@Operation(summary = "Returns data from a 'START PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -391,7 +393,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
+	@Operation(summary = "Returns data from a 'DELETE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),

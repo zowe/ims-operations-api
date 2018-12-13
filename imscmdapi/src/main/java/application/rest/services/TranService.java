@@ -39,6 +39,7 @@ import commands.update.tran.UpdateTran;
 import commands.update.tran.UpdateTran.ScopeOptions;
 import exceptions.RestException;
 import icon.helpers.MCInteraction;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -220,6 +221,7 @@ public class TranService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@Hidden
 	@Operation(summary = "Returns data from a 'START TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -660,7 +662,7 @@ public class TranService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
+	@Operation(summary = "Returns data from a 'DELETE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
@@ -732,7 +734,7 @@ public class TranService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'Update TRAN' IMS command",
+	@Operation(summary = "Returns data from a 'UPDATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
