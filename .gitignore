@@ -5,6 +5,7 @@ clientdb.xml
 RemoteSystemsTempFiles/
 .recommenders
 .metadata
+Servers/
 
 # Log file
 *.log
