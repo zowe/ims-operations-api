@@ -42,6 +42,7 @@ import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -80,11 +81,11 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(type = "integer")))
 			@QueryParam("class") 
 			List<Integer> clazz,
 
@@ -97,11 +98,11 @@ public class TranService {
 			@QueryParam("qcntval")
 			Integer qcntval,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
-			@Parameter(style = ParameterStyle.FORM,
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,
 			array=@ArraySchema(schema = @Schema(allowableValues = 
 		{"AFFIN", "BAL", "CONV", "CPIC", "DYN", "IOPREV", "LCK", "NOTINIT", "QERR", "QSTP", "SUSPEND", 
 				"STOQ", "STOSCHD", "TRACE", "USTO"})))
@@ -229,15 +230,15 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema=@Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema=@Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema=@Schema(type="integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema=@Schema(type="integer")))
 			@QueryParam("class") 
 			List<Integer> clazz,
 
@@ -308,11 +309,11 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema=@Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
@@ -669,11 +670,11 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,  array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema=@Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
@@ -741,15 +742,15 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)))
 			@QueryParam("names") 
 			String names,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema=@Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "integer")))
 			@QueryParam("class") 
 			List<Integer> clazz, 
 
@@ -759,17 +760,17 @@ public class TranService {
 			@QueryParam("option") 
 			String option,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"ALL", "ACTIVE"})))
 			@QueryParam("scope") 
 			String scope,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"Q", "SCHD", "SUSPEND", "TRACE"})))
 			@QueryParam("start") 
 			String start,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"Q", "SCHD", "TRACE"})))
 			@QueryParam("stop") 
 			String stop,

@@ -19,6 +19,7 @@ import exceptions.RestException;
 import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -36,7 +37,7 @@ public class RegionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionService.class);
 
-	
+
 	OMServlet omServlet = new OMServlet();
 
 	@Path("/stop")
@@ -49,12 +50,12 @@ public class RegionService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response stop(
 
-			@Parameter(style = ParameterStyle.FORM, description = "Region Number Identifier",
-			array=@ArraySchema(schema = @Schema(type = "integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Region Number Identifier. Can specify a Region Number or a Job Name, but NOT BOTH.",
+			array=@ArraySchema(schema = @Schema(type = "integer"), maxItems = 2))
 			@QueryParam("regNum") 
 			String regNumber,
 
-			@Parameter(schema = @Schema(maxLength = 8))
+			@Parameter(description = "Can specify a Region Number or a Job Name, but NOT BOTH.", schema = @Schema(maxLength = 8))
 			@QueryParam("jobname") 
 			String jobName,
 
@@ -82,8 +83,10 @@ public class RegionService {
 		StringBuilder sb = new StringBuilder("CMD((STOP REGION ");
 		if (regNumber != null) {
 			String[] regNumbers = regNumber.split("\\s*,\\s*");
-			for (String n : regNumbers) {
-				sb.append(n + " ");
+			if (regNumbers.length > 1) {
+				sb.append(regNumbers[0]).append("-").append(regNumbers[1]).append(" ");
+			} else {
+				sb.append(regNumber).append(" ");
 			}
 			if (abdump != null) {
 				sb.append("ABDUMP " + abdump + " ");
@@ -107,7 +110,6 @@ public class RegionService {
 				sb.append("CANCEL");
 			}
 		} 
-		sb.deleteCharAt(sb.length()-1);
 		sb.append(")");
 		sb.append(" OPTION=AOPOUTPUT");
 		sb.append(")");
@@ -137,13 +139,11 @@ public class RegionService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
 
-			@Parameter(style = ParameterStyle.FORM, description = "Region Number Identifier",
-			array=@ArraySchema(schema = @Schema(type = "string")))
+			@Parameter(description = "Region Number Identifier", required = true)
 			@QueryParam("membername") 
 			String memName,
 
-			@Parameter(style = ParameterStyle.FORM, description = "",
-			array=@ArraySchema(schema = @Schema(type = "string", maxLength = 8)))
+			@Parameter(description = "")
 			@QueryParam("jobname") 
 			String jobName,
 
@@ -161,32 +161,15 @@ public class RegionService {
 		mcSpec.setPort(Integer.parseInt(port));
 		mcSpec.setImsPlexName(plex);
 		StringBuilder sb = new StringBuilder("CMD((START REGION ");
-		if (memName != null && memName.length() > 1) {
-			String[] memNameArr = memName.split("\\s*,\\s*");
-			for (String n : memNameArr) {
-				sb.append(n + " ");
-			}
-			if (local) {
-				sb.append("LOCAL");
-			}
-		} else if (memName != null && memName.length() == 1) {
-			String[] memNameArr = memName.split("\\s*,\\s*");
-			for (String n : memNameArr) {
-				sb.append(n + " ");
-			}
+		if (memName != null) {
+			sb.append(memName + " ");
 			if (jobName != null) {
-				String[] jobNameArr = jobName.split("\\s*,\\s*");
-				sb.append("JOBNAME ");
-				for (String n : jobNameArr) {
-					sb.append(n + " ");
-				}
-				if (local) {
-					sb.append("LOCAL");
-				}
-			} 
-			if (local) {
-				sb.append("LOCAL");
+				sb.append(jobName + " ");
 			}
+		} 
+		if (local) {
+			sb.append("LOCAL");
+
 		}
 
 		sb.append(")");

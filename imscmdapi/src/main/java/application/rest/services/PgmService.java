@@ -50,6 +50,7 @@ import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -89,26 +90,26 @@ public class PgmService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,
 			array=@ArraySchema(schema = 
-			@Schema(allowableValues = {"ALL", "BMPTYP", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
+			@Schema(allowableValues = {"ALL", "BMPTYPE", "DEFN", "DEFNTYPE", "DOPT", "FP", "GLOBAL", 
 					"IMSID", "GPSB", "LANG", "LOCAL", "MODEL", "RESIDENT", "SCHDTYPE", "STATUS", 
 					"TIMESTAMP", "TRANSTAT", "EXPORTNEEDED", "DB", "RTC", "TRAN", "WORK"})), 
 			description = "Specifies the program output fields to be returned. The program name is always returned, along with the name of the IMS™ that created the output, the region type, and the completion code.")
 			@QueryParam("attributes") String show, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"DB-NOTAVL", "IOPREV", "LOCK", "NOTINIT", "STOSCHD", "TRACE"})),
 			description = "Selects programs for display that possess at least one of the specified program status. This selection allows for additional filtering by program status. The program status is returned as output, even if the SHOW(STATUS) was not specified.")
 			@QueryParam("status") 
 			String status,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
@@ -186,13 +187,13 @@ public class PgmService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			@Parameter(style = ParameterStyle.FORM,  explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is 'ALL' which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type = "string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr,
 
@@ -250,12 +251,12 @@ public class PgmService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
-			@Parameter(style = ParameterStyle.FORM, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
@@ -400,12 +401,12 @@ public class PgmService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
-			@Parameter(style = ParameterStyle.FORM, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
@@ -473,21 +474,21 @@ public class PgmService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
-			@Parameter(style = ParameterStyle.FORM, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = @Schema(type="string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
 			@QueryParam("route") 
 			String imsmbr,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"SCHD", "TRACE", "REFRESH"})))
 			@QueryParam("start") 
 			String start,
 
-			@Parameter(style = ParameterStyle.FORM, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"SCHD", "TRACE"})))
 			@QueryParam("stop") 
 			String stop,
