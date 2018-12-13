@@ -164,7 +164,7 @@ public class RegionService {
 		if (memName != null) {
 			sb.append(memName + " ");
 			if (jobName != null) {
-				sb.append(jobName + " ");
+				sb.append("JOBNAME ").append(jobName + " ");
 			}
 		} 
 		if (local) {

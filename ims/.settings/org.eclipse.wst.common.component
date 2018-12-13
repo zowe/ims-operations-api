@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="imscmdapi">
+    <wb-module deploy-name="ims">
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/.apt_generated"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/WebContent"/>
-        <property name="java-output-path" value="/imscmdapi/target/classes"/>
-        <property name="context-root" value="imscmdapi"/>
+        <property name="java-output-path" value="/ims/target/classes"/>
+        <property name="context-root" value="ims"/>
     </wb-module>
 </project-modules>
