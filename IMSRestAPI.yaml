@@ -5,12 +5,10 @@ info:
     commmands
   version: 1.0.0
 servers:
-- url: http://localhost:8080/ims
-  variables: {}
-- url: http://localhost:9080/ims
+- url: /ims
   variables: {}
 paths:
-  /v1/api/program:
+  /apis/v1/program:
     get:
       tags:
       - Program
@@ -40,7 +38,7 @@ paths:
             type: string
             enum:
             - ALL
-            - BMPTYP
+            - BMPTYPE
             - DEFN
             - DEFNTYPE
             - DOPT
@@ -423,7 +421,7 @@ paths:
     delete:
       tags:
       - Program
-      summary: Returns data from a 'CREATE PGM' IMS command
+      summary: Returns data from a 'DELETE PGM' IMS command
       operationId: delete
       parameters:
       - name: names
@@ -487,86 +485,23 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/program/start:
-    put:
-      tags:
-      - Program
-      summary: Returns data from a 'START PGM' IMS command
-      operationId: start
-      parameters:
-      - name: names
-        in: query
-        description: Specifies the 1-8 character name of the program. Wildcards can
-          be specified in the name. The name is a repeatable parameter. The default
-          is 'ALL' which returns all program resources.
-        style: form
-        schema:
-          type: array
-          items:
-            maxLength: 8
-            type: string
-      - name: route
-        in: query
-        style: form
-        schema:
-          type: array
-          items:
-            type: string
-      - name: hostname
-        in: header
-        description: IMS Connect host address
-        required: true
-        schema:
-          type: string
-      - name: port
-        in: header
-        description: IMS Connect port number
-        required: true
-        schema:
-          type: string
-      - name: plex
-        in: header
-        description: IMS Connect plex name
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          content:
-            application/json: {}
-        200:
-          description: Successful Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StartProgramOutput'
-        400:
-          description: Request Error
-        500:
-          description: Internal Server Error
-  /v1/api/region/start:
+  /apis/v1/region/start:
     put:
       tags:
       - Region
       summary: Return data from 'START REGION' IMS command
-      operationId: start_1
+      operationId: start
       parameters:
       - name: membername
         in: query
         description: Region Number Identifier
-        style: form
+        required: true
         schema:
-          type: array
-          items:
-            type: string
+          type: string
       - name: jobname
         in: query
-        style: form
         schema:
-          type: array
-          items:
-            maxLength: 8
-            type: string
+          type: string
       - name: local
         in: query
         schema:
@@ -599,7 +534,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/region/stop:
+  /apis/v1/region/stop:
     put:
       tags:
       - Region
@@ -608,15 +543,18 @@ paths:
       parameters:
       - name: regNum
         in: query
-        description: Region Number Identifier
+        description: Region Number Identifier. Can specify a Region Number or a Job
+          Name, but NOT BOTH.
         style: form
         schema:
+          maxItems: 2
           type: array
           items:
             type: integer
             format: int64
       - name: jobname
         in: query
+        description: Can specify a Region Number or a Job Name, but NOT BOTH.
         schema:
           maxLength: 8
           type: string
@@ -663,7 +601,7 @@ paths:
           description: Request Error
         500:
           description: Internal Server Error
-  /v1/api/transaction:
+  /apis/v1/transaction:
     get:
       tags:
       - Transaction
@@ -855,7 +793,7 @@ paths:
     put:
       tags:
       - Transaction
-      summary: Returns data from a 'Update TRAN' IMS command
+      summary: Returns data from a 'UPDATE TRAN' IMS command
       operationId: update
       parameters:
       - name: names
@@ -1498,7 +1436,7 @@ paths:
     delete:
       tags:
       - Transaction
-      summary: Returns data from a 'CREATE TRAN' IMS command
+      summary: Returns data from a 'DELETE TRAN' IMS command
       operationId: delete
       parameters:
       - name: names
@@ -1554,72 +1492,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeleteTransactionOutput'
-        400:
-          description: Request Error
-        500:
-          description: Internal Server Error
-  /v1/api/transaction/start:
-    put:
-      tags:
-      - Transaction
-      summary: Returns data from a 'START TRAN' IMS command
-      operationId: start_2
-      parameters:
-      - name: names
-        in: query
-        style: form
-        schema:
-          type: array
-          items:
-            maxLength: 8
-            type: string
-      - name: route
-        in: query
-        style: form
-        schema:
-          type: array
-          items:
-            type: string
-      - name: class
-        in: query
-        style: form
-        schema:
-          type: array
-          items:
-            type: integer
-            format: int64
-      - name: affinity
-        in: query
-        schema:
-          type: boolean
-      - name: hostname
-        in: header
-        description: IMS Connect host address
-        required: true
-        schema:
-          type: string
-      - name: port
-        in: header
-        description: IMS Connect port number
-        required: true
-        schema:
-          type: string
-      - name: plex
-        in: header
-        description: IMS Connect plex name
-        required: true
-        schema:
-          type: string
-      responses:
-        default:
-          content:
-            application/json: {}
-        200:
-          description: Successful Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StartTransactionOutput'
         400:
           description: Request Error
         500:
@@ -1724,38 +1596,6 @@ components:
           description: Reason Code
       description: POJO that describes a single message element in the messages portion
         of the JSON output. Returned by an IMS mbr or OM
-    StartProgramOutput:
-      type: object
-      properties:
-        data:
-          type: array
-          description: A list of StartProgram objects. Represents the JSON data output
-            for all programs from the command
-          items:
-            $ref: '#/components/schemas/StartProgram'
-        messages:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Message'
-          description: A map that represents messages that are returned from OM after
-            submitting the command. The key is either the IMS member or OM that returned
-            the message
-    StartTransactionOutput:
-      type: object
-      properties:
-        data:
-          type: array
-          description: A list of StartTransaction objects. Represents the JSON data
-            output for all programs from the command
-          items:
-            $ref: '#/components/schemas/StartTransaction'
-        messages:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Message'
-          description: A map that represents messages that are returned from OM after
-            submitting the command. The key is either the IMS member or OM that returned
-            the message
     DeleteTransaction:
       type: object
       properties:
@@ -1845,10 +1685,6 @@ components:
             the message
       description: POJO that represents all the data returned from OM following a
         Create TRAN command
-    StartProgram:
-      type: object
-      description: A list of StartProgram objects. Represents the JSON data output
-        for all programs from the command
     QueryTransactionOutput:
       type: object
       properties:
@@ -2123,10 +1959,6 @@ components:
             the message
       description: POJO that represents all the data returned from OM following a
         Update TRAN command
-    StartTransaction:
-      type: object
-      description: A list of StartTransaction objects. Represents the JSON data output
-        for all programs from the command
     QueryTransaction:
       type: object
       properties:
@@ -2549,3 +2381,4 @@ components:
           description: Work is in progress for the transaction or one of its associated
             resources.
       description: POJO from a Query TRAN command that represents output for one transaction
+
