@@ -5,9 +5,7 @@ info:
     commmands
   version: 1.0.0
 servers:
-- url: http://localhost:8080/ims
-  variables: {}
-- url: http://localhost:9080/ims
+- url: /ims
   variables: {}
 paths:
   /apis/v1/program:
@@ -40,7 +38,7 @@ paths:
             type: string
             enum:
             - ALL
-            - BMPTYP
+            - BMPTYPE
             - DEFN
             - DEFNTYPE
             - DOPT
@@ -497,19 +495,13 @@ paths:
       - name: membername
         in: query
         description: Region Number Identifier
-        style: form
+        required: true
         schema:
-          type: array
-          items:
-            type: string
+          type: string
       - name: jobname
         in: query
-        style: form
         schema:
-          type: array
-          items:
-            maxLength: 8
-            type: string
+          type: string
       - name: local
         in: query
         schema:
@@ -551,15 +543,18 @@ paths:
       parameters:
       - name: regNum
         in: query
-        description: Region Number Identifier
+        description: Region Number Identifier. Can specify a Region Number or a Job
+          Name, but NOT BOTH.
         style: form
         schema:
+          maxItems: 2
           type: array
           items:
             type: integer
             format: int64
       - name: jobname
         in: query
+        description: Can specify a Region Number or a Job Name, but NOT BOTH.
         schema:
           maxLength: 8
           type: string
