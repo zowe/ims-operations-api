@@ -82,7 +82,7 @@ public class PgmService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'QUERY PGM' IMS command",
+	@Operation(summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
 			content = @Content(schema = @Schema(implementation = QueryProgramOutput.class))),
@@ -244,7 +244,7 @@ public class PgmService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'CREATE PGM' IMS command",
+	@Operation(summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -394,7 +394,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'DELETE PGM' IMS command",
+	@Operation(summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -467,7 +467,7 @@ public class PgmService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'UPDATE PGM' IMS command",
+	@Operation(summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = UpdateProgram.class))),

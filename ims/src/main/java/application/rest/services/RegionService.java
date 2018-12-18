@@ -43,7 +43,7 @@ public class RegionService {
 	@Path("/stop")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Return data from 'STOP REGION' IMS command",
+	@Operation(summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
@@ -132,7 +132,7 @@ public class RegionService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Return data from 'START REGION' IMS command",
+	@Operation(summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),

@@ -74,7 +74,7 @@ public class TranService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'QUERY TRAN' IMS command",
+	@Operation(summary = "Query information about IMS transactions across IMSplex using 'QUERY TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = QueryTransactionOutput.class))),
@@ -302,7 +302,7 @@ public class TranService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'CREATE TRAN' IMS command",
+	@Operation(summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region using 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = CreateTransactionOutput.class))),
@@ -663,7 +663,7 @@ public class TranService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'DELETE TRAN' IMS command",
+	@Operation(summary = "Delete IMS transactions using 'DELETE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
@@ -735,7 +735,7 @@ public class TranService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Returns data from a 'UPDATE TRAN' IMS command",
+	@Operation(summary = "Update, start or stop IMS transaction resources using 'UPDATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 					content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
