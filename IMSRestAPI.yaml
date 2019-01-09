@@ -1,0 +1,2384 @@
+openapi: 3.0.1
+info:
+  title: IMS Command Services
+  description: IMS Command Services allows users to use RESTFul APIs to submit IMS
+    commmands
+  version: 1.0.0
+servers:
+- url: /ims
+  variables: {}
+paths:
+  /apis/v1/program:
+    get:
+      tags:
+      - Program
+      summary: Returns data from a 'QUERY PGM' IMS command
+      operationId: query
+      parameters:
+      - name: names
+        in: query
+        description: Specifies the 1-8 character name of the program. Wildcards can
+          be specified in the name. The name is a repeatable parameter. The default
+          is NAME(*) which returns all program resources.
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: attributes
+        in: query
+        description: Specifies the program output fields to be returned. The program
+          name is always returned, along with the name of the IMS™ that created the
+          output, the region type, and the completion code.
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - ALL
+            - BMPTYPE
+            - DEFN
+            - DEFNTYPE
+            - DOPT
+            - FP
+            - GLOBAL
+            - IMSID
+            - GPSB
+            - LANG
+            - LOCAL
+            - MODEL
+            - RESIDENT
+            - SCHDTYPE
+            - STATUS
+            - TIMESTAMP
+            - TRANSTAT
+            - EXPORTNEEDED
+            - DB
+            - RTC
+            - TRAN
+            - WORK
+      - name: status
+        in: query
+        description: Selects programs for display that possess at least one of the
+          specified program status. This selection allows for additional filtering
+          by program status. The program status is returned as output, even if the
+          SHOW(STATUS) was not specified.
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - DB-NOTAVL
+            - IOPREV
+            - LOCK
+            - NOTINIT
+            - STOSCHD
+            - TRACE
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryProgramOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    put:
+      tags:
+      - Program
+      summary: Returns data from a 'UPDATE PGM' IMS command
+      operationId: update
+      parameters:
+      - name: names
+        in: query
+        description: Specifies the 1-8 character name of the program. Wildcards can
+          be specified in the name. The name is a repeatable parameter. The default
+          is NAME(*) which returns all program resources.
+        required: true
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - SCHD
+            - TRACE
+            - REFRESH
+      - name: stop
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - SCHD
+            - TRACE
+      - name: bmptype
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: dopt
+        in: query
+        description: Specifies the dynamic option.
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: fp
+        in: query
+        description: Specifies the dynamic option.
+        schema:
+          type: string
+          enum:
+          - E
+          - N
+      - name: gpsb
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: lang
+        in: query
+        schema:
+          type: string
+          enum:
+          - ASSEM
+          - COBOL
+          - JAVA
+          - PASCAL
+          - PLI
+      - name: lock
+        in: query
+        schema:
+          type: string
+          enum:
+          - ON
+          - OFF
+      - name: resident
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: schdtype
+        in: query
+        schema:
+          type: string
+          enum:
+          - PARALLEL
+          - SERIAL
+      - name: transtat
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: option
+        in: query
+        schema:
+          type: string
+          enum:
+          - ALLRSP
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateProgram'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    post:
+      tags:
+      - Program
+      summary: Returns data from a 'CREATE PGM' IMS command
+      operationId: create
+      parameters:
+      - name: names
+        in: query
+        description: Specifies the 1-8 character name of the program. Wildcards can
+          be specified in the name. The name is a repeatable parameter. The default
+          is NAME(*) which returns all program resources.
+        required: true
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: desc
+        in: query
+        description: Specifies the name of the descriptor to use as a model to define
+          this resource.
+        schema:
+          type: string
+      - name: rsc
+        in: query
+        description: Specifies the name of the resource to use as a model to define
+          this resource.
+        schema:
+          type: string
+      - name: bmptype
+        in: query
+        description: BMP type option. Specifies whether the program executes in a
+          BMP type region or not. A BMP type region can be a BMP region or a JBP region.
+          PSBs scheduled by DB2® stored procedures, by programs running under WebSphere®
+          Application Server, and by other users of the ODBA interface may be defined
+          with BMPTYPE Y or N.
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: dopt
+        in: query
+        description: Specifies the dynamic option.
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: fp
+        in: query
+        description: Specifies the Fast Path option.
+        schema:
+          type: string
+          enum:
+          - N
+          - E
+      - name: gpsb
+        in: query
+        description: Specifies the generated PSB option.
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: lang
+        in: query
+        description: |-
+          Specifies the language interface of the program for a GPSB, or defines a DOPT(Y) program as using the Java™ language.
+          In order to define a DOPT program using the Java language, the program must be defined with DOPT(Y) and LANG(JAVA). DOPT PSBs are not loaded at IMS restart, they are loaded every time the program is scheduled. When the program is scheduled for the first time, IMS does not know the language until after the program is scheduled in a region and the PSB is loaded. Unless LANG(JAVA) is defined for the DOPT(Y) program, the program is incorrectly scheduled in a non-Java region.
+        schema:
+          type: string
+          enum:
+          - ASSEM
+          - COBOL
+          - JAVA
+          - PASCAL
+          - PLI
+      - name: resident
+        in: query
+        description: Specifies the resident option. The RESIDENT(N) option takes effect
+          right away. The RESIDENT(Y) option takes effect at the next restart, unless
+          an error is encountered such as no PSB in ACBLIB for the program, or if
+          the program was created as RESIDENT(Y) after the checkpoint from which this
+          IMS is performing emergency restart
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: schdtype
+        in: query
+        description: Specifies whether this program can be scheduled into more than
+          one message region or batch message region simultaneously.
+        schema:
+          type: string
+          enum:
+          - PARALLEL
+          - SERIAL
+      - name: transtat
+        in: query
+        description: Specifies whether transaction level statistics should be logged.
+          The value specified has meaning only if the program is a JBP or a non-message
+          driven BMP. If Y is specified, transaction level statistics are written
+          to the log in a X'56FA' log record.
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProgramOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    delete:
+      tags:
+      - Program
+      summary: Returns data from a 'DELETE PGM' IMS command
+      operationId: delete
+      parameters:
+      - name: names
+        in: query
+        description: Specifies the 1-8 character name of the program. Wildcards can
+          be specified in the name. The name is a repeatable parameter. The default
+          is NAME(*) which returns all program resources.
+        required: true
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: option
+        in: query
+        description: Indicates that the response lines are to be returned for all
+          resources that are processed on the command. The default action is to return
+          response lines only for the resources that resulted in an error. It is valid
+          only with NAME(*). ALLRSP is ignored for other NAME values.
+        schema:
+          type: string
+          enum:
+          - ALLRSP
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProgramOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+  /apis/v1/region/start:
+    put:
+      tags:
+      - Region
+      summary: Return data from 'START REGION' IMS command
+      operationId: start
+      parameters:
+      - name: membername
+        in: query
+        description: Region Number Identifier
+        required: true
+        schema:
+          type: string
+      - name: jobname
+        in: query
+        schema:
+          type: string
+      - name: local
+        in: query
+        schema:
+          type: boolean
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+  /apis/v1/region/stop:
+    put:
+      tags:
+      - Region
+      summary: Return data from 'STOP REGION' IMS command
+      operationId: stop
+      parameters:
+      - name: regNum
+        in: query
+        description: Region Number Identifier. Can specify a Region Number or a Job
+          Name, but NOT BOTH.
+        style: form
+        schema:
+          maxItems: 2
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: jobname
+        in: query
+        description: Can specify a Region Number or a Job Name, but NOT BOTH.
+        schema:
+          maxLength: 8
+          type: string
+      - name: abdump
+        in: query
+        description: Specify a transaction to abnormally terminate
+        schema:
+          type: string
+      - name: transaction
+        in: query
+        description: Specify a program in WFI mode to stop its message processing
+          within the specified region
+        schema:
+          type: string
+      - name: cancel
+        in: query
+        schema:
+          type: boolean
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+  /apis/v1/transaction:
+    get:
+      tags:
+      - Transaction
+      summary: Returns data from a 'QUERY TRAN' IMS command
+      operationId: query_1
+      parameters:
+      - name: names
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: class
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: qcntcomp
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - LT
+            - LE
+            - GT
+            - GE
+            - EQ
+            - NE
+      - name: qcntval
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: status
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - AFFIN
+            - BAL
+            - CONV
+            - CPIC
+            - DYN
+            - IOPREV
+            - LCK
+            - NOTINIT
+            - QERR
+            - QSTP
+            - SUSPEND
+            - STOQ
+            - STOSCHD
+            - TRACE
+            - USTO
+      - name: conv
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: fp
+        in: query
+        schema:
+          type: string
+          enum:
+          - E
+          - N
+          - P
+      - name: remote
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: resp
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: attributes
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - AFFIN
+            - ALL
+            - AOCMD
+            - CLASS
+            - CMTMODE
+            - CONV
+            - CPRI
+            - DCLWA
+            - DEFN
+            - DEFNTYPE
+            - DIRROUTE
+            - EDITRTN
+            - EDITUC
+            - EMHBSZ
+            - EXPRTIME
+            - FP
+            - GLOBAL
+            - IMSID
+            - INQ
+            - LCT
+            - LOCAL
+            - LPRI
+            - MAXRGN
+            - MODEL
+            - MSGTYPE
+            - MSNAME
+            - NPRI
+            - PARLIM
+            - PGM
+            - PLCT
+            - PLCTTIME
+            - PSB
+            - QCNT
+            - RECOVER
+            - REMOTE
+            - RESP
+            - RGC
+            - SEGNO
+            - SEGSZ
+            - SERIAL
+            - SPASZ
+            - SPATRUNC
+            - STATUS
+            - TIMESTAMP
+            - TRANSTAT
+            - WFI
+            - WORK
+            - EXPORTNEEDED
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryTransactionOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    put:
+      tags:
+      - Transaction
+      summary: Returns data from a 'UPDATE TRAN' IMS command
+      operationId: update
+      parameters:
+      - name: names
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: class
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: option
+        in: query
+        description: |-
+          ALLRSP: Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values. AFFIN: AFFIN is valid with START(SCHD) or STOP(SCHD).
+          When used with START(SCHD), OPTION(AFFIN) indicates that the transaction has local affinity to the IMS™ and that an inform request should be performed to register interest in the local affinity queue.
+        schema:
+          type: string
+          enum:
+          - AFFIN
+          - ALLRSP
+      - name: scope
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - ALL
+            - ACTIVE
+      - name: start
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Q
+            - SCHD
+            - SUSPEND
+            - TRACE
+      - name: stop
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - Q
+            - SCHD
+            - TRACE
+      - name: aocmd
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - CMD
+          - TRAN
+          - Y
+      - name: setClass
+        in: query
+        schema:
+          maximum: 999
+          minimum: 1
+          type: integer
+          format: int64
+      - name: cmtmode
+        in: query
+        schema:
+          type: string
+          enum:
+          - SNGL
+          - MULT
+      - name: conv
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: cpri
+        in: query
+        schema:
+          maximum: 14
+          minimum: 0
+          type: integer
+          format: int64
+      - name: dclwa
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: dirroute
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: editrtn
+        in: query
+        schema:
+          type: string
+      - name: edituc
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: emhbsz
+        in: query
+        schema:
+          maximum: 30720
+          minimum: 0
+          type: integer
+          format: int64
+      - name: exprtime
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: fp
+        in: query
+        schema:
+          type: string
+          enum:
+          - E
+          - N
+          - P
+      - name: inq
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: lct
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          format: int64
+      - name: lpri
+        in: query
+        schema:
+          maximum: 14
+          minimum: 0
+          type: integer
+          format: int64
+      - name: lock
+        in: query
+        schema:
+          type: string
+          enum:
+          - ON
+          - OFF
+      - name: maxrgn
+        in: query
+        schema:
+          minimum: 0
+          type: integer
+          format: int64
+      - name: msgtype
+        in: query
+        schema:
+          type: string
+          enum:
+          - MULTSEG
+          - SNGLSEG
+      - name: msname
+        in: query
+        schema:
+          type: string
+      - name: npri
+        in: query
+        schema:
+          maximum: 14
+          minimum: 0
+          type: integer
+          format: int64
+      - name: parlim
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: pgm
+        in: query
+        schema:
+          type: string
+      - name: plct
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: plcttime
+        in: query
+        schema:
+          maximum: 6553500
+          minimum: 1
+          type: integer
+          format: int64
+      - name: recover
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: remote
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: resp
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: segno
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: segsz
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: serial
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: sidl
+        in: query
+        schema:
+          maximum: 2036
+          minimum: 1
+          type: integer
+          format: int64
+      - name: sidr
+        in: query
+        schema:
+          maximum: 2036
+          minimum: 1
+          type: integer
+          format: int64
+      - name: spasz
+        in: query
+        schema:
+          maximum: 32767
+          minimum: 16
+          type: integer
+          format: int64
+      - name: spatrunc
+        in: query
+        schema:
+          type: string
+          enum:
+          - S
+          - R
+      - name: transtat
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: wfi
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTransactionOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    post:
+      tags:
+      - Transaction
+      summary: Returns data from a 'CREATE TRAN' IMS command
+      operationId: create
+      parameters:
+      - name: names
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: desc
+        in: query
+        schema:
+          type: string
+      - name: rsc
+        in: query
+        schema:
+          type: string
+      - name: aocmd
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - CMD
+          - TRAN
+          - Y
+          - -1
+      - name: class
+        in: query
+        schema:
+          maximum: 999
+          minimum: 1
+          type: integer
+          format: int64
+      - name: cmtmode
+        in: query
+        schema:
+          type: string
+          enum:
+          - SNGL
+          - MULT
+      - name: conv
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: dclwa
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: dirroute
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: editrtn
+        in: query
+        schema:
+          type: string
+      - name: edituc
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: emhbsz
+        in: query
+        schema:
+          maximum: 30720
+          minimum: 0
+          type: integer
+          format: int64
+      - name: exprtime
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: fp
+        in: query
+        schema:
+          type: string
+          enum:
+          - E
+          - N
+          - P
+      - name: inq
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: lct
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          format: int64
+      - name: lpri
+        in: query
+        schema:
+          maximum: 14
+          minimum: 0
+          type: integer
+          format: int64
+      - name: maxrgn
+        in: query
+        schema:
+          minimum: 0
+          type: integer
+          format: int64
+      - name: msgtype
+        in: query
+        schema:
+          type: string
+          enum:
+          - MULTSEG
+          - SNGLSEG
+      - name: msname
+        in: query
+        schema:
+          type: string
+      - name: npri
+        in: query
+        schema:
+          maximum: 14
+          minimum: 0
+          type: integer
+          format: int64
+      - name: parlim
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: pgm
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: plct
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: plcttime
+        in: query
+        schema:
+          maximum: 6553500
+          minimum: 1
+          type: integer
+          format: int64
+      - name: recover
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: remote
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: resp
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: segno
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: segsz
+        in: query
+        schema:
+          maximum: 65535
+          minimum: 0
+          type: integer
+          format: int64
+      - name: serial
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: sidl
+        in: query
+        schema:
+          maximum: 2036
+          minimum: 1
+          type: integer
+          format: int64
+      - name: sidr
+        in: query
+        schema:
+          maximum: 2036
+          minimum: 1
+          type: integer
+          format: int64
+      - name: spasz
+        in: query
+        schema:
+          maximum: 32767
+          minimum: 16
+          type: integer
+          format: int64
+      - name: spatrunc
+        in: query
+        schema:
+          type: string
+          enum:
+          - S
+          - R
+      - name: transtat
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: wfi
+        in: query
+        schema:
+          type: string
+          enum:
+          - N
+          - Y
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTransactionOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+    delete:
+      tags:
+      - Transaction
+      summary: Returns data from a 'DELETE TRAN' IMS command
+      operationId: delete
+      parameters:
+      - name: names
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            maxLength: 8
+            type: string
+      - name: route
+        in: query
+        style: form
+        schema:
+          type: array
+          items:
+            type: string
+      - name: option
+        in: query
+        description: Indicates that the response lines are to be returned for all
+          resources that are processed on the command. The default action is to return
+          response lines only for the resources that resulted in an error. It is valid
+          only with NAME(*). ALLRSP is ignored for other NAME values.
+        schema:
+          type: string
+          enum:
+          - ALLRSP
+      - name: hostname
+        in: header
+        description: IMS Connect host address
+        required: true
+        schema:
+          type: string
+      - name: port
+        in: header
+        description: IMS Connect port number
+        required: true
+        schema:
+          type: string
+      - name: plex
+        in: header
+        description: IMS Connect plex name
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          content:
+            application/json: {}
+        200:
+          description: Successful Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteTransactionOutput'
+        400:
+          description: Request Error
+        500:
+          description: Internal Server Error
+components:
+  schemas:
+    CreateTransaction:
+      type: object
+      properties:
+        cc:
+          type: string
+          description: Completion Code
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            non-zero completion code.
+        mbr:
+          type: string
+          description: IMSplex member that built the output line.
+        tran:
+          type: string
+          description: Transaction Name
+      description: POJO from a Create TRAN command that represents output for one
+        transaction
+    UpdateTransaction:
+      type: object
+      properties:
+        cc:
+          type: string
+          description: 'Completion code. The completion code indicates whether IMS
+            was able to process the command for the specified resource. The completion
+            code is always returned. '
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            nonzero completion code.
+        convid:
+          type: string
+          description: Conversation ID of conversation associated with transaction
+            that caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+        errt:
+          type: string
+          description: Error text with diagnostic information. Error text can be returned
+            for a nonzero completion code and contains information that further explains
+            the completion code.
+        gbl:
+          type: string
+          description: Indicates that the response line is for the global update.
+        lu:
+          type: string
+          description: APPC LU name associated with the transaction conversation that
+            caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+        mbr:
+          type: string
+          description: The IMSplex member that built the output line. The IMS identifier
+            of the IMS for which the transaction information is displayed. The IMS
+            identifier is always returned.
+        node:
+          type: string
+          description: Node name of static node associated with the transaction conversation
+            that caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+        tmem:
+          type: string
+          description: OTMA tmember name associated with the transaction conversation
+            that caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+        tpip:
+          type: string
+          description: OTMA tpipe name associated with the transaction conversation
+            that caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+        tran:
+          type: string
+          description: The transaction name. The transaction name is always displayed.
+        user:
+          type: string
+          description: User name of dynamic user associated with the transaction conversation
+            that caused the update to fail with a completion code of C'1A'. This information
+            can be used to exit the conversation, before attempting the update again.
+      description: POJO from a Update TRAN command that represents output for one
+        transaction
+    Message:
+      type: object
+      properties:
+        rsntxt:
+          type: string
+          description: Reason Code Text
+        message:
+          type: string
+          description: Message from OM. Usually returned only when there is an error
+        rc:
+          type: string
+          description: Return Code
+        command:
+          type: string
+          description: The command executed
+        rsn:
+          type: string
+          description: Reason Code
+      description: POJO that describes a single message element in the messages portion
+        of the JSON output. Returned by an IMS mbr or OM
+    DeleteTransaction:
+      type: object
+      properties:
+        cc:
+          type: string
+          description: Completion Code
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            non-zero completion code.
+        convid:
+          type: string
+          description: Conversation id of conversation associated with transaction
+            that caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+        errt:
+          type: string
+          description: Error text that provides diagnostic information. Error text
+            can be returned for a nonzero completion code and further explains the
+            completion code.
+        mbr:
+          type: string
+          description: IMSplex member that built the output line.
+        lu:
+          type: string
+          description: APPC LU name associated with the transaction conversation that
+            caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+        node:
+          type: string
+          description: Node name of static node associated with transaction conversation
+            that caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+        tmem:
+          type: string
+          description: OTMA tmember name associated with transaction conversation
+            that caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+        tpip:
+          type: string
+          description: OTMA tpipe name associated with the transaction conversation
+            that caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+        tran:
+          type: string
+          description: Transaction name.
+        user:
+          type: string
+          description: User name of dynamic user associated with the transaction conversation
+            that caused the delete to fail with a completion code of C'1A'. This information
+            may be used to exit the conversation, before attempting the delete again.
+      description: POJO from a Delete TRAN command that represents output for one
+        transaction
+    QueryProgramOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of QueryProgram objects. Represents the JSON data output
+            for all programs from the command
+          items:
+            $ref: '#/components/schemas/QueryProgram'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+      description: POJO that represents all the data returned from OM following a
+        Query PGM command
+    CreateTransactionOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of CreateTransaction objects. Represents the JSON data
+            output for all transaction from the command
+          items:
+            $ref: '#/components/schemas/CreateTransaction'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+      description: POJO that represents all the data returned from OM following a
+        Create TRAN command
+    QueryTransactionOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of QueryTran objects. Represents the JSON data output
+            for all programs from the command
+          items:
+            $ref: '#/components/schemas/QueryTransaction'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+      description: POJO that represents all the data returned from OM following a
+        Query TRAN command
+    UpdateProgram:
+      type: object
+      properties:
+        cc:
+          type: string
+          description: Completion Code
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            non-zero completion code.
+        errt:
+          type: string
+          description: Error text with diagnostic information. Error text can be returned
+            for a nonzero completion code and contains information that further explains
+            the completion code.
+        job:
+          type: string
+          description: Job Name of the program that is posted.
+        mbr:
+          type: string
+          description: IMSplex member that built the output line.
+        pgm:
+          type: string
+          description: Program name.
+        rgnn:
+          type: string
+          description: Region Number where the program is scheduled.
+        rgnt:
+          type: string
+          description: "\tRegion type where the program is scheduled."
+      description: POJO from a Update PGM command that represents output for one program
+    CreateProgramOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of CreateProgram objects. Represents the JSON data output
+            for all programs from the command
+          items:
+            $ref: '#/components/schemas/CreateProgram'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+      description: POJO that represents all the data returned from OM following a
+        Create PGM command
+    QueryProgram:
+      type: object
+      properties:
+        bmpt:
+          type: string
+          description: BMP type. The output is returned from the local IMS.
+        cc:
+          type: string
+          description: Completion Code
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            non-zero completion code.
+        db:
+          type: string
+          description: Database referenced by the program.
+        dfnt:
+          type: string
+          description: Definition type
+        dopt:
+          type: string
+          description: Dynamic option (Y) or not (N). The output is returned from
+            the local IMS.
+        expn:
+          type: string
+          description: Indicates whether the program has been exported to the IMSRSC
+            repository.
+        fp:
+          type: string
+          description: Fast Path exclusive program (E) or not (N). The output is returned
+            from the local IMS.
+        gpsb:
+          type: string
+          description: Generated PSB generated by IMS (Y) or not (N). The output is
+            returned from the local IMS.
+        imsid:
+          type: string
+          description: Returns from the repository the IMSIDs that have the resource
+            defined.
+        lang:
+          type: string
+          description: Language interface. The output is returned from the local IMS.
+        lstt:
+          type: string
+          description: Local application program status.
+        lrsdnt:
+          type: string
+          description: Local runtime value of the resident option. Indicates whether
+            the program PSB resides in local storage.
+        mbr:
+          type: string
+          description: IMSplex member that build the output line.
+        mdln:
+          type: string
+          description: Model name. Name of the resource used as a model to create
+            this resource. DFSDSPG1 is the IMS descriptor name for programs.
+        mdlt:
+          type: string
+          description: Model type, either RSC or DESC. RSC means that the resource
+            was created using another resource as a model. DESC means that the resource
+            was created using a descriptor as a model.
+        pgm:
+          type: string
+          description: Program name that references the database.
+        rbmpt:
+          type: string
+          description: BMP type. The output is returned from the repository.
+        rdopt:
+          type: string
+          description: Dynamic option (Y) or not (N). The output is returned from
+            the repository.
+        repo:
+          type: string
+          description: Indicates whether the line shows the stored resource definitions.
+        rfp:
+          type: string
+          description: "\tFast Path exclusive program (E) or not (N). The output is\
+            \ returned from the repository."
+        rgnt:
+          type: string
+          description: Region type in which program can run. Some programs can run
+            in additional region types. For example, a program defined with a program
+            type of MSG can run in a BMP under certain conditions.
+        rlang:
+          type: string
+          description: Language interface. The output is returned from the repository.
+        rrsdnt:
+          type: string
+          description: Resident value from the repository.
+        rrgnt:
+          type: string
+          description: Region type in which program can run. The output is returned
+            from the repository.
+        rschd:
+          type: string
+          description: Schedule type. The output is returned from the repository.
+        rsdnt:
+          type: string
+          description: Local deferred resident value that takes effect at the next
+            IMS restart. A value of Y is shown if a program was defined as resident
+            but could not be made resident at IMS restart time because no ACB existed
+            for the PSB. This program can become resident during the next IMS restart
+            only if there is an ACB for the PSB in the ACBLIB or IMS catalog.
+        rtc:
+          type: string
+          description: Routing code associated with the program.
+        rtls:
+          type: string
+          description: "\tTransaction level statistics logged (Y) or not (N). The\
+            \ output is returned from the repository."
+        rtmcr:
+          type: string
+          description: Create time from the repository. This is the time the resource
+            was first created in the repository.
+        rtmup:
+          type: string
+          description: Update time from the repository. This is the time the resource
+            was last updated in the repository.
+        schd:
+          type: string
+          description: "\tSchedule type. The output is returned from the local IMS."
+        tls:
+          type: string
+          description: Transaction
+        tmac:
+          type: string
+          description: The time that the resource was last accessed. The last access
+            time is retained across warm start, emergency restart, EXPORT and IMPORT.
+            The updating of the last access time is not logged. After a restart, the
+            last access time reflects the time recorded in the restart checkpoint
+            log records.
+        tmcr:
+          type: string
+          description: The time that the resource was created with a CREATE PGM command,
+            an IMPORT command that creates the program, or IMS initialization. The
+            create time is retained across warm start, emergency restart, EXPORT and
+            IMPORT. The output is returned from the local IMS
+        tmim:
+          type: string
+          description: The time that the resource was last imported, if applicable.
+            The import time is retained across warm start and emergency restart. The
+            output is returned from the local IMS.
+        tmup:
+          type: string
+          description: The last time the attributes of the runtime resource definition
+            were updated as a result of the UPDATE PGM command or the IMPORT command.
+            The update time is retained across warm start and emergency restart. The
+            output value is obtained from the local IMS.
+        tran:
+          type: string
+          description: Transaction associated with the program.
+        wrk:
+          type: string
+          description: 'Work is in progress for the program or one of its associated
+            resources. '
+      description: POJO from a Query PGM command that represents output for one program
+    DeleteTransactionOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of DeleteTransaction objects. Represents the JSON data
+            output for all transactions from the command
+          items:
+            $ref: '#/components/schemas/DeleteTransaction'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+    CreateProgram:
+      type: object
+      properties:
+        cc:
+          type: string
+          description: Completion Code
+        cctxt:
+          type: string
+          description: Completion code text that briefly explains the meaning of the
+            non-zero completion code.
+        mbr:
+          type: string
+          description: IMSplex member that built the output line.
+        pgm:
+          type: string
+          description: Program name.
+      description: POJO from a Create PGM command that represents output for one program
+    UpdateTransactionOutput:
+      type: object
+      properties:
+        data:
+          type: array
+          description: A list of UpdateTran objects. Represents the JSON data output
+            for all programs from the command
+          items:
+            $ref: '#/components/schemas/UpdateTransaction'
+        messages:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+          description: A map that represents messages that are returned from OM after
+            submitting the command. The key is either the IMS member or OM that returned
+            the message
+      description: POJO that represents all the data returned from OM following a
+        Update TRAN command
+    QueryTransaction:
+      type: object
+      properties:
+        afin:
+          type: string
+          description: Affinity of the transaction messages on the shared queues,
+            or affinity registration of the transactions for this IMS.
+        aocmd:
+          type: string
+          description: Transaction supports AOI CMD calls (CMD, TRAN, or Y) or not
+            (N). The output value is obtained from the local IMS.
+        cc:
+          type: string
+          description: 'Completion code. The completion code indicates whether IMS
+            was able to process the command for the specified resource. The completion
+            code is always returned. '
+        cctxt:
+          type: string
+          description: "\tCompletion code text that briefly explains the meaning of\
+            \ the nonzero completion code."
+        cmtm:
+          type: string
+          description: 'Commit mode for the transaction: commit after a single message
+            (SNGL) or multiple messages (MULT). The output value is obtained from
+            the local IMS.'
+        conv:
+          type: string
+          description: Conversation option. Transaction is conversational (Y), or
+            not (N). The output value is obtained from the local IMS.
+        convid:
+          type: string
+          description: Conversation ID for transaction that has a conversation in
+            progress.
+        dclw:
+          type: string
+          description: Perform log write-ahead for recoverable, nonresponse mode input
+            messages and transaction output messages (Y) or not (N). The output value
+            is obtained from the local IMS.
+        dfnt:
+          type: string
+          description: Definition type
+        drrt:
+          type: string
+          description: Supports MSC directed routing (Y) or not (N). The output value
+            is obtained from the local IMS.
+        edtr:
+          type: string
+          description: Input edit routine name.
+        edtt:
+          type: string
+          description: Input data is to be translated to uppercase (Y) or not (N).
+            The output value is obtained from the local IMS.
+        emhbs:
+          type: string
+          description: EMH buffer size. The output value is obtained from the local
+            IMS.
+        expn:
+          type: string
+          description: Indicates whether the transaction has been exported to the
+            IMSRSC repository. The value can be Y or N.
+        exprt:
+          type: string
+          description: Transaction expiration time. The output value is obtained from
+            the local IMS.
+        fp:
+          type: string
+          description: Fast Path potential candidate (P), Fast Path exclusive (E),
+            or FP option not enabled (N). The output value is obtained from the local
+            IMS.
+        imsid:
+          type: string
+          description: Returns the IMSIDs that have the resource defined. The output
+            value is obtained from the repository.
+        inq:
+          type: string
+          description: Inquiry transaction (Y) or not (N). The output value is obtained
+            from the local IMS.
+        lcls:
+          type: string
+          description: Scheduling class used to determine which message regions can
+            process the transaction locally on a particular IMS.
+        lcp:
+          type: string
+          description: Local current scheduling priority. The current scheduling priority
+            is used to calculate which transaction is selected for scheduling.
+        llct:
+          type: string
+          description: Limit count in the local IMS. The limit count is the number
+            that, when compared to the number of input transactions queued and waiting
+            to be processed, determines whether the normal or limit priority value
+            is assigned to this transaction.
+        llp:
+          type: string
+          description: Local limit scheduling priority. The limit scheduling priority
+            is the priority to which this transaction is raised when the number of
+            input transactions enqueued and waiting to be processed is equal to or
+            greater than the limit count value.
+        lmrg:
+          type: string
+          description: Local maximum region count. The maximum region count is the
+            maximum number of message processing program (MPP) regions that can be
+            concurrently scheduled to process a transaction that is eligible for parallel
+            scheduling.
+        lnp:
+          type: string
+          description: Local normal scheduling priority. The normal scheduling priority
+            is the priority assigned to this transaction when the number of input
+            transactions enqueued and waiting to be processed is less than the limit
+            count value.
+        lplct:
+          type: string
+          description: Local processing limit count. The processing limit count is
+            the number of transaction messages a program can process in a single scheduling.
+        lplm:
+          type: string
+          description: Local parallel processing limit count. The parallel limit count
+            is the maximum number of messages that can currently be queued, but not
+            yet processed, by each active message region currently scheduled for this
+            transaction. An additional message region is scheduled whenever the transaction
+            queue count exceeds the PARLIM value multiplied by the number of regions
+            currently scheduled for this transaction.
+        lq:
+          type: string
+          description: Local transaction message queue count.
+        lsno:
+          type: string
+          description: Local application program output segment limit allowed in message
+            queues for each GU call.
+        lssz:
+          type: string
+          description: Local application program output segment size limit allowed
+            in the message queues for each GU call.
+        lstt:
+          type: string
+          description: Local transaction status.
+        lu:
+          type: string
+          description: APPC LU name that initiated conversation.
+        mdln:
+          type: string
+          description: Model name. Name of the resource used as a model to create
+            this resource. DFSDSTR1 is the IMS descriptor name for transactions.
+        mdlt:
+          type: string
+          description: Model type, either RSC or DESC. RSC means that the resource
+            was created using another resource as a model. DESC means that the resource
+            was created using a descriptor as a model.
+        mbr:
+          type: string
+          description: IMSplex member that built the output line. IMS identifier of
+            IMS that built the output. The IMS identifier is always returned.
+        msgt:
+          type: string
+          description: Message type of single segment (SNGLSEG) or multiple segment
+            (MULTSEG). The output value is obtained from the local IMS.
+        msn:
+          type: string
+          description: Logical link path name. The output value is obtained from the
+            local IMS.
+        node:
+          type: string
+          description: Node name that initiated conversation.
+        plctt:
+          type: string
+          description: Processing limit count time.
+        psb:
+          type: string
+          description: PSB name associated with the transaction. The output value
+            is obtained from the local IMS.
+        q:
+          type: string
+          description: Global transaction message queue count on the shared queues.
+            Q is displayed only if shared queues are used.
+        raocmd:
+          type: string
+          description: Transaction supports AOI CMD calls (CMD, TRAN, or Y) or not
+            (N). The output value is obtained from the repository.
+        rcls:
+          type: string
+          description: "\tClass value in the repository."
+        rcmtm:
+          type: string
+          description: 'Commit mode for the transaction: commit after a single message
+            (SNGL) or multiple messages (MULT). The output value is obtained from
+            the repository.'
+        rconv:
+          type: string
+          description: Conversation ID if a conversation is in progress in the repository.
+        rcv:
+          type: string
+          description: Recovered during an IMS emergency or normal restart (Y) or
+            not (N). The output value is obtained from the local IMS.
+        rdclw:
+          type: string
+          description: Perform log write-ahead for recoverable, nonresponse mode input
+            messages and transaction output messages (Y) or not (N). The output value
+            is obtained from the repository.
+        rdrrt:
+          type: string
+          description: Supports MSC directed routing (Y) or not (N). The output value
+            is obtained from the repository.
+        redtr:
+          type: string
+          description: Edit routine value obtained from the repository.
+        redtt:
+          type: string
+          description: Input data is to be translated to uppercase (Y) or not (N).
+            The output value is obtained from the repository. For the values to be
+            returned, see LEditUC in this table.
+        remhbs:
+          type: string
+          description: EMH buffer size. The output value is obtained from the repository.
+        repo:
+          type: string
+          description: Indicates whether the output line contains the stored resource
+            definitions.
+        rexprt:
+          type: string
+          description: Transaction expiration time. The output value is obtained from
+            the repository.
+        rfp:
+          type: string
+          description: Fast Path potential candidate (P), Fast Path exclusive (E),
+            or FP option not enabled (N). The output value is obtained from the repository.
+            For the values to be returned, see the description for LFP in this table.
+        rgc:
+          type: string
+          description: Number of regions the transaction is currently scheduled in
+            the local IMS. The output value is obtained from the local IMS.
+        rinq:
+          type: string
+          description: Inquiry transaction (Y) or not (N). The output value is obtained
+            from the repository. For the values to be returned, see the description
+            for LInq in this table.
+        rlct:
+          type: string
+          description: Limit count value in the repository. The limit count is the
+            number that, when compared to the number of input transactions queued
+            and waiting to be processed, determines whether the normal or limit priority
+            value is assigned to this transaction.
+        rlp:
+          type: string
+          description: Local limit scheduling priority value in the repository. The
+            limit scheduling priority is the priority to which this transaction is
+            raised when the number of input transactions enqueued and waiting to be
+            processed is equal to or greater than the limit count value.
+        rmrg:
+          type: string
+          description: Maximum region count obtained from the repository. The maximum
+            region count is the maximum number of message processing program (MPP)
+            regions that can be concurrently scheduled to process a transaction that
+            is eligible for parallel scheduling.
+        rmsgt:
+          type: string
+          description: Message type of single segment (SNGLSEG) or multiple segment
+            (MULTSEG). The output value is obtained from the repository. For the values
+            to be returned, see the description for LMsgType in this table.
+        rmt:
+          type: string
+          description: Remote transaction (Y) or not (N). The output value is obtained
+            from the local IMS.
+        rnp:
+          type: string
+          description: Normal scheduling priority value obtained from the repository.
+            The normal scheduling priority is the priority assigned to this transaction
+            when the number of input transactions enqueued and waiting to be processed
+            is less than the limit count value.
+        rplct:
+          type: string
+          description: Processing limit count obtained from the repository. The processing
+            limit count is the number of transaction messages a program can process
+            in a single scheduling.
+        rplctt:
+          type: string
+          description: Processing limit count time value in the repository.
+        rplm:
+          type: string
+          description: "\tParallel processing limit count obtained from the repository.\
+            \ The parallel limit count is the maximum number of messages that can\
+            \ currently be queued, but not yet processed, by each active message region\
+            \ currently scheduled for this transaction. An additional message region\
+            \ is scheduled whenever the transaction queue count exceeds the PARLIM\
+            \ value multiplied by the number of regions currently scheduled for this\
+            \ transaction."
+        rpsb:
+          type: string
+          description: PSB name associated with the transaction. The output value
+            is obtained from the repository.
+        rrcv:
+          type: string
+          description: Recovered during an IMS emergency or normal restart (Y) or
+            not (N). The output value is obtained from the repository. For the values
+            to be returned, see the description for LRecover in this table.
+        rrmt:
+          type: string
+          description: Remote transaction (Y) or not (N). The output value is obtained
+            from the repository. For the values to be returned, see the description
+            for LRemote in this table.
+        rrsp:
+          type: string
+          description: Response mode transaction (Y) or not (N). The output value
+            is obtained from the repository. For the values to be returned, see the
+            description for LResp in this table.
+        rser:
+          type: string
+          description: Transaction is processed serially (Y) or not (N). The output
+            value is obtained from the repository. For the values to be returned,
+            see the description for LSerial in this table.
+        rsidl:
+          type: string
+          description: Local system ID. The output value is obtained from the repository.
+        rsidr:
+          type: string
+          description: Remote system ID. The output value is obtained from the repository.
+        rsno:
+          type: string
+          description: Application program output segment limit allowed in message
+            queues for each GU call. The value is obtained from the repository.
+        rsp:
+          type: string
+          description: Response mode transaction (Y) or not (N). The output value
+            is obtained from the local IMS.
+        rspasz:
+          type: string
+          description: Conversational transaction scratchpad area size. The output
+            value is obtained from the repository.
+        rspatr:
+          type: string
+          description: 'Conversational transaction SPA data should be truncated (R)
+            or preserved (S) across a program switch to a transaction that is defined
+            with a smaller SPA. '
+        rsssz:
+          type: string
+          description: Application program output segment size limit allowed in the
+            message queues for each GU call. The value is obtained from the repository.
+        rtls:
+          type: string
+          description: Transaction level statistics logged (Y) or not (N). The output
+            value is obtained from the repository. For the values to be returned,
+            see the description for LTranStat in this table.
+        rtmcr:
+          type: string
+          description: Create time from the repository. This is the time the resource
+            was first created in the repository.
+        rtmup:
+          type: string
+          description: Update time from the repository. This is the time the resource
+            was last updated in the repository.
+        rwfi:
+          type: string
+          description: Wait-for-input transaction (Y) or not (N). The output value
+            is obtained from the repository. For the values to be returned, see the
+            description for LWFI in this table.
+        ser:
+          type: string
+          description: Transaction is processed serially (Y) or not (N). The output
+            value is obtained from the local IMS.
+        sidl:
+          type: string
+          description: Local system ID. The output value is obtained from the local
+            IMS.
+        sidr:
+          type: string
+          description: Remote system ID. The output value is obtained from the local
+            IMS.
+        spasz:
+          type: string
+          description: Conversational transaction scratchpad area size. The output
+            value is obtained from the local IMS.
+        spatr:
+          type: string
+          description: Conversational transaction SPA data should be truncated (R)
+            or preserved (S) across a program switch to a transaction that is defined
+            with a smaller SPA. The output value is obtained from the local IMS.
+        stt:
+          type: string
+          description: Global transaction status
+        tls:
+          type: string
+          description: Transaction level statistics logged (Y) or not (N). The output
+            value is obtained from the local IMS.
+        tmac:
+          type: string
+          description: The time that the resource was last accessed. The output value
+            is obtained from the local IMS.
+        tmcr:
+          type: string
+          description: The time that the resource was created. The output value is
+            obtained from the local IMS.
+        tmem:
+          type: string
+          description: OTMA tmember that initiated conversation.
+        tmim:
+          type: string
+          description: The time that the resource was last imported. The import time
+            is retained across warm start and emergency restart. The output value
+            is obtained from the local IMS.
+        tmup:
+          type: string
+          description: The last time the attributes of the runtime resource definition
+            were updated as a result of the UPDATE TRAN, a type-1 command, or the
+            IMPORT command. The update time is retained across warm start and emergency
+            restart. The output value is obtained from the local IMS.
+        tpip:
+          type: string
+          description: OTMA tpipe that initiated conversation.
+        tran:
+          type: string
+          description: Transaction name. A transaction defines the processing characteristics
+            of messages destined for an application program.
+        user:
+          type: string
+          description: User that initiated conversation.
+        wfi:
+          type: string
+          description: Wait-for-input transaction (Y) or not (N). The output value
+            is obtained from the local IMS.
+        wrk:
+          type: string
+          description: Work is in progress for the transaction or one of its associated
+            resources.
+      description: POJO from a Query TRAN command that represents output for one transaction
+
