@@ -51,6 +51,11 @@ public class TestCreateDeletePgm
 	public void testCreateDeletePgm() {
 		logger.info("TESTING CREATE and DELETE PGM");
 		
+		List<String[]> queryParamspre = new ArrayList<>();
+		String[] namespre = new String[] {"names", "TEST"};
+		queryParamspre.add(namespre);
+		RequestUtils.deleteRequest(queryParamspre, "/program", client);
+		
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"names", "TEST"};
 		queryParams.add(names);

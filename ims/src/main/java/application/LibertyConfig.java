@@ -11,6 +11,9 @@ import application.rest.OMServlet;
 import filters.HeaderRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 
 /**
  * Configuration class for REST endpoint
@@ -18,7 +21,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
  *
  */
 @Component
-@ApplicationPath("/apis/v1")
+@ApplicationPath("/apis")
 public class LibertyConfig extends ResourceConfig{
 
 	public LibertyConfig(@Context ServletConfig servletConfig) {
