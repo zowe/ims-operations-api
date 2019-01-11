@@ -6,6 +6,7 @@ RemoteSystemsTempFiles/
 .recommenders
 .metadata
 Servers/
+/test/
 
 # Log file
 *.log
