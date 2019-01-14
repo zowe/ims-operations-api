@@ -53,7 +53,7 @@ public class TestUpdateTran {
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
-		Response responses = RequestUtils.putRequest(queryParams, "/transaction/", client);
+		Response responses = RequestUtils.putRequest(queryParams, "/PLEX1/transaction/", client);
 		UpdateTransactionOutput upr = RequestUtils.validateUTRSuccess(responses);
 		logger.info(upr.toString());
 		
@@ -64,7 +64,7 @@ public class TestUpdateTran {
 		String[] show = new String[] {"attributes", "STATUS"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
-		Response responses2 = RequestUtils.getRequest(queryParams2, "/transaction/", client);
+		Response responses2 = RequestUtils.getRequest(queryParams2, "/PLEX1/transaction/", client);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(responses2);
 		for (QueryTransaction r : qpr.getData()) {
 			assertEquals("STOSCHD", r.getLstt());
@@ -77,7 +77,7 @@ public class TestUpdateTran {
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
-		Response responses3 = RequestUtils.putRequest(queryParams3, "/transaction/", client);
+		Response responses3 = RequestUtils.putRequest(queryParams3, "/PLEX1/transaction/", client);
 		UpdateTransactionOutput upr2 = RequestUtils.validateUTRSuccess(responses3);
 		logger.info(upr2.toString());
 		
@@ -88,7 +88,7 @@ public class TestUpdateTran {
 		String[] show2 = new String[] {"attributes", "STATUS"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);
-		Response responses4 = RequestUtils.getRequest(queryParams4, "/transaction/", client);
+		Response responses4 = RequestUtils.getRequest(queryParams4, "/PLEX1/transaction/", client);
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(responses4);
 		for (QueryTransaction r : qpr2.getData()) {
 			assertEquals(null, r.getLstt());

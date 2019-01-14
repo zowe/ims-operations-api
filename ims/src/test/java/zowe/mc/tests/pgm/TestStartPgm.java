@@ -43,7 +43,7 @@ public class TestStartPgm {
 	public void testStartPgm() {
 		logger.info("TESTING START PGM");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/program/start", client);
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/PLEX1/program/start", client);
 		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {

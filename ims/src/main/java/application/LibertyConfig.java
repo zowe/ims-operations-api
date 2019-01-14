@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
  *
  */
 @Component
-@ApplicationPath("/apis")
+@ApplicationPath("/apis/v1")
 public class LibertyConfig extends ResourceConfig{
 
 	public LibertyConfig(@Context ServletConfig servletConfig) {

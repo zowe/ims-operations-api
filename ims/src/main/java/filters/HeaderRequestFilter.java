@@ -16,9 +16,9 @@ public class HeaderRequestFilter implements ContainerRequestFilter {
 	public void filter(ContainerRequestContext ctx) throws IOException {
 		MultivaluedMap<String, String> headers = ctx.getHeaders();
 
-		if (headers.get("hostname") == null || headers.get("port") == null || headers.get("plex") == null) {
+		if (headers.get("hostname") == null || headers.get("port") == null) {
 			ctx.abortWith(Response.status(Response.Status.BAD_REQUEST)
-					.entity("hostname, port, and plex headers must be populated with values")
+					.entity("hostname and port headers must be populated with values")
 					.build());
 
 		}

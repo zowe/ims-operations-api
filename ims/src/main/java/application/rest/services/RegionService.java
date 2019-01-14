@@ -4,6 +4,7 @@ import javax.ejb.Stateless;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -30,7 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 
 @Stateless
-@Path("/region")
+@Path("/{plex}/region")
 @Tag(name = "Region")
 @CheckHeader
 public class RegionService {
@@ -73,7 +74,10 @@ public class RegionService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -153,7 +157,10 @@ public class RegionService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 
 		MCInteraction mcSpec = new MCInteraction();

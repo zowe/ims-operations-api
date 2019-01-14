@@ -11,6 +11,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -61,7 +62,7 @@ import utils.Type2CommandSerializable;
  *
  */
 @Stateless
-@Path("/transaction")
+@Path("/{plex}/transaction")
 @Tag(name = "Transaction")
 @CheckHeader
 public class TranService {
@@ -137,7 +138,10 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -248,7 +252,10 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -464,7 +471,10 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -684,7 +694,10 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -922,7 +935,11 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect plex name", required = true) @HeaderParam("plex") String plex) {
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex
+			) {
 
 
 		MCInteraction mcSpec = new MCInteraction();

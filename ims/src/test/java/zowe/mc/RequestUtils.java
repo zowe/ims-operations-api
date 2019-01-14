@@ -38,7 +38,7 @@ public class RequestUtils {
 		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 		
 		Response responses = builder.post(Entity.json(null));
 		return responses;
@@ -56,7 +56,7 @@ public class RequestUtils {
 		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 		
 		Response responses = builder.delete();
 		return responses;
@@ -73,7 +73,7 @@ public class RequestUtils {
 		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 
 		Response responses = builder.put(Entity.json(null));
 		return responses;
@@ -92,7 +92,7 @@ public class RequestUtils {
 
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 
 		Response responses = builder.get();
 		return responses;

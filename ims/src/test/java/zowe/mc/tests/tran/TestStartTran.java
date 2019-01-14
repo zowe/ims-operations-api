@@ -43,7 +43,7 @@ public class TestStartTran {
 	public void testStartTran() {
 		logger.info("TESTING START TRAN");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/transaction/start", client);
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/PLEX1/transaction/start", client);
 		StartTransactionOutput spr = RequestUtils.validateSTRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {

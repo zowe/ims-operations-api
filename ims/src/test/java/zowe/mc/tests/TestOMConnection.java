@@ -78,11 +78,11 @@ public class TestOMConnection {
 	public void testBadPlex() {
 		
 		logger.info("TESTING Bad Connection");
-		String path = "/program/";
+		String path = "FOO/program/";
 		WebTarget webTarget = client.target("http://localhost:8081/");
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
-				.header("plex", "FOO").accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 
 		Response responses = builder.get();
 
@@ -102,11 +102,11 @@ public class TestOMConnection {
 	@Test
 	public void testBadConnection() {
 		logger.info("TESTING Bad Connection");
-		String path = "/program/";
+		String path = "PLEX1/program/";
 		WebTarget webTarget = client.target("http://localhost:8081/");
 		Invocation.Builder builder =  webTarget.path(path).queryParam("names", "*").request(MediaType.APPLICATION_JSON).header("hostname", "FOO")
 				.header("port", TestProperties.port)
-				.header("plex", TestProperties.plex).accept(MediaType.APPLICATION_JSON);
+				.accept(MediaType.APPLICATION_JSON);
 
 		Response responses = builder.get();
 
