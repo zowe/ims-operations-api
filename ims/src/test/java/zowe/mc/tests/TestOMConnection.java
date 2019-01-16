@@ -97,7 +97,7 @@ public class TestOMConnection {
 	}
 	
 	/**
-	 * Negative test for bad connection
+	 * Negative test for bad connection webhook
 	 */
 	@Test
 	public void testBadConnection() {
