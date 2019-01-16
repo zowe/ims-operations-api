@@ -97,7 +97,7 @@ public class TestOMConnection {
 	}
 	
 	/**
-	 * Negative test for bad connection
+	 * Negative test for bad connection trigger
 	 */
 	@Test
 	public void testBadConnection() {
