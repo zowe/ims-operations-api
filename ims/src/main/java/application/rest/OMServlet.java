@@ -193,9 +193,11 @@ public class OMServlet {
 			Collection<OmCommandErrorMbr> omCommandErrorMbrs = omMessageContext.getOmCommandErrorMbrs();
 			for (OmCommandErrorMbr omCommandErrorMbr : omCommandErrorMbrs) {
 				JSONObject omMessage = new JSONObject();
-				omMessage.put("rsn", omCommandErrorMbr.getOmMemberRsn());
-				omMessage.put("rsntxt", omCommandErrorMbr.getOmMemberRsntxt());
-				omMessage.put("rc", omCommandErrorMbr.getOmMemberRc());
+				if (!omCommandErrorMbr.getOmMemberRc().equals("00000000")) {
+					omMessage.put("rsn", omCommandErrorMbr.getOmMemberRsn());
+					omMessage.put("rsntxt", omCommandErrorMbr.getOmMemberRsntxt());
+					omMessage.put("rc", omCommandErrorMbr.getOmMemberRc());
+				}
 				omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 				//omMessage.put("message_title", omCommandErrorMbr.getOmMemberMessageTittle());
 				//omMessage.put("message", omCommandErrorMbr.getOmMemberMessageSummary());
@@ -209,9 +211,11 @@ public class OMServlet {
 			omMessage.put("command", extractEssentialCommand(omMessageContext.getOmCommandExecuted()));
 			//	omMessage.put("message_title", omMessageContext.getOmMessageTittle());
 			//	omMessage.put("message", omMessageContext.getOmMessageSummary());
-			omMessage.put("rc", omMessageContext.getOmReturnCode());
-			omMessage.put("rsn", omMessageContext.getOmReasonCode());
-			omMessage.put("rsntxt", omMessageContext.getOmReasonText());
+			if (!omMessageContext.getOmReturnCode().equals("00000000")) {
+				omMessage.put("rc", omMessageContext.getOmReturnCode());
+				omMessage.put("rsn", omMessageContext.getOmReasonCode());
+				omMessage.put("rsntxt", omMessageContext.getOmReasonText());
+			}
 
 			omMessages.put(omMessageContext.getOmName(), omMessage);
 		}

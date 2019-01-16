@@ -53,11 +53,11 @@ public class RegionService {
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Region Number Identifier. Can specify a Region Number or a Job Name, but NOT BOTH.",
 			array=@ArraySchema(schema = @Schema(type = "integer"), maxItems = 2))
-			@QueryParam("regNum") 
+			@QueryParam("reg_num") 
 			String regNumber,
 
 			@Parameter(description = "Can specify a Region Number or a Job Name, but NOT BOTH.", schema = @Schema(maxLength = 8))
-			@QueryParam("jobname") 
+			@QueryParam("job_name") 
 			String jobName,
 
 			@Parameter(description = "Specify a transaction to abnormally terminate")
@@ -144,11 +144,11 @@ public class RegionService {
 	public Response start(
 
 			@Parameter(description = "Region Number Identifier", required = true)
-			@QueryParam("membername") 
+			@QueryParam("member_name") 
 			String memName,
 
 			@Parameter(description = "")
-			@QueryParam("jobname") 
+			@QueryParam("job_name") 
 			String jobName,
 
 			@Parameter()
