@@ -68,7 +68,7 @@ public class TestCreateDeletePgm
 			assertEquals("TEST", q.getPgm());
 		}
 		for (String key : cpr.getMessages().keySet()) {
-			assertEquals("00000000", cpr.getMessages().get(key).getRc());
+			assertEquals(null, cpr.getMessages().get(key).getRc());
 		}
 		
 		List<String[]> queryParams2 = new ArrayList<>();
@@ -83,7 +83,7 @@ public class TestCreateDeletePgm
 			assertEquals("TEST", q.getPgm());
 		}
 		for (String key : dpr2.getMessages().keySet()) {
-			assertEquals("00000000", dpr2.getMessages().get(key).getRc());
+			assertEquals(null, dpr2.getMessages().get(key).getRc());
 		}
 
 

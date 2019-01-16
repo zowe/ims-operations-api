@@ -47,7 +47,7 @@ public class TestStartPgm {
 		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {
-			assertEquals("00000000", spr.getMessages().get(key).getRc());
+			assertEquals(null, spr.getMessages().get(key).getRc());
 		}
 
 	}

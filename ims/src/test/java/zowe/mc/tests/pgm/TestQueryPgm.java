@@ -59,7 +59,7 @@ public class TestQueryPgm
 			assertEquals("0", q.getCc());
 		}
 		for (String key : qpr.getMessages().keySet()) {
-			assertEquals("00000000", qpr.getMessages().get(key).getRc());
+			assertEquals(null, qpr.getMessages().get(key).getRc());
 		}
 	}
 
@@ -84,7 +84,7 @@ public class TestQueryPgm
 			assertNotNull(q.getTmcr());
 		}
 		for (String key : qpr.getMessages().keySet()) {
-			assertEquals("00000000", qpr.getMessages().get(key).getRc());
+			assertEquals(null, qpr.getMessages().get(key).getRc());
 		}
 
 		//SHOW=DOPT
@@ -100,7 +100,7 @@ public class TestQueryPgm
 			assertNotNull(q.getDopt());
 		}
 		for (String key : qpr2.getMessages().keySet()) {
-			assertEquals("00000000", qpr2.getMessages().get(key).getRc());
+			assertEquals(null, qpr2.getMessages().get(key).getRc());
 		}
 
 		//SHOW=SCHDTYPE
@@ -116,7 +116,7 @@ public class TestQueryPgm
 			assertNotNull(q.getSchd());
 		}
 		for (String key : qpr3.getMessages().keySet()) {
-			assertEquals("00000000", qpr3.getMessages().get(key).getRc());
+			assertEquals(null, qpr3.getMessages().get(key).getRc());
 		}
 
 	}

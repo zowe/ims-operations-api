@@ -68,7 +68,7 @@ import zowe.mc.SuiteExtension;
 				assertEquals("TEST", q.getPgm());
 			}
 			for (String key : cpr.getMessages().keySet()) {
-				assertEquals("00000000", cpr.getMessages().get(key).getRc());
+				assertEquals(null, cpr.getMessages().get(key).getRc());
 			}
 			
 			
@@ -86,7 +86,7 @@ import zowe.mc.SuiteExtension;
 				assertEquals("TEST", q.getTran());
 			}
 			for (String key : ctr.getMessages().keySet()) {
-				assertEquals("00000000", ctr.getMessages().get(key).getRc());
+				assertEquals(null, ctr.getMessages().get(key).getRc());
 			}
 			
 			List<String[]> queryParams2 = new ArrayList<>();
@@ -101,7 +101,7 @@ import zowe.mc.SuiteExtension;
 				assertEquals("TEST", q.getTran());
 			}
 			for (String key : dtr.getMessages().keySet()) {
-				assertEquals("00000000", dtr.getMessages().get(key).getRc());
+				assertEquals(null, dtr.getMessages().get(key).getRc());
 			}
 			
 			List<String[]> queryParams3 = new ArrayList<>();
@@ -116,7 +116,7 @@ import zowe.mc.SuiteExtension;
 				assertEquals("TEST", q.getPgm());
 			}
 			for (String key : dpr.getMessages().keySet()) {
-				assertEquals("00000000", dpr.getMessages().get(key).getRc());
+				assertEquals(null, dpr.getMessages().get(key).getRc());
 			}
 			
 		
