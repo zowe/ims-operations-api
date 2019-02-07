@@ -20,6 +20,7 @@ import application.rest.responses.pgm.query.QueryProgram;
 import application.rest.responses.pgm.query.QueryProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for "QUERY PGM" IMS rest services
@@ -51,7 +52,7 @@ public class TestQueryPgm
 		logger.info("TESTING Query PGM");
 		
 		//QUERY PGM
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/PLEX1/program/", client);
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -75,7 +76,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, "/PLEX1/program/", client);
+		Response response = RequestUtils.getRequest(queryParams,  "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -91,7 +92,7 @@ public class TestQueryPgm
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, "/PLEX1/program/", client);
+		Response response2= RequestUtils.getRequest(queryParams2,  "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -107,7 +108,7 @@ public class TestQueryPgm
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, "/PLEX1/program/", client);
+		Response response3= RequestUtils.getRequest(queryParams3,  "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr3 = RequestUtils.validateQPRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -133,7 +134,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, "/PLEX1/program", client);
+		Response response= RequestUtils.getRequest(queryParams,  "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -156,7 +157,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] route = new String[] {"route", "FOO"};
 		queryParams.add(route);
-		Response response= RequestUtils.getRequest(queryParams, "/PLEX1/program", client);
+		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

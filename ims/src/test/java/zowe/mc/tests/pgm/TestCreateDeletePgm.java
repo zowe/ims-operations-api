@@ -21,6 +21,7 @@ import application.rest.responses.pgm.delete.DeleteProgram;
 import application.rest.responses.pgm.delete.DeleteProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for "CREATE/DELETE PGM" IMS rest services
@@ -54,12 +55,12 @@ public class TestCreateDeletePgm
 		List<String[]> queryParamspre = new ArrayList<>();
 		String[] namespre = new String[] {"names", "TEST"};
 		queryParamspre.add(namespre);
-		RequestUtils.deleteRequest(queryParamspre, "/PLEX1/program", client);
+		RequestUtils.deleteRequest(queryParamspre, "/" + TestProperties.plex + "/program", client);
 		
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"names", "TEST"};
 		queryParams.add(names);
-		Response response = RequestUtils.postRequest(queryParams, "/PLEX1/program", client);
+		Response response = RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program", client);
 		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(cpr.toString());
@@ -74,7 +75,7 @@ public class TestCreateDeletePgm
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] names2 = new String[] {"names", "TEST"};
 		queryParams2.add(names2);
-		Response response2 = RequestUtils.deleteRequest(queryParams2, "/PLEX1/program", client);
+		Response response2 = RequestUtils.deleteRequest(queryParams2, "/" + TestProperties.plex + "/program", client);
 		DeleteProgramOutput dpr2 = RequestUtils.validateDPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(dpr2.toString());

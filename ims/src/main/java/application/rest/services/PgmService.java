@@ -63,6 +63,8 @@ import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
 import utils.Type2CommandSerializable;
 
+
+
 /**
  * Restful interface for IMS commands pertaining to program resources
  * @author jerryli
@@ -77,13 +79,16 @@ public class PgmService {
 	//@Autowired
 	//@EJB
 	OMServlet omServlet = new OMServlet();
+	
+	//@Resource(name = "mc_cf")
+	//ConnectionFactory mc_cf;
 
 	private static final Logger logger = LoggerFactory.getLogger(PgmService.class);
 
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
+	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
 			content = @Content(schema = @Schema(implementation = QueryProgramOutput.class))),
@@ -122,7 +127,6 @@ public class PgmService {
 			String plex
 			) {
 
-		
 		
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -187,7 +191,7 @@ public class PgmService {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Hidden
-	@Operation(summary = "Returns data from a 'START PGM' IMS command",
+	@Operation(operationId="startpgm", summary = "Returns data from a 'START PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = StartProgramOutput.class))),
@@ -254,7 +258,7 @@ public class PgmService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
+	@Operation(operationId = "createpgm", summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -407,7 +411,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
+	@Operation(operationId="deletepgm", summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -483,7 +487,7 @@ public class PgmService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
+	@Operation(operationId = "updatepgm", summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = UpdateProgram.class))),

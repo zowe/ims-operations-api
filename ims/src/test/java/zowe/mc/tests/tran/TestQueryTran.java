@@ -16,10 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import application.rest.responses.pgm.create.CreateProgram;
+import application.rest.responses.pgm.create.CreateProgramOutput;
+import application.rest.responses.tran.create.CreateTransaction;
+import application.rest.responses.tran.create.CreateTransactionOutput;
 import application.rest.responses.tran.query.QueryTransaction;
 import application.rest.responses.tran.query.QueryTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for "QUERY TRAN" IMS rest services
@@ -36,6 +41,20 @@ public class TestQueryTran {
 	@BeforeAll
 	public static void setUp() {
 		client = ClientBuilder.newClient();
+		
+		logger.info("Need to create program first");
+		List<String[]> queryParams = new ArrayList<>();
+		String[] names = new String[] {"names", "JUNIT"};
+		queryParams.add(names);
+		RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program", client);
+		
+		
+		List<String[]> queryParams1 = new ArrayList<>();
+		String[] names1 = new String[] {"names", "JUNIT"};
+		String[] pgm1 = new String[] {"pgm", "JUNIT"};
+		queryParams1.add(names1);
+		queryParams1.add(pgm1);
+		RequestUtils.postRequest(queryParams1, "/" + TestProperties.plex + "/transaction", client);
 	}
 	
 	/**
@@ -44,9 +63,12 @@ public class TestQueryTran {
 	 */
 	@Test
 	public void testQueryTran() {
+		
+		
+		
 		logger.info("TESTING Query TRAN");
 		
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/PLEX1/transaction/", client);
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/transaction", client);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -70,7 +92,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, "/PLEX1/transaction/", client);
+		Response response = RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction", client);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -86,7 +108,7 @@ public class TestQueryTran {
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "PGM"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, "/PLEX1/transaction/", client);
+		Response response2= RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/transaction", client);
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -102,7 +124,7 @@ public class TestQueryTran {
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "AOCMD"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, "/PLEX1/transaction/", client);
+		Response response3= RequestUtils.getRequest(queryParams3, "/" + TestProperties.plex + "/transaction", client);
 		QueryTransactionOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -127,7 +149,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, "/PLEX1/transaction/", client);
+		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction", client);
 		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

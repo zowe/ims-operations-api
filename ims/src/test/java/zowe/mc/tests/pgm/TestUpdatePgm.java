@@ -18,6 +18,7 @@ import application.rest.responses.pgm.query.QueryProgramOutput;
 import application.rest.responses.pgm.update.UpdateProgamOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,46 +51,46 @@ public class TestUpdatePgm {
 		//First we stop the program
 		logger.info("Testing Update PGM by stopping scheduling of a program");		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "DBF*"};
+		String[] names = new String[] {"names", "DBFS*"};
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
-		Response responses = RequestUtils.putRequest(queryParams, "/PLEX1/program/", client);
+		Response responses = RequestUtils.putRequest(queryParams, "/" + TestProperties.plex + "/program", client);
 		UpdateProgamOutput upr = RequestUtils.validateUPRSuccess(responses);
 		logger.info(upr.toString());
 		
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"names", "DBF*"};
+		String[] names2 = new String[] {"names", "DBFS*"};
 		String[] show = new String[] {"attributes", "ALL"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
-		Response responses2 = RequestUtils.getRequest(queryParams2, "/PLEX1/program/", client);
+		Response responses2 = RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(responses2);
 		for (QueryProgram r : qpr.getData()) {
-			assertEquals("STOSCHD", r.getLstt());
+			assert(r.getLstt().contains("STOSCHD"));
 		}
 		
 		//First we start the program
-		logger.info("Testing Update PGM by stopping scheduling of a program");		
+		logger.info("Testing Update PGM by starting scheduling of a program");		
 		List<String[]> queryParams3 = new ArrayList<>();
-		String[] names3 = new String[] {"names", "DBF*"};
+		String[] names3 = new String[] {"names", "DBFS*"};
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
-		Response responses3 = RequestUtils.putRequest(queryParams3, "/PLEX1/program/", client);
+		Response responses3 = RequestUtils.putRequest(queryParams3, "/" + TestProperties.plex + "/program", client);
 		UpdateProgamOutput upr2 = RequestUtils.validateUPRSuccess(responses3);
 		logger.info(upr2.toString());
 		
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams4 = new ArrayList<>();
-		String[] names4 = new String[] {"names", "DBF*"};
+		String[] names4 = new String[] {"names", "DBFS*"};
 		String[] show2 = new String[] {"attributes", "ALL"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);
-		Response responses4 = RequestUtils.getRequest(queryParams4, "/PLEX1/program/", client);
+		Response responses4 = RequestUtils.getRequest(queryParams4, "/" + TestProperties.plex + "/program", client);
 		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(responses4);
 		for (QueryProgram r : qpr2.getData()) {
 			assertEquals(null, r.getLstt());

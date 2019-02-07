@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import application.rest.responses.pgm.start.StartProgramOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for "START PGM" IMS rest services
@@ -43,7 +44,7 @@ public class TestStartPgm {
 	public void testStartPgm() {
 		logger.info("TESTING START PGM");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/PLEX1/program/start", client);
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/program/start", client);
 		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {

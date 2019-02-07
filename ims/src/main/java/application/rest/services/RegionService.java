@@ -1,5 +1,8 @@
 package application.rest.services;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
@@ -44,7 +47,7 @@ public class RegionService {
 	@Path("/stop")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
+	@Operation(operationId="stoprgn", summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
@@ -77,7 +80,11 @@ public class RegionService {
 			
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
+			
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
+			@QueryParam("route") 
+			String imsmbr) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -119,6 +126,16 @@ public class RegionService {
 		sb.append(")");
 
 		JSONObject result = new JSONObject();
+		
+		if (imsmbr != null) {
+			sb.append(" ROUTE(");
+			List<String> routeList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+			for (String s : routeList) {
+				sb.append(s + ",");
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append(")");
+		}
 
 
 		try {
@@ -136,7 +153,7 @@ public class RegionService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
+	@Operation(operationId="startrgn", summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
@@ -160,7 +177,11 @@ public class RegionService {
 			
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
+			
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
+			@QueryParam("route") 
+			String imsmbr) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -184,6 +205,16 @@ public class RegionService {
 		sb.append(")");
 
 		JSONObject result = new JSONObject();
+		
+		if (imsmbr != null) {
+			sb.append(" ROUTE(");
+			List<String> routeList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+			for (String s : routeList) {
+				sb.append(s + ",");
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append(")");
+		}
 
 
 		try {

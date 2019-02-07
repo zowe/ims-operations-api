@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import application.rest.responses.tran.start.StartTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
+import zowe.mc.TestProperties;
 
 /**
  * Tests for "START TRAN" IMS rest services
@@ -43,7 +44,7 @@ public class TestStartTran {
 	public void testStartTran() {
 		logger.info("TESTING START TRAN");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/PLEX1/transaction/start", client);
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/transaction/start", client);
 		StartTransactionOutput spr = RequestUtils.validateSTRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {
