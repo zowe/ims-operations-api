@@ -1,3 +1,7 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package application.rest.responses.tran.query;
 
 import java.lang.reflect.Field;

@@ -1,3 +1,7 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package application.rest.responses.pgm.start;
 
 import java.util.HashMap;

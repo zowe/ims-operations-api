@@ -1,3 +1,7 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package application.rest.responses.pgm.query;
 
 import java.lang.reflect.Field;

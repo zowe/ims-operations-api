@@ -1,3 +1,7 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package annotations;
 
 import java.lang.annotation.Retention;

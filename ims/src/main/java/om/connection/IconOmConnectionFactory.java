@@ -1,15 +1,9 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package om.connection;
-/*********************************************************************************
- * Licensed Materials - Property of IBM
- * 5655-TAC
- * (C) Copyright IBM Corp. 2013 All Rights Reserved. 
- * US Government Users Restricted Rights - Use, duplication or
- * disclosure restricted by GSA ADP Schedule Contract with 
- * IBM Corp.               
- *********************************************************************************/
-
-
-
+ 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.UUID;
