@@ -8,14 +8,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -232,5 +235,74 @@ public class RegionService {
 		return Response.ok(result).build();
 
 	}
+	
+	@Path("/")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(operationId="disrgn", summary = "Display region and DC information associated with an IMS™ system. The region is scheduled to an application program and the IMS resources are assigned.",
+	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
+			@ApiResponse(responseCode = "200", description = "Successful Request"),
+			@ApiResponse(responseCode = "400", description = "Request Error"),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+	public Response display(
+			@Parameter()
+			@QueryParam("dc") 
+			boolean dc,
+			
+			@Parameter(description = "")
+			@QueryParam("region") 
+			boolean region,
+			
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
+			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			
+			@Parameter(in = ParameterIn.PATH)
+			@PathParam("plex") 
+			String plex,
+			
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
+			@QueryParam("route") 
+			String imsmbr,
+			
+			@Context 
+			UriInfo uriInfo) {
+		
+		
+		MCInteraction mcSpec = new MCInteraction();
+		mcSpec.setHostname(hostname);
+		mcSpec.setPort(Integer.parseInt(port));
+		mcSpec.setImsPlexName(plex);
+		StringBuilder sb = new StringBuilder("CMD((DIS ACT REGION");
+		
 
+		sb.append(")");
+		sb.append(" OPTION=AOPOUTPUT");
+		sb.append(")");
+
+		JSONObject result = new JSONObject();
+		
+		if (imsmbr != null) {
+			sb.append(" ROUTE(");
+			List<String> routeList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+			for (String s : routeList) {
+				sb.append(s + ",");
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append(")");
+		}
+
+
+		try {
+			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
+		} catch (RestException e) {
+			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
+			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
+		}
+
+		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+		return Response.ok(result).build();
+
+	}
+		
+		
 }

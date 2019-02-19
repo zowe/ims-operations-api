@@ -90,7 +90,7 @@ public class QueryTransaction {
 	@Schema(description = "PSB name associated with the transaction. The output value is obtained from the local IMS.")
 	String psb;
 	@Schema(description = "Global transaction message queue count on the shared queues. Q is displayed only if shared queues are used.")
-	String q;
+	String qcnt;
 	@Schema(description = "Transaction supports AOI CMD calls (CMD, TRAN, or Y) or not (N). The output value is obtained from the repository.")
 	String raocmd;
 	@Schema(description = "	Class value in the repository.")
@@ -440,11 +440,11 @@ public class QueryTransaction {
 	public void setPsb(String psb) {
 		this.psb = psb;
 	}
-	public String getQ() {
-		return q;
+	public String getQcnt() {
+		return qcnt;
 	}
-	public void setQ(String q) {
-		this.q = q;
+	public void setQcnt(String qcnt) {
+		this.qcnt = qcnt;
 	}
 	public String getRaocmd() {
 		return raocmd;

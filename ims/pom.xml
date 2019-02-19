@@ -51,7 +51,7 @@
 		<version>2.1.1.RELEASE</version>
 		<relativePath />
 	</parent>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.ibm</groupId>
@@ -102,8 +102,10 @@
 
 		<!-- Logging (conflicts with log4j embedded in Spring Boot so we remove 
 			it for now) -->
-		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
-			<version>1.7.5</version> </dependency> -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
 
 		<!-- Swagger -->
 		<dependency>
@@ -152,7 +154,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>${project.name}##${version}</finalName>
+		<!-- <finalName>${project.name}##${version}</finalName> -->
 		<plugins>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
@@ -182,10 +184,16 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				 <configuration>
+				<configuration>
 					<skipTests>true</skipTests>
-				</configuration> 
+				</configuration>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 </project>

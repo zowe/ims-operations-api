@@ -18,9 +18,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,7 @@ import utils.Type2CommandSerializable;
 @CheckHeader
 public class TranService {
 
-	
+
 	OMServlet omServlet = new OMServlet();
 
 	private static final Logger logger = LoggerFactory.getLogger(TranService.class);
@@ -82,7 +84,7 @@ public class TranService {
 	@Operation(operationId= "querytran", summary = "Query information about IMS transactions across IMSplex using 'QUERY TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-					content = @Content(schema = @Schema(implementation = QueryTransactionOutput.class))),
+			content = @Content(schema = @Schema(implementation = QueryTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
@@ -141,10 +143,13 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
+
+			@Context 
+			UriInfo uriInfo) {
 
 		MCInteraction mcSpec = new MCInteraction();
 		mcSpec.setHostname(hostname);
@@ -152,66 +157,72 @@ public class TranService {
 		mcSpec.setImsPlexName(plex);
 		QueryTran tran = new QueryTran();
 
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			tran.getNAME().addAll(nameList);
-		}
-
-		if(clazz != null) {
-			tran.getCLASS().addAll(clazz);
-		}
-		if (qcntcomp != null && qcntval != null) {
-			QueryTran.QCNT qcnt = new QueryTran.QCNT();
-			qcnt.setQCNTComp(QueryTran.QCNT.QcntComp.fromValue(qcntcomp));
-			qcnt.setQCNTValue(qcntval);
-			tran.setQCNT(qcnt);
-		}
-		ArrayList<QueryTran.StatusOptions> statusOptions = new ArrayList();
-		if (status != null) {
-			List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
-			for (String s : statusList) {
-				statusOptions.add(QueryTran.StatusOptions.fromValue(s));
-			}
-			tran.getSTATUS().addAll(statusOptions);
-		}
-		if (conv != null) {
-			tran.setCONV(ConvOptions.fromValue(conv));
-		}
-		if (fp != null) {
-			tran.setFP(FpOptions.fromValue(fp));
-		}
-		if (remote != null) {
-			tran.setREMOTE(RemoteOptions.fromValue(remote));
-		}
-		if (resp != null) {
-			tran.setRESP(RespOptions.fromValue(resp));
-		}
-		ArrayList<QueryTran.ShowOptions> showOptions = new ArrayList();
-		if (show != null) {
-			List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
-			for (String s : showList) {
-				showOptions.add(QueryTran.ShowOptions.fromValue(s));
-			}
-			tran.getSHOW().addAll(showOptions);
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setQueryTran(tran);
-		type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
-		type2Command.setResource(Type2Command.ResourceOptions.TRAN);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				tran.getNAME().addAll(nameList);
+			}
+
+			if(clazz != null) {
+				tran.getCLASS().addAll(clazz);
+			}
+			if (qcntcomp != null && qcntval != null) {
+				QueryTran.QCNT qcnt = new QueryTran.QCNT();
+				qcnt.setQCNTComp(QueryTran.QCNT.QcntComp.fromValue(qcntcomp));
+				qcnt.setQCNTValue(qcntval);
+				tran.setQCNT(qcnt);
+			}
+			ArrayList<QueryTran.StatusOptions> statusOptions = new ArrayList();
+			if (status != null) {
+				List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
+				for (String s : statusList) {
+					statusOptions.add(QueryTran.StatusOptions.fromValue(s));
+				}
+				tran.getSTATUS().addAll(statusOptions);
+			}
+			if (conv != null) {
+				tran.setCONV(ConvOptions.fromValue(conv));
+			}
+			if (fp != null) {
+				tran.setFP(FpOptions.fromValue(fp));
+			}
+			if (remote != null) {
+				tran.setREMOTE(RemoteOptions.fromValue(remote));
+			}
+			if (resp != null) {
+				tran.setRESP(RespOptions.fromValue(resp));
+			}
+
+			ArrayList<QueryTran.ShowOptions> showOptions = new ArrayList();
+			if (show != null) {
+				List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
+				for (String s : showList) {
+					showOptions.add(QueryTran.ShowOptions.fromValue(s));
+				}
+				tran.getSHOW().addAll(showOptions);
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setQueryTran(tran);
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.TRAN);
+
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -219,10 +230,15 @@ public class TranService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
-
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 	}
 
 
@@ -233,7 +249,7 @@ public class TranService {
 	@Operation(operationId= "starttran", summary = "Returns data from a 'START TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-					content = @Content(schema = @Schema(implementation = StartTransactionOutput.class))),
+			content = @Content(schema = @Schema(implementation = StartTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
@@ -255,58 +271,69 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
-		StringBuilder sb = new StringBuilder("CMD((STA TRAN");
-		if (names != null) {
-			if (names.equalsIgnoreCase("ALL")){
-				sb.append(" ALL");
-				if (clazz != null) {
-					sb.append(" CLASS " + clazz);
-				}
-			}
-			else {
-				sb.append(" " + names);
-				if (affinity) {
-					sb.append(" AFFINITY");
-				}
-			}
-		} else {
-			sb.append(" ALL");
-		}
-		sb.append(")");
-		sb.append(" OPTION=AOPOUTPUT");
-		sb.append(")");
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			mcSpec.getDatastores().addAll(imsmbrList);
-			sb.append("ROUTE(");
-			for (String s : imsmbrList) {
-				sb.append(s).append(",");
-			}
-			sb.deleteCharAt(sb.length()-1);
-			sb.append(")");
-		}
-
-		JSONObject result = new JSONObject();
+			@Context 
+			UriInfo uriInfo) {
 
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+			StringBuilder sb = new StringBuilder("CMD((STA TRAN");
+			if (names != null) {
+				if (names.equalsIgnoreCase("ALL")){
+					sb.append(" ALL");
+					if (clazz != null) {
+						sb.append(" CLASS " + clazz);
+					}
+				}
+				else {
+					sb.append(" " + names);
+					if (affinity) {
+						sb.append(" AFFINITY");
+					}
+				}
+			} else {
+				sb.append(" ALL");
+			}
+			sb.append(")");
+			sb.append(" OPTION=AOPOUTPUT");
+			sb.append(")");
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				mcSpec.getDatastores().addAll(imsmbrList);
+				sb.append("ROUTE(");
+				for (String s : imsmbrList) {
+					sb.append(s).append(",");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append(")");
+			}
+
+			JSONObject result = new JSONObject();
 			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
 		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+
 	}
 
 	@Path("/")
@@ -315,7 +342,7 @@ public class TranService {
 	@Operation(operationId ="createtran", summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region using 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-					content = @Content(schema = @Schema(implementation = CreateTransactionOutput.class))),
+			content = @Content(schema = @Schema(implementation = CreateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
@@ -474,191 +501,199 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
+			@Context 
+			UriInfo uriInfo) {
 
-		CreateTran tran = new CreateTran();
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			tran.getNAME().addAll(nameList);
-		}
-
-		boolean isLike = false;
-		CreateTran.LIKE like = new CreateTran.LIKE();
-		if (desc != null) {
-			like.setDESC(desc);
-			isLike = true;
-		}
-		if (rsc != null) {
-			like.setRSC(rsc);
-			isLike = true;
-		}
-		if (isLike) {
-			tran.setLIKE(like);
-		}
-
-		boolean isSet = false;
-		CreateTran.SET set = new CreateTran.SET();
-		if (aocmd != null) {
-			set.setAOCMD(CreateTran.SET.AocmdOptions.fromValue(aocmd));
-			isSet = true;
-		}
-		if (clazz != null) {
-			set.setCLASS(clazz);
-			isSet = true;
-		}
-		if (cmtmode != null) {
-			set.setCMTMODE(CreateTran.SET.CmtmodeOptions.fromValue(cmtmode));
-			isSet = true;
-		}
-		if (conv != null) {
-			set.setCONV(CreateTran.SET.ConvOptions.fromValue(conv));
-			isSet = true;
-		}
-		if (dclwa != null) {
-			set.setDCLWA(CreateTran.SET.DclwaOptions.fromValue(dclwa));
-			isSet = true;
-		}
-		if (dirroute != null) {
-			set.setDIRROUTE(CreateTran.SET.DirrouteOptions.fromValue(dirroute));
-			isSet = true;
-		}
-		if (editrtn != null) {
-			set.setEDITRTN(editrtn);
-			isSet = true;
-		}
-		if (edituc != null) {
-			set.setEDITUC(CreateTran.SET.EditucOptions.fromValue(edituc));
-			isSet = true;
-		}
-		if (exprtime != null) {
-			set.setEXPRTIME(exprtime);
-			isSet = true;
-		}
-		if (fp != null) {
-			set.setFP(CreateTran.SET.FpOptions.fromValue(fp));
-			isSet = true;
-		}
-		if (inq != null) {
-			set.setINQ(CreateTran.SET.InqOptions.fromValue(inq));
-			isSet = true;
-		}
-		if (lct != null) {
-			set.setLCT(lct);
-			isSet = true;
-		}
-		if (lpri != null) {
-			set.setLPRI(lpri);
-			isSet = true;
-		}
-		if (maxrgn != null) {
-			set.setMAXRGN(maxrgn);
-			isSet = true;
-		}
-		if (msgtype != null) {
-			set.setMSGTYPE(CreateTran.SET.MsgtypeOptions.fromValue(msgtype));
-			isSet = true;
-		}
-		if (msname != null) {
-			set.setMSNAME(msname);
-			isSet = true;
-		}
-		if (npri != null) {
-			set.setNPRI(npri);
-			isSet = true;
-		}
-		if (parlim != null) {
-			set.setPARLIM(parlim);
-			isSet = true;
-		}
-		if (pgm != null) {
-			set.setPGM(pgm);
-			isSet = true;
-		}
-		if (plct != null) {
-			set.setPLCT(plcttime);
-			isSet = true;
-		}
-		if (plcttime != null) {
-			set.setPLCTTIME(plcttime);
-			isSet = true;
-		}
-		if (recover != null) {
-			set.setRECOVER(CreateTran.SET.RecoverOptions.fromValue(recover));
-			isSet = true;
-		}
-		if (remote != null) {
-			set.setREMOTE(CreateTran.SET.RemoteOptions.fromValue(remote));
-			isSet = true;
-		}
-		if (resp != null) {
-			set.setRESP(CreateTran.SET.RespOptions.fromValue(resp));
-			isSet = true;
-		}
-		if (segno != null) {
-			set.setSEGNO(segno);
-			isSet = true;
-		}
-		if (segsz != null) {
-			set.setSEGSZ(segsz);
-			isSet = true;
-		}
-		if (serial != null) {
-			set.setSERIAL(CreateTran.SET.SerialOptions.fromValue(serial));
-			isSet = true;
-		}
-		if (sidl != null) {
-			set.setSIDL(sidl);
-			isSet = true;
-		}
-		if (sidr != null) {
-			set.setSIDR(sidr);
-			isSet = true;
-		}
-		if (spasz != null) {
-			set.setSPASZ(spasz);
-			isSet = true;
-		}
-		if (spatrunc != null) {
-			set.setSPATRUNC(CreateTran.SET.SpatruncOptions.fromValue(spatrunc));
-			isSet = true;
-		}
-		if (transtat != null) {
-			set.setTRANSTAT(CreateTran.SET.TranstatOptions.fromValue(transtat));
-			isSet = true;
-		}
-		if (wfi != null) {
-			set.setWFI(CreateTran.SET.WfiOptions.fromValue(wfi));
-			isSet = true;
-		}
-		if (isSet) {
-			tran.setSET(set);
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setCreateTran(tran);
-		type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
-		type2Command.setResource(Type2Command.ResourceOptions.TRAN);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			CreateTran tran = new CreateTran();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				tran.getNAME().addAll(nameList);
+			}
+
+			boolean isLike = false;
+			CreateTran.LIKE like = new CreateTran.LIKE();
+			if (desc != null) {
+				like.setDESC(desc);
+				isLike = true;
+			}
+			if (rsc != null) {
+				like.setRSC(rsc);
+				isLike = true;
+			}
+			if (isLike) {
+				tran.setLIKE(like);
+			}
+
+			boolean isSet = false;
+			CreateTran.SET set = new CreateTran.SET();
+			if (aocmd != null) {
+				set.setAOCMD(CreateTran.SET.AocmdOptions.fromValue(aocmd));
+				isSet = true;
+			}
+			if (clazz != null) {
+				set.setCLASS(clazz);
+				isSet = true;
+			}
+			if (cmtmode != null) {
+				set.setCMTMODE(CreateTran.SET.CmtmodeOptions.fromValue(cmtmode));
+				isSet = true;
+			}
+			if (conv != null) {
+				set.setCONV(CreateTran.SET.ConvOptions.fromValue(conv));
+				isSet = true;
+			}
+			if (dclwa != null) {
+				set.setDCLWA(CreateTran.SET.DclwaOptions.fromValue(dclwa));
+				isSet = true;
+			}
+			if (dirroute != null) {
+				set.setDIRROUTE(CreateTran.SET.DirrouteOptions.fromValue(dirroute));
+				isSet = true;
+			}
+			if (editrtn != null) {
+				set.setEDITRTN(editrtn);
+				isSet = true;
+			}
+			if (edituc != null) {
+				set.setEDITUC(CreateTran.SET.EditucOptions.fromValue(edituc));
+				isSet = true;
+			}
+			if (exprtime != null) {
+				set.setEXPRTIME(exprtime);
+				isSet = true;
+			}
+			if (fp != null) {
+				set.setFP(CreateTran.SET.FpOptions.fromValue(fp));
+				isSet = true;
+			}
+			if (inq != null) {
+				set.setINQ(CreateTran.SET.InqOptions.fromValue(inq));
+				isSet = true;
+			}
+			if (lct != null) {
+				set.setLCT(lct);
+				isSet = true;
+			}
+			if (lpri != null) {
+				set.setLPRI(lpri);
+				isSet = true;
+			}
+			if (maxrgn != null) {
+				set.setMAXRGN(maxrgn);
+				isSet = true;
+			}
+			if (msgtype != null) {
+				set.setMSGTYPE(CreateTran.SET.MsgtypeOptions.fromValue(msgtype));
+				isSet = true;
+			}
+			if (msname != null) {
+				set.setMSNAME(msname);
+				isSet = true;
+			}
+			if (npri != null) {
+				set.setNPRI(npri);
+				isSet = true;
+			}
+			if (parlim != null) {
+				set.setPARLIM(parlim);
+				isSet = true;
+			}
+			if (pgm != null) {
+				set.setPGM(pgm);
+				isSet = true;
+			}
+			if (plct != null) {
+				set.setPLCT(plcttime);
+				isSet = true;
+			}
+			if (plcttime != null) {
+				set.setPLCTTIME(plcttime);
+				isSet = true;
+			}
+			if (recover != null) {
+				set.setRECOVER(CreateTran.SET.RecoverOptions.fromValue(recover));
+				isSet = true;
+			}
+			if (remote != null) {
+				set.setREMOTE(CreateTran.SET.RemoteOptions.fromValue(remote));
+				isSet = true;
+			}
+			if (resp != null) {
+				set.setRESP(CreateTran.SET.RespOptions.fromValue(resp));
+				isSet = true;
+			}
+			if (segno != null) {
+				set.setSEGNO(segno);
+				isSet = true;
+			}
+			if (segsz != null) {
+				set.setSEGSZ(segsz);
+				isSet = true;
+			}
+			if (serial != null) {
+				set.setSERIAL(CreateTran.SET.SerialOptions.fromValue(serial));
+				isSet = true;
+			}
+			if (sidl != null) {
+				set.setSIDL(sidl);
+				isSet = true;
+			}
+			if (sidr != null) {
+				set.setSIDR(sidr);
+				isSet = true;
+			}
+			if (spasz != null) {
+				set.setSPASZ(spasz);
+				isSet = true;
+			}
+			if (spatrunc != null) {
+				set.setSPATRUNC(CreateTran.SET.SpatruncOptions.fromValue(spatrunc));
+				isSet = true;
+			}
+			if (transtat != null) {
+				set.setTRANSTAT(CreateTran.SET.TranstatOptions.fromValue(transtat));
+				isSet = true;
+			}
+			if (wfi != null) {
+				set.setWFI(CreateTran.SET.WfiOptions.fromValue(wfi));
+				isSet = true;
+			}
+			if (isSet) {
+				tran.setSET(set);
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setCreateTran(tran);
+			type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
+			type2Command.setResource(Type2Command.ResourceOptions.TRAN);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
+
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -666,10 +701,16 @@ public class TranService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
 
 	}
 
@@ -679,7 +720,7 @@ public class TranService {
 	@Operation(operationId="deletetran", summary = "Delete IMS transactions using 'DELETE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-					content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
+			content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
@@ -697,44 +738,50 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
+			@Context 
+			UriInfo uriInfo) {
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
-
-		DeleteTran tran = new DeleteTran();
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			tran.getNAME().addAll(nameList);
-		}
-
-		if (option != null) {
-			tran.setOPTION(DeleteTran.OptionOptions.fromValue(option));
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setDeleteTran(tran);
-		type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
-		type2Command.setResource(Type2Command.ResourceOptions.TRAN);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			DeleteTran tran = new DeleteTran();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				tran.getNAME().addAll(nameList);
+			}
+
+			if (option != null) {
+				tran.setOPTION(DeleteTran.OptionOptions.fromValue(option));
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setDeleteTran(tran);
+			type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
+			type2Command.setResource(Type2Command.ResourceOptions.TRAN);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -742,10 +789,17 @@ public class TranService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+
 	}
 
 	@Path("/")
@@ -754,7 +808,7 @@ public class TranService {
 	@Operation(operationId="updatetran", summary = "Update, start or stop IMS transaction resources using 'UPDATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
-					content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
+			content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
@@ -818,7 +872,7 @@ public class TranService {
 			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("dirroute")
 			String dirroute,
-			
+
 			@Parameter()
 			@QueryParam("editrtn")
 			String editrtn,
@@ -938,217 +992,222 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex
+			String plex,
+
+			@Context 
+			UriInfo uriInfo
 			) {
 
-
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
-
-		UpdateTran tran = new UpdateTran();
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			tran.getNAME().addAll(nameList);
-		}
-		
-		ArrayList<UpdateTran.StartOptions> startOptions = new ArrayList();
-		if (start != null) {
-			List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
-			for (String s : startList) {
-				startOptions.add(UpdateTran.StartOptions.fromValue(s));
-			}
-			tran.getSTART().addAll(startOptions);
-		}
-		ArrayList<UpdateTran.StopOptions> stopOptions = new ArrayList();
-		if (stop != null) {
-			List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
-			for (String s : stopList) {
-				stopOptions.add(UpdateTran.StopOptions.fromValue(s));
-			}
-			tran.getSTOP().addAll(stopOptions);
-		}
-		
-		if (clazz != null) {
-			tran.getCLASS().addAll(clazz);
-		}
-		
-		ArrayList<UpdateTran.OptionOptions> optionOptions = new ArrayList();
-		if (option != null) {
-			List<String> optionList = Arrays.asList(option.split("\\s*,\\s*"));
-			for (String s : optionList) {
-				optionOptions.add(UpdateTran.OptionOptions.fromValue(s));
-			}
-			tran.getOPTION().addAll(optionOptions);
-		}
-		
-		if (scope != null) {
-			tran.setSCOPE(ScopeOptions.fromValue(scope));
-		}
-		
-		boolean isSet = false;
-		UpdateTran.SET set = new UpdateTran.SET();
-		if (aocmd != null) {
-			set.setAOCMD(UpdateTran.SET.AocmdOptions.fromValue(aocmd));
-			isSet = true;
-		}
-		if (clazz != null) {
-			set.setCLASS(setClazz);
-			isSet = true;
-		}
-		if (cmtmode != null) {
-			set.setCMTMODE(UpdateTran.SET.CmtmodeOptions.fromValue(cmtmode));
-			isSet = true;
-		}
-		if (conv != null) {
-			set.setCONV(UpdateTran.SET.ConvOptions.fromValue(conv));
-			isSet = true;
-		}
-		if (dclwa != null) {
-			set.setDCLWA(UpdateTran.SET.DclwaOptions.fromValue(dclwa));
-			isSet = true;
-		}
-		if (dirroute != null) {
-			set.setDIRROUTE(UpdateTran.SET.DirrouteOptions.fromValue(dirroute));
-			isSet = true;
-		}
-		if (editrtn != null) {
-			set.setEDITRTN(editrtn);
-			isSet = true;
-		}
-		if (edituc != null) {
-			set.setEDITUC(UpdateTran.SET.EditucOptions.fromValue(edituc));
-			isSet = true;
-		}
-		if (exprtime != null) {
-			set.setEXPRTIME(exprtime);
-			isSet = true;
-		}
-		if (fp != null) {
-			set.setFP(UpdateTran.SET.FpOptions.fromValue(fp));
-			isSet = true;
-		}
-		if (inq != null) {
-			set.setINQ(UpdateTran.SET.InqOptions.fromValue(inq));
-			isSet = true;
-		}
-		if (lct != null) {
-			set.setLCT(lct);
-			isSet = true;
-		}
-		if (lpri != null) {
-			set.setLPRI(lpri);
-			isSet = true;
-		}
-		if (lock != null) {
-			set.setLOCK(UpdateTran.SET.LockOptions.fromValue(lock));
-			isSet=true;
-		}
-		if (maxrgn != null) {
-			set.setMAXRGN(maxrgn);
-			isSet = true;
-		}
-		if (msgtype != null) {
-			set.setMSGTYPE(UpdateTran.SET.MsgtypeOptions.fromValue(msgtype));
-			isSet = true;
-		}
-		if (msname != null) {
-			set.setMSNAME(msname);
-			isSet = true;
-		}
-		if (npri != null) {
-			set.setNPRI(npri);
-			isSet = true;
-		}
-		if (parlim != null) {
-			set.setPARLIM(parlim);
-			isSet = true;
-		}
-		if (pgm != null) {
-			set.setPGM(pgm);
-			isSet = true;
-		}
-		if (plct != null) {
-			set.setPLCT(plcttime);
-			isSet = true;
-		}
-		if (plcttime != null) {
-			set.setPLCTTIME(plcttime);
-			isSet = true;
-		}
-		if (recover != null) {
-			set.setRECOVER(UpdateTran.SET.RecoverOptions.fromValue(recover));
-			isSet = true;
-		}
-		if (remote != null) {
-			set.setREMOTE(UpdateTran.SET.RemoteOptions.fromValue(remote));
-			isSet = true;
-		}
-		if (resp != null) {
-			set.setRESP(UpdateTran.SET.RespOptions.fromValue(resp));
-			isSet = true;
-		}
-		if (segno != null) {
-			set.setSEGNO(segno);
-			isSet = true;
-		}
-		if (segsz != null) {
-			set.setSEGSZ(segsz);
-			isSet = true;
-		}
-		if (serial != null) {
-			set.setSERIAL(UpdateTran.SET.SerialOptions.fromValue(serial));
-			isSet = true;
-		}
-		if (sidl != null) {
-			set.setSIDL(sidl);
-			isSet = true;
-		}
-		if (sidr != null) {
-			set.setSIDR(sidr);
-			isSet = true;
-		}
-		if (spasz != null) {
-			set.setSPASZ(spasz);
-			isSet = true;
-		}
-		if (spatrunc != null) {
-			set.setSPATRUNC(UpdateTran.SET.SpatruncOptions.fromValue(spatrunc));
-			isSet = true;
-		}
-		if (transtat != null) {
-			set.setTRANSTAT(UpdateTran.SET.TranstatOptions.fromValue(transtat));
-			isSet = true;
-		}
-		if (wfi != null) {
-			set.setWFI(UpdateTran.SET.WfiOptions.fromValue(wfi));
-			isSet = true;
-		}
-		if (isSet) {
-			tran.setSET(set);
-		}
-		
-		Type2Command type2Command = new Type2Command();
-		type2Command.setUpdateTran(tran);
-		type2Command.setVerb(Type2Command.VerbOptions.UPDATE); 
-		type2Command.setResource(Type2Command.ResourceOptions.TRAN);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			UpdateTran tran = new UpdateTran();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				tran.getNAME().addAll(nameList);
+			}
+
+			ArrayList<UpdateTran.StartOptions> startOptions = new ArrayList();
+			if (start != null) {
+				List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
+				for (String s : startList) {
+					startOptions.add(UpdateTran.StartOptions.fromValue(s));
+				}
+				tran.getSTART().addAll(startOptions);
+			}
+			ArrayList<UpdateTran.StopOptions> stopOptions = new ArrayList();
+			if (stop != null) {
+				List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
+				for (String s : stopList) {
+					stopOptions.add(UpdateTran.StopOptions.fromValue(s));
+				}
+				tran.getSTOP().addAll(stopOptions);
+			}
+
+			if (clazz != null) {
+				tran.getCLASS().addAll(clazz);
+			}
+
+			ArrayList<UpdateTran.OptionOptions> optionOptions = new ArrayList();
+			if (option != null) {
+				List<String> optionList = Arrays.asList(option.split("\\s*,\\s*"));
+				for (String s : optionList) {
+					optionOptions.add(UpdateTran.OptionOptions.fromValue(s));
+				}
+				tran.getOPTION().addAll(optionOptions);
+			}
+
+			if (scope != null) {
+				tran.setSCOPE(ScopeOptions.fromValue(scope));
+			}
+
+			boolean isSet = false;
+			UpdateTran.SET set = new UpdateTran.SET();
+			if (aocmd != null) {
+				set.setAOCMD(UpdateTran.SET.AocmdOptions.fromValue(aocmd));
+				isSet = true;
+			}
+			if (clazz != null) {
+				set.setCLASS(setClazz);
+				isSet = true;
+			}
+			if (cmtmode != null) {
+				set.setCMTMODE(UpdateTran.SET.CmtmodeOptions.fromValue(cmtmode));
+				isSet = true;
+			}
+			if (conv != null) {
+				set.setCONV(UpdateTran.SET.ConvOptions.fromValue(conv));
+				isSet = true;
+			}
+			if (dclwa != null) {
+				set.setDCLWA(UpdateTran.SET.DclwaOptions.fromValue(dclwa));
+				isSet = true;
+			}
+			if (dirroute != null) {
+				set.setDIRROUTE(UpdateTran.SET.DirrouteOptions.fromValue(dirroute));
+				isSet = true;
+			}
+			if (editrtn != null) {
+				set.setEDITRTN(editrtn);
+				isSet = true;
+			}
+			if (edituc != null) {
+				set.setEDITUC(UpdateTran.SET.EditucOptions.fromValue(edituc));
+				isSet = true;
+			}
+			if (exprtime != null) {
+				set.setEXPRTIME(exprtime);
+				isSet = true;
+			}
+			if (fp != null) {
+				set.setFP(UpdateTran.SET.FpOptions.fromValue(fp));
+				isSet = true;
+			}
+			if (inq != null) {
+				set.setINQ(UpdateTran.SET.InqOptions.fromValue(inq));
+				isSet = true;
+			}
+			if (lct != null) {
+				set.setLCT(lct);
+				isSet = true;
+			}
+			if (lpri != null) {
+				set.setLPRI(lpri);
+				isSet = true;
+			}
+			if (lock != null) {
+				set.setLOCK(UpdateTran.SET.LockOptions.fromValue(lock));
+				isSet=true;
+			}
+			if (maxrgn != null) {
+				set.setMAXRGN(maxrgn);
+				isSet = true;
+			}
+			if (msgtype != null) {
+				set.setMSGTYPE(UpdateTran.SET.MsgtypeOptions.fromValue(msgtype));
+				isSet = true;
+			}
+			if (msname != null) {
+				set.setMSNAME(msname);
+				isSet = true;
+			}
+			if (npri != null) {
+				set.setNPRI(npri);
+				isSet = true;
+			}
+			if (parlim != null) {
+				set.setPARLIM(parlim);
+				isSet = true;
+			}
+			if (pgm != null) {
+				set.setPGM(pgm);
+				isSet = true;
+			}
+			if (plct != null) {
+				set.setPLCT(plcttime);
+				isSet = true;
+			}
+			if (plcttime != null) {
+				set.setPLCTTIME(plcttime);
+				isSet = true;
+			}
+			if (recover != null) {
+				set.setRECOVER(UpdateTran.SET.RecoverOptions.fromValue(recover));
+				isSet = true;
+			}
+			if (remote != null) {
+				set.setREMOTE(UpdateTran.SET.RemoteOptions.fromValue(remote));
+				isSet = true;
+			}
+			if (resp != null) {
+				set.setRESP(UpdateTran.SET.RespOptions.fromValue(resp));
+				isSet = true;
+			}
+			if (segno != null) {
+				set.setSEGNO(segno);
+				isSet = true;
+			}
+			if (segsz != null) {
+				set.setSEGSZ(segsz);
+				isSet = true;
+			}
+			if (serial != null) {
+				set.setSERIAL(UpdateTran.SET.SerialOptions.fromValue(serial));
+				isSet = true;
+			}
+			if (sidl != null) {
+				set.setSIDL(sidl);
+				isSet = true;
+			}
+			if (sidr != null) {
+				set.setSIDR(sidr);
+				isSet = true;
+			}
+			if (spasz != null) {
+				set.setSPASZ(spasz);
+				isSet = true;
+			}
+			if (spatrunc != null) {
+				set.setSPATRUNC(UpdateTran.SET.SpatruncOptions.fromValue(spatrunc));
+				isSet = true;
+			}
+			if (transtat != null) {
+				set.setTRANSTAT(UpdateTran.SET.TranstatOptions.fromValue(transtat));
+				isSet = true;
+			}
+			if (wfi != null) {
+				set.setWFI(UpdateTran.SET.WfiOptions.fromValue(wfi));
+				isSet = true;
+			}
+			if (isSet) {
+				tran.setSET(set);
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setUpdateTran(tran);
+			type2Command.setVerb(Type2Command.VerbOptions.UPDATE); 
+			type2Command.setResource(Type2Command.ResourceOptions.TRAN);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -1156,10 +1215,16 @@ public class TranService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
+		}  catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
 
 	}
 }

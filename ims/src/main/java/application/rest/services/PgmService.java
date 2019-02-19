@@ -18,8 +18,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -83,7 +85,7 @@ public class PgmService {
 	//@Autowired
 	//@EJB
 	OMServlet omServlet = new OMServlet();
-	
+
 	//@Resource(name = "mc_cf")
 	//ConnectionFactory mc_cf;
 
@@ -125,59 +127,65 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex
+			String plex,
+
+			@Context 
+			UriInfo uriInfo
 			) {
 
-		
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
-		QueryPgm pgm = new QueryPgm();
-
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			pgm.getNAME().addAll(nameList);
-		}
-
-		ArrayList<ShowOptions> showOptions = new ArrayList();
-		if (show != null) {
-			List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
-			for (String s : showList) {
-				showOptions.add(ShowOptions.fromValue(s));
-			}
-			pgm.getSHOW().addAll(showOptions);
-		}
-
-		ArrayList<StatusOptions> statusOptions = new ArrayList();
-		if (status != null) {
-			List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
-			for (String s : statusList) {
-				statusOptions.add(StatusOptions.fromValue(s));
-			}
-			pgm.getSTATUS().addAll(statusOptions);
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setQueryPgm(pgm);
-		type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
-		type2Command.setResource(Type2Command.ResourceOptions.PGM);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+			QueryPgm pgm = new QueryPgm();
+
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				pgm.getNAME().addAll(nameList);
+			}
+
+			ArrayList<ShowOptions> showOptions = new ArrayList();
+			if (show != null) {
+				List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
+				for (String s : showList) {
+					showOptions.add(ShowOptions.fromValue(s));
+				}
+				pgm.getSHOW().addAll(showOptions);
+			}
+
+			ArrayList<StatusOptions> statusOptions = new ArrayList();
+			if (status != null) {
+				List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
+				for (String s : statusList) {
+					statusOptions.add(StatusOptions.fromValue(s));
+				}
+				pgm.getSTATUS().addAll(statusOptions);
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setQueryPgm(pgm);
+			type2Command.setVerb(Type2Command.VerbOptions.QUERY); 
+			type2Command.setResource(Type2Command.ResourceOptions.PGM);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -185,10 +193,16 @@ public class PgmService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
 	}
 
 	@Path("/start")
@@ -214,47 +228,61 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
-		StringBuilder sb = new StringBuilder("CMD((STA PGM");
-		if (names != null) {
-			sb.append(" " + names);
-		} else {
-			sb.append(" ALL");
-		}
-		sb.append(")");
-		sb.append(" OPTION=AOPOUTPUT");
-		sb.append(")");
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			mcSpec.getDatastores().addAll(imsmbrList);
-			sb.append("ROUTE(");
-			for (String s : imsmbrList) {
-				sb.append(s).append(",");
-			}
-			sb.deleteCharAt(sb.length()-1);
-			sb.append(")");
-		}
-
-		JSONObject result = new JSONObject();
+			@Context 
+			UriInfo uriInfo) {
 
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+			StringBuilder sb = new StringBuilder("CMD((STA PGM");
+			if (names != null) {
+				sb.append(" " + names);
+			} else {
+				sb.append(" ALL");
+			}
+			sb.append(")");
+			sb.append(" OPTION=AOPOUTPUT");
+			sb.append(")");
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				mcSpec.getDatastores().addAll(imsmbrList);
+				sb.append("ROUTE(");
+				for (String s : imsmbrList) {
+					sb.append(s).append(",");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append(")");
+			}
+
+			JSONObject result = new JSONObject();
+
+
 			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
 		}
 
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+
 
 	}
 
@@ -326,78 +354,85 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
+			@Context 
+			UriInfo uriInfo) {
 
-		CreatePgm pgm = new CreatePgm();
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			pgm.getNAME().addAll(nameList);
-		}
-
-		boolean isSet = false;
-		CreatePgm.SET set = new CreatePgm.SET();
-		if (bmptype != null) {
-			set.setBMPTYPE(CreatePgm.SET.BmptypeOptions.fromValue(bmptype));
-			isSet=true;
-		}
-		if (dopt != null) {
-			set.setDOPT(CreatePgm.SET.DoptOptions.fromValue(dopt));
-			isSet=true;
-		}
-		if (fp != null) {
-			set.setFP(CreatePgm.SET.FpOptions.fromValue(fp));
-			isSet=true;
-		}
-		if (gpsb != null) {
-			set.setGPSB(CreatePgm.SET.GpsbOptions.fromValue(gpsb));
-			isSet=true;
-		}
-		if (lang != null) {
-			set.setLANG(CreatePgm.SET.LangOptions.fromValue(lang));
-			isSet=true;
-		}
-		if (resident != null) {
-			set.setRESIDENT(CreatePgm.SET.ResidentOptions.fromValue(resident));
-			isSet=true;
-		}
-		if (schdtype != null) {
-			set.setSCHDTYPE(CreatePgm.SET.SchdtypeOptions.fromValue(schdtype));
-			isSet=true;
-		} 
-		if (transtat != null) {
-			set.setTRANSTAT(CreatePgm.SET.TranstatOptions.fromValue(transtat));
-			isSet=true;
-		}
-
-		if (isSet) {
-			pgm.setSET(set);
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setCreatePgm(pgm);
-		type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
-		type2Command.setResource(Type2Command.ResourceOptions.PGM);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			CreatePgm pgm = new CreatePgm();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				pgm.getNAME().addAll(nameList);
+			}
+
+			boolean isSet = false;
+			CreatePgm.SET set = new CreatePgm.SET();
+			if (bmptype != null) {
+				set.setBMPTYPE(CreatePgm.SET.BmptypeOptions.fromValue(bmptype));
+				isSet=true;
+			}
+			if (dopt != null) {
+				set.setDOPT(CreatePgm.SET.DoptOptions.fromValue(dopt));
+				isSet=true;
+			}
+			if (fp != null) {
+				set.setFP(CreatePgm.SET.FpOptions.fromValue(fp));
+				isSet=true;
+			}
+			if (gpsb != null) {
+				set.setGPSB(CreatePgm.SET.GpsbOptions.fromValue(gpsb));
+				isSet=true;
+			}
+			if (lang != null) {
+				set.setLANG(CreatePgm.SET.LangOptions.fromValue(lang));
+				isSet=true;
+			}
+			if (resident != null) {
+				set.setRESIDENT(CreatePgm.SET.ResidentOptions.fromValue(resident));
+				isSet=true;
+			}
+			if (schdtype != null) {
+				set.setSCHDTYPE(CreatePgm.SET.SchdtypeOptions.fromValue(schdtype));
+				isSet=true;
+			} 
+			if (transtat != null) {
+				set.setTRANSTAT(CreatePgm.SET.TranstatOptions.fromValue(transtat));
+				isSet=true;
+			}
+
+			if (isSet) {
+				pgm.setSET(set);
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setCreatePgm(pgm);
+			type2Command.setVerb(Type2Command.VerbOptions.CREATE); 
+			type2Command.setResource(Type2Command.ResourceOptions.PGM);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -405,10 +440,15 @@ public class PgmService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
-
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
 	}
 
@@ -437,43 +477,51 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
 
-		MCInteraction mcSpec = new MCInteraction();
-		mcSpec.setHostname(hostname);
-		mcSpec.setPort(Integer.parseInt(port));
-		mcSpec.setImsPlexName(plex);
+			@Context 
+			UriInfo uriInfo) {
 
-		DeletePgm pgm = new DeletePgm();
-		if (names != null) {
-			List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-			pgm.getNAME().addAll(nameList);
-		}
-
-		if (option != null) {
-			pgm.setOPTION(DeletePgm.OptionOptions.fromValue(option));
-		}
-
-		Type2Command type2Command = new Type2Command();
-		type2Command.setDeletePgm(pgm);
-		type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
-		type2Command.setResource(Type2Command.ResourceOptions.PGM);
-
-		if (imsmbr != null) {
-			List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-			type2Command.getRoute().addAll(imsmbrList);
-			mcSpec.getDatastores().addAll(imsmbrList);
-		}
-
-		JSONObject result = new JSONObject();
-
-		Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 		try {
+			MCInteraction mcSpec = new MCInteraction();
+			mcSpec.setHostname(hostname);
+			mcSpec.setPort(Integer.parseInt(port));
+			mcSpec.setImsPlexName(plex);
+
+			DeletePgm pgm = new DeletePgm();
+			if (names != null) {
+				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+				pgm.getNAME().addAll(nameList);
+			}
+
+			if (option != null) {
+				pgm.setOPTION(DeletePgm.OptionOptions.fromValue(option));
+			}
+
+			Type2Command type2Command = new Type2Command();
+			type2Command.setDeletePgm(pgm);
+			type2Command.setVerb(Type2Command.VerbOptions.DELETE); 
+			type2Command.setResource(Type2Command.ResourceOptions.PGM);
+
+			if (imsmbr != null) {
+				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+				type2Command.getRoute().addAll(imsmbrList);
+				mcSpec.getDatastores().addAll(imsmbrList);
+			}
+
+			JSONObject result = new JSONObject();
+
+			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 			String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 			result = omServlet.executeImsCommand(cmd, mcSpec);
+
+
+			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+			return Response.ok(result).build();
 		} catch (OmCommandGenerationException e1) {
 			logger.error("Unable to generate IMS command", e1);
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -481,10 +529,15 @@ public class PgmService {
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-		} 
-
-		logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-		return Response.ok(result).build();
+		} catch (IllegalArgumentException e) {
+			RestException r = new RestException(e.getMessage());
+			JSONObject rJSON = new JSONObject();
+			rJSON.put("error", "Invalid Parameter Value, check command and log");
+			rJSON.put("uri", uriInfo.getRequestUri().toString());
+			r.setResponse(rJSON);
+			logger.debug("Invalid Parameter Value " + e.getMessage());
+			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+		}
 
 	}
 
@@ -559,103 +612,111 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			
+
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
-			String plex) {
+			String plex,
+
+			@Context 
+			UriInfo uriInfo) {
 
 		{
-
-			MCInteraction mcSpec = new MCInteraction();
-			mcSpec.setHostname(hostname);
-			mcSpec.setPort(Integer.parseInt(port));
-			mcSpec.setImsPlexName(plex);
-
-			UpdatePgm pgm = new UpdatePgm();
-			if (names != null) {
-				List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
-				pgm.getNAME().addAll(nameList);
-			}
-			ArrayList<UpdatePgm.StartOptions> startOptions = new ArrayList();
-			if (start != null) {
-				List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
-				for (String s : startList) {
-					startOptions.add(StartOptions.fromValue(s));
-				}
-				pgm.getSTART().addAll(startOptions);
-			}
-			ArrayList<UpdatePgm.StopOptions> stopOptions = new ArrayList();
-			if (stop != null) {
-				List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
-				for (String s : stopList) {
-					stopOptions.add(StopOptions.fromValue(s));
-				}
-				pgm.getSTOP().addAll(stopOptions);
-			}
-
-			boolean isSet = false;
-			UpdatePgm.SET set = new UpdatePgm.SET();
-			if (bmptype != null) {
-				set.setBMPTYPE(BmptypeOptions.fromValue(bmptype));
-				isSet=true;
-			}
-			if (dopt != null) {
-				set.setDOPT(DoptOptions.fromValue(dopt));
-				isSet=true;
-			}
-			if (fp != null) {
-				set.setFP(FpOptions.fromValue(fp));
-				isSet=true;
-			}
-			if (gpsb != null) {
-				set.setGPSB(GpsbOptions.fromValue(gpsb));
-				isSet=true;
-			}
-			if (lang != null) {
-				set.setLANG(LangOptions.fromValue(lang));
-				isSet=true;
-			}
-			if (lock != null) {
-				set.setLOCK(LockOptions.fromValue(lock));
-				isSet=true;
-			}
-			if (resident != null) {
-				set.setRESIDENT(ResidentOptions.fromValue(resident));
-				isSet=true;
-			}
-			if (schdtype != null) {
-				set.setSCHDTYPE(SchdtypeOptions.fromValue(schdtype));
-				isSet=true;
-			}
-			if (transtat != null) {
-				set.setTRANSTAT(TranstatOptions.fromValue(transtat));
-				isSet=true;
-			}
-			if (isSet) {
-				pgm.setSET(set);
-			}
-			if (option != null) {
-				pgm.setOPTION(OptionOptions.fromValue(option));
-			}
-
-
-			Type2Command type2Command = new Type2Command();
-			type2Command.setUpdatePgm(pgm);
-			type2Command.setVerb(Type2Command.VerbOptions.UPDATE); 
-			type2Command.setResource(Type2Command.ResourceOptions.PGM);
-
-			if (imsmbr != null) {
-				List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
-				type2Command.getRoute().addAll(imsmbrList);
-				mcSpec.getDatastores().addAll(imsmbrList);
-			}
-
-			JSONObject result = new JSONObject();
-
-			Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
 			try {
+
+				MCInteraction mcSpec = new MCInteraction();
+				mcSpec.setHostname(hostname);
+				mcSpec.setPort(Integer.parseInt(port));
+				mcSpec.setImsPlexName(plex);
+
+				UpdatePgm pgm = new UpdatePgm();
+				if (names != null) {
+					List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
+					pgm.getNAME().addAll(nameList);
+				}
+				ArrayList<UpdatePgm.StartOptions> startOptions = new ArrayList();
+				if (start != null) {
+					List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
+					for (String s : startList) {
+						startOptions.add(StartOptions.fromValue(s));
+					}
+					pgm.getSTART().addAll(startOptions);
+				}
+				ArrayList<UpdatePgm.StopOptions> stopOptions = new ArrayList();
+				if (stop != null) {
+					List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
+					for (String s : stopList) {
+						stopOptions.add(StopOptions.fromValue(s));
+					}
+					pgm.getSTOP().addAll(stopOptions);
+				}
+
+				boolean isSet = false;
+				UpdatePgm.SET set = new UpdatePgm.SET();
+				if (bmptype != null) {
+					set.setBMPTYPE(BmptypeOptions.fromValue(bmptype));
+					isSet=true;
+				}
+				if (dopt != null) {
+					set.setDOPT(DoptOptions.fromValue(dopt));
+					isSet=true;
+				}
+				if (fp != null) {
+					set.setFP(FpOptions.fromValue(fp));
+					isSet=true;
+				}
+				if (gpsb != null) {
+					set.setGPSB(GpsbOptions.fromValue(gpsb));
+					isSet=true;
+				}
+				if (lang != null) {
+					set.setLANG(LangOptions.fromValue(lang));
+					isSet=true;
+				}
+				if (lock != null) {
+					set.setLOCK(LockOptions.fromValue(lock));
+					isSet=true;
+				}
+				if (resident != null) {
+					set.setRESIDENT(ResidentOptions.fromValue(resident));
+					isSet=true;
+				}
+				if (schdtype != null) {
+					set.setSCHDTYPE(SchdtypeOptions.fromValue(schdtype));
+					isSet=true;
+				}
+				if (transtat != null) {
+					set.setTRANSTAT(TranstatOptions.fromValue(transtat));
+					isSet=true;
+				}
+				if (isSet) {
+					pgm.setSET(set);
+				}
+				if (option != null) {
+					pgm.setOPTION(OptionOptions.fromValue(option));
+				}
+
+
+				Type2Command type2Command = new Type2Command();
+				type2Command.setUpdatePgm(pgm);
+				type2Command.setVerb(Type2Command.VerbOptions.UPDATE); 
+				type2Command.setResource(Type2Command.ResourceOptions.PGM);
+
+				if (imsmbr != null) {
+					List<String> imsmbrList = Arrays.asList(imsmbr.split("\\s*,\\s*"));
+					type2Command.getRoute().addAll(imsmbrList);
+					mcSpec.getDatastores().addAll(imsmbrList);
+				}
+
+				JSONObject result = new JSONObject();
+
+				Type2CommandSerializable type2CommandSerializable = new Type2CommandSerializable();
+
 				String cmd = type2CommandSerializable.fromType2CommandObject(type2Command);
 				result = omServlet.executeImsCommand(cmd, mcSpec);
+
+
+				logger.debug("IMS Command Successfully Submitted. Check Return Code.");
+				return Response.ok(result).build();
 			} catch (OmCommandGenerationException e1) {
 				logger.error("Unable to generate IMS command", e1);
 				return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -663,10 +724,17 @@ public class PgmService {
 			} catch (RestException e) {
 				logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 				return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
-			} 
+			} catch (IllegalArgumentException e) {
+				RestException r = new RestException(e.getMessage());
+				JSONObject rJSON = new JSONObject();
+				rJSON.put("error", "Invalid Parameter Value, check command and log");
+				rJSON.put("uri", uriInfo.getRequestUri().toString());
+				r.setResponse(rJSON);
+				logger.debug("Invalid Parameter Value " + e.getMessage());
+				return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
+			}
 
-			logger.debug("IMS Command Successfully Submitted. Check Return Code.");
-			return Response.ok(result).build();
+
 		}
 
 	}
