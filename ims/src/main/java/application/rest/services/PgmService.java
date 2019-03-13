@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,8 +22,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +61,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
@@ -79,6 +83,7 @@ import utils.Type2CommandSerializable;
 @Stateless
 @Path("/{plex}/program")
 @Tag(name = "Program")
+@SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
 @CheckHeader
 public class PgmService {
 
@@ -94,6 +99,7 @@ public class PgmService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed("admin")
 	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
@@ -127,6 +133,8 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			//@Parameter(in = ParameterIn.HEADER, description = "IMS Connect username", required = false) @HeaderParam("username") String username,
+			//@Parameter(in = ParameterIn.HEADER, description = "IMS Connect password", required = false) @HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -137,10 +145,13 @@ public class PgmService {
 			) {
 
 		try {
+
 			MCInteraction mcSpec = new MCInteraction();
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+
+
 			QueryPgm pgm = new QueryPgm();
 
 			if (names != null) {
@@ -201,8 +212,8 @@ public class PgmService {
 			r.setResponse(rJSON);
 			logger.debug("Invalid Parameter Value " + e.getMessage());
 			return Response.status(Status.BAD_REQUEST).entity(r.getResponse()).build();
-		}
 
+		}
 	}
 
 	@Path("/start")

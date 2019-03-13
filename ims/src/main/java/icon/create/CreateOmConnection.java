@@ -120,7 +120,8 @@ public final class CreateOmConnection {
         if(this.isRacf){
         	tmInteractionProperties = new TmInteractionProperties(this.imsplex ,this.racfUserId, this.racfGroupName, this.racfPassword);
         }else{
-        	tmInteractionProperties = new TmInteractionProperties(this.imsplex ,null, this.racfGroupName, null);
+        	//tmInteractionProperties = new TmInteractionProperties(this.imsplex ,null, this.racfGroupName, null);
+        	 tmInteractionProperties = new TmInteractionProperties(this.imsplex);
         }
         
         //Create an OmConnection to establish the connection and be placed in the cacheConnection

@@ -22,6 +22,9 @@ public class MCInteraction {
 	private String imsplexName = null;
 	private List<String> datastores = new ArrayList<String>();
 	private String command;
+	private String racfUsername;
+	private String racfPassword;
+	private boolean racfEnabled = false;
 
 	public String getCommand() {
 		return command;
@@ -94,6 +97,24 @@ public class MCInteraction {
 	}
 	public void setDatastores(List<String> datastores) {
 		this.datastores = datastores;
+	}
+	public String getRacfUsername() {
+		return racfUsername;
+	}
+	public void setRacfUsername(String racfUsername) {
+		this.racfUsername = racfUsername;
+	}
+	public String getRacfPassword() {
+		return racfPassword;
+	}
+	public void setRacfPassword(String racfPassowrd) {
+		this.racfPassword = racfPassowrd;
+	}
+	public boolean isRacfEnabled() {
+		return racfEnabled;
+	}
+	public void setRacfEnabled(boolean racfEnabled) {
+		this.racfEnabled = racfEnabled;
 	}
 
 

@@ -9,6 +9,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Context;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.springframework.stereotype.Component;
 
 import application.rest.OMServlet;
@@ -33,6 +34,7 @@ public class LibertyConfig extends ResourceConfig{
 		register(AcceptHeaderOpenApiResource.class);
 		register(HeaderRequestFilter.class);
 		register(OMServlet.class);
+		register(RolesAllowedDynamicFeature.class);
 		packages("application");
 	}
 

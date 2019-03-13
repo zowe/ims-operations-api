@@ -16,14 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import exceptions.RestException;
+import icon.create.CreateOmConnection;
 import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.servers.Server;
 import json.java.JSONArray;
 import json.java.JSONObject;
-import om.connection.IconOmConnection;
-import om.connection.IconOmConnectionFactory;
+import om.connection.OMConnection;
 import om.exception.OmConnectionException;
 import om.exception.OmException;
 import om.exception.message.OM_EXCEPTION;
@@ -35,10 +37,11 @@ import om.services.Om;
 
 @OpenAPIDefinition(
 		info = @Info(
-				title = "IMS Command Services",
+				title = "IMS Operations API",
 				version = "1.0.0",
-				description = "IMS Command Services allows users to use RESTFul APIs to submit IMS commmands"),
-		servers = {@Server(url = "/ims")})
+				description = "IMS Operation API allows users to use RESTFul APIs to submit IMS commmands"),
+		servers = {@Server(url = "/ims")},
+		security = {@SecurityRequirement(name = "Basic Auth")})
 @Stateless
 @Service
 public class OMServlet {
@@ -90,14 +93,22 @@ public class OMServlet {
 
 		//ArrayList<String> plexImsMbrs = new ArrayList<String>();
 
-		IconOmConnection omConnection = null;
+		OMConnection omConnection = null;
 		Om om = null;
 		OmResultSet omResultSet;
 
-		IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
+		//IconOmConnectionFactory IconCF = new IconOmConnectionFactory();
 
 		try {
-			omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
+			CreateOmConnection create = new CreateOmConnection(-1, mcSpec.getHostname(), mcSpec.getPort(), mcSpec.getImsPlexName());
+
+			if (mcSpec.isRacfEnabled()) {
+				create.enableRACF(mcSpec.getRacfUsername(), mcSpec.getRacfPassword());
+			}
+
+			omConnection = create.getIconOmConnection();
+			
+			//omConnection = IconCF.createIconOmConnectionFromData(mcSpec);
 
 
 			om = new Om(omConnection);
