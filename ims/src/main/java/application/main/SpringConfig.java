@@ -7,7 +7,7 @@ package application.main;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
-import filters.HeaderRequestFilter;
+import filters.AuthRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
@@ -18,7 +18,7 @@ public class SpringConfig extends ResourceConfig{
 		packages("application.resources");
 		register(OpenApiResource.class);
 		register(AcceptHeaderOpenApiResource.class);
-		register(HeaderRequestFilter.class);
+		register(AuthRequestFilter.class);
 		packages("application");
 	}
 

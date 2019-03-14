@@ -99,7 +99,7 @@ public class PgmService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed("admin")
+	@RolesAllowed({"admin", "user"})
 	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
@@ -133,8 +133,8 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			//@Parameter(in = ParameterIn.HEADER, description = "IMS Connect username", required = false) @HeaderParam("username") String username,
-			//@Parameter(in = ParameterIn.HEADER, description = "IMS Connect password", required = false) @HeaderParam("password") String password,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -301,6 +301,7 @@ public class PgmService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId = "createpgm", summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -466,6 +467,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId="deletepgm", summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -555,6 +557,7 @@ public class PgmService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId = "updatepgm", summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",

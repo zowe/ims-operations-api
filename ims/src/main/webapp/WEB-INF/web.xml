@@ -14,7 +14,7 @@
 	</welcome-file-list>
 	
 	
-	 <security-constraint>
+	<!--  <security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Open API YAML</web-resource-name>
 			<url-pattern>*.yaml</url-pattern>
@@ -34,6 +34,7 @@
 			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
+	-->
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Swagger UI</web-resource-name>
@@ -44,6 +45,17 @@
 			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
+	<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Basic Authorization</web-resource-name>
+        <description/>
+        <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+        <role-name>admin</role-name>
+         <role-name>user</role-name>
+    </auth-constraint>
+</security-constraint>
 
 	<login-config>
 		<auth-method>BASIC</auth-method>
@@ -51,6 +63,8 @@
 	</login-config>
 	<security-role>
 		<role-name>admin</role-name>
+	</security-role>
+	<security-role>
 		<role-name>user</role-name>
 	</security-role>
 

@@ -7,6 +7,7 @@ package application.rest.services;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -54,6 +55,7 @@ public class RegionService {
 	@Path("/stop")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId="stoprgn", summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
@@ -160,6 +162,7 @@ public class RegionService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId="startrgn", summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
@@ -239,6 +242,7 @@ public class RegionService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin", "user"})
 	@Operation(operationId="disrgn", summary = "Display region and DC information associated with an IMS™ system. The region is scheduled to an application program and the IMS resources are assigned.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),

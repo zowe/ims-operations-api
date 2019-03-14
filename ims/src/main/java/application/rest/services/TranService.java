@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -81,6 +82,7 @@ public class TranService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin", "user"})
 	@Operation(operationId= "querytran", summary = "Query information about IMS transactions across IMSplex using 'QUERY TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -339,6 +341,7 @@ public class TranService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId ="createtran", summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region using 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -717,6 +720,7 @@ public class TranService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId="deletetran", summary = "Delete IMS transactions using 'DELETE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -805,6 +809,7 @@ public class TranService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin"})
 	@Operation(operationId="updatetran", summary = "Update, start or stop IMS transaction resources using 'UPDATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",

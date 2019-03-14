@@ -13,12 +13,9 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.springframework.stereotype.Component;
 
 import application.rest.OMServlet;
-import filters.HeaderRequestFilter;
+import filters.AuthRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.servers.Server;
 
 /**
  * Configuration class for REST endpoint
@@ -32,7 +29,7 @@ public class LibertyConfig extends ResourceConfig{
 	public LibertyConfig(@Context ServletConfig servletConfig) {
 		register(OpenApiResource.class);
 		register(AcceptHeaderOpenApiResource.class);
-		register(HeaderRequestFilter.class);
+		register(AuthRequestFilter.class);
 		register(OMServlet.class);
 		register(RolesAllowedDynamicFeature.class);
 		packages("application");

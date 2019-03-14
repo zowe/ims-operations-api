@@ -21,7 +21,6 @@ import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.servers.Server;
 import json.java.JSONArray;
 import json.java.JSONObject;
