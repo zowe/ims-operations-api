@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="commands/update/tran" xmlns:tns="commands/update/tran"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.0"
+	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	elementFormDefault="qualified">
+
+	<!-- ========================================================================================== -->
+	<!-- UPDATE TRAN SCHEMA DEFINITION -->
+	<!-- ========================================================================================== -->
+
+	<xs:complexType name="UpdateTran">
+		<xs:annotation>
+			<xs:appinfo>
+				<jxb:class>
+					<jxb:javadoc>A UpUpdateTran object represents an OM Update
+						Transaction Command Interaction.
+					</jxb:javadoc>
+				</jxb:class>
+			</xs:appinfo>
+		</xs:annotation>
+
+		<xs:sequence>
+			<xs:element name="NAME" type="tns:nameOptions"
+				minOccurs="1" maxOccurs="unbounded" />
+
+			<xs:element name="CLASS" type="xs:int" minOccurs="0"
+				maxOccurs="unbounded" />
+
+			<xs:element name="START" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="startOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Q" />
+						<xs:enumeration value="SCHD" />
+						<xs:enumeration value="SUSPEND" />
+						<xs:enumeration value="TRACE" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+			<xs:element name="STOP" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="stopOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Q" />
+						<xs:enumeration value="SCHD" />
+						<xs:enumeration value="TRACE" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+			<xs:element name="STARTSTOP" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:class name="STARTSTOP" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:sequence>
+						<xs:element name="START" minOccurs="0"
+							maxOccurs="unbounded">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="startOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Q" />
+									<xs:enumeration value="SCHD" />
+									<xs:enumeration value="SUSPEND" />
+									<xs:enumeration value="TRACE" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="STOP" minOccurs="0"
+							maxOccurs="unbounded">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="stopOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Q" />
+									<xs:enumeration value="SCHD" />
+									<xs:enumeration value="TRACE" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="SET" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:class name="SET" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:sequence>
+						<xs:element name="AOCMD" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="aocmdOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="CMD" />
+									<xs:enumeration value="N" />
+									<xs:enumeration value="TRAN" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="CLASS" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+
+						<xs:element name="CMTMODE" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="cmtmodeOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="MULT" />
+									<xs:enumeration value="SNGL" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="CONV" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="convOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="CPRI" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+
+						<xs:element name="DCLWA" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="dclwaOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="DIRROUTE" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="dirrouteOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="EDITRTN" type="xs:string"
+							minOccurs="0" maxOccurs="1" />
+
+						<xs:element name="EDITUC" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="editucOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="EMHBSZ" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+						<xs:element name="EXPRTIME" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+						<xs:element name="FP" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass name="fpOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="E" />
+									<xs:enumeration value="N" />
+									<xs:enumeration value="P" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="INQ" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass name="inqOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="LCT" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+
+						<xs:element name="LOCK" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="lockOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="ON" />
+									<xs:enumeration value="OFF" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="LPRI" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+						<xs:element name="MAXRGN" type="xs:int" minOccurs="0"
+							maxOccurs="1" />
+						<xs:element name="MSGTYPE" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="msgtypeOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="MULTSEG" />
+									<xs:enumeration value="SNGLSEG" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="MSNAME" type="xs:string" 
+						minOccurs="0" maxOccurs="1" />
+
+						<xs:element name="NPRI" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="PARLIM" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="PGM" type="xs:string" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="PLCT" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="PLCTTIME" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="RECOVER" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="recoverOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="REMOTE" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="remoteOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="RESP" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="respOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="SEGNO" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="SEGSZ" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="SERIAL" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="serialOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="SIDL" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="SIDR" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="SPASZ" type="xs:int" 
+						minOccurs="0" maxOccurs="1" />
+						<xs:element name="SPATRUNC" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="spatruncOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="R" />
+									<xs:enumeration value="S" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="TRANSTAT" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass
+											name="transtatOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+						<xs:element name="WFI" minOccurs="0" maxOccurs="1">
+							<xs:simpleType>
+								<xs:annotation>
+									<xs:appinfo>
+										<jxb:typesafeEnumClass name="wfiOptions" />
+									</xs:appinfo>
+								</xs:annotation>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="N" />
+									<xs:enumeration value="Y" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+
+			<xs:element name="OPTION" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="optionOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="AFFIN" />
+						<xs:enumeration value="ALLRSP" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+			<xs:element name="SCOPE" minOccurs="0" maxOccurs="1">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="scopeOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ALL" />
+						<xs:enumeration value="ACTIVE" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Name values for update transactions -->
+	<xs:simpleType name="nameOptions">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="8" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- CLASS enumeration options for update transactions -->
+	<xs:simpleType name="classOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="999" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- CPRI enumeration options for update transactions -->
+	<xs:simpleType name="cpriOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="14" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- EMHBSZ enumeration options for update transactions -->
+	<xs:simpleType name="emhbszOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="30720" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- EXPRTIME enumeration options for update transactions -->
+	<xs:simpleType name="exprtimeOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- LCT enumeration options for update transactions -->
+	<xs:simpleType name="lctOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- LPRI enumeration options for update transactions -->
+	<xs:simpleType name="lpriOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- MAXRGN enumeration options for update transactions -->
+	<xs:simpleType name="maxrgnOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="999" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- NPRI enumeration options for update transactions -->
+	<xs:simpleType name="npriOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="14" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- PARLIM enumeration options for update transactions -->
+	<xs:simpleType name="parlimOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- PGM enumeration options for update transactions -->
+
+	<!-- PLCT enumeration options for update transactions -->
+	<xs:simpleType name="plctOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- PLCTTIME enumeration options for update transactions -->
+	<xs:simpleType name="plcttimeOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="6553500" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- SEGNO enumeration options for update transactions -->
+	<xs:simpleType name="segnoOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- SEGSZ enumeration options for update transactions -->
+	<xs:simpleType name="segszOptions">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="65535" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- SIDL enumeration options for update transactions -->
+	<xs:simpleType name="sidlOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="2036" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- SIDR enumeration options for update transactions -->
+	<xs:simpleType name="sidrOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="2036" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- SPASZ enumeration options for update transactions -->
+	<xs:simpleType name="spaszOptions">
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="16" />
+			<xs:maxInclusive value="32767" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

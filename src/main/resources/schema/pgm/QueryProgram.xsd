@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="commands/query/pgm" xmlns:tns="commands/query/pgm"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.0"
+	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	elementFormDefault="qualified">
+
+	<!-- ========================================================================================== -->
+	<!-- QUERY PGM SCHEMA DEFINITION -->
+	<!-- ========================================================================================== -->
+	<xs:complexType name="QueryPgm">
+		<xs:sequence>
+			<xs:element name="NAME" type="tns:nameOptions"
+				minOccurs="1" maxOccurs="unbounded" />
+
+			<!-- SHOW HERE IS INCORRECT it should be a choice , maybe its ok to leave 
+				it like this but is not technically correct -->
+			<xs:element name="SHOW" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="showOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="ALL" />
+						<xs:enumeration value="BMPTYPE" />
+						<xs:enumeration value="DB" />
+						<xs:enumeration value="DEFN" />
+						<xs:enumeration value="DEFNTYPE" />
+						<xs:enumeration value="DOPT" />
+						<xs:enumeration value="FP" />
+						<xs:enumeration value="GLOBAL" />
+						<xs:enumeration value="IMSID" />
+						<xs:enumeration value="GPSB" />
+						<xs:enumeration value="LANG" />
+						<xs:enumeration value="LOCAL" />
+						<xs:enumeration value="MODEL" />
+						<xs:enumeration value="RESIDENT" />
+						<xs:enumeration value="RTC" />
+						<xs:enumeration value="SCHDTYPE" />
+						<xs:enumeration value="STATUS" />
+						<xs:enumeration value="TIMESTAMP" />
+						<xs:enumeration value="TRAN" />
+						<xs:enumeration value="TRANSTAT" />
+						<xs:enumeration value="WORK" />
+						<xs:enumeration value="EXPORTNEEDED" />
+						<xs:enumeration value="DB" />
+						<xs:enumeration value="RTC" />
+						<xs:enumeration value="TRAN" />
+						<xs:enumeration value="WORK" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+			<xs:element name="STATUS" minOccurs="0"
+				maxOccurs="unbounded">
+				<xs:simpleType>
+					<xs:annotation>
+						<xs:appinfo>
+							<jxb:typesafeEnumClass name="statusOptions" />
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="DB-NOTAVL" />
+						<xs:enumeration value="IOPREV" />
+						<xs:enumeration value="LOCK" />
+						<xs:enumeration value="NOTINIT" />
+						<xs:enumeration value="STOSCHD" />
+						<xs:enumeration value="TRACE" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Name values for update transactions -->
+	<xs:simpleType name="nameOptions">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="8" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>
