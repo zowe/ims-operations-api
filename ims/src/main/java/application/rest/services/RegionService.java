@@ -55,7 +55,7 @@ public class RegionService {
 	@Path("/stop")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "region-user", "put-user"})
 	@Operation(operationId="stoprgn", summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
@@ -86,6 +86,8 @@ public class RegionService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 			
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -162,7 +164,7 @@ public class RegionService {
 	@Path("/start")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "region-user", "put-user"})
 	@Operation(operationId="startrgn", summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
@@ -184,6 +186,8 @@ public class RegionService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 			
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -242,7 +246,7 @@ public class RegionService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin", "user"})
+	@RolesAllowed({"ims-admin", "region-user", "get-user"})
 	@Operation(operationId="disrgn", summary = "Display region and DC information associated with an IMS™ system. The region is scheduled to an application program and the IMS resources are assigned.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
@@ -259,6 +263,8 @@ public class RegionService {
 			
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 			
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 

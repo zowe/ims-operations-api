@@ -14,59 +14,65 @@
 	</welcome-file-list>
 	
 	
-	<!--  <security-constraint>
+	<!-- No restrictions on the Swagger Doc -->
+	  <security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Open API YAML</web-resource-name>
 			<url-pattern>*.yaml</url-pattern>
 		</web-resource-collection>
-		<auth-constraint>
-			<role-name>user</role-name>
-			<role-name>admin</role-name>
-		</auth-constraint>
 	</security-constraint>
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Open API JSON</web-resource-name>
 			<url-pattern>*.json</url-pattern>
 		</web-resource-collection>
-		<auth-constraint>
-			<role-name>user</role-name>
-			<role-name>admin</role-name>
-		</auth-constraint>
 	</security-constraint>
-	-->
+	
+	<!-- Restrictions on Swagger UI -->
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Swagger UI</web-resource-name>
 			<url-pattern>/ims</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
-			<role-name>user</role-name>
-			<role-name>admin</role-name>
-		</auth-constraint>
+        <role-name>ims-admin</role-name>
+    </auth-constraint>
 	</security-constraint>
-	<security-constraint>
+	
+<!-- 	<security-constraint>
     <web-resource-collection>
         <web-resource-name>Basic Authorization</web-resource-name>
         <description/>
         <url-pattern>/*</url-pattern>
     </web-resource-collection>
-    <auth-constraint>
-        <role-name>admin</role-name>
-         <role-name>user</role-name>
-    </auth-constraint>
-</security-constraint>
+</security-constraint> -->
 
 	<login-config>
 		<auth-method>BASIC</auth-method>
 		<realm-name>default</realm-name>
 	</login-config>
 	<security-role>
-		<role-name>admin</role-name>
+		<role-name>ims-admin</role-name>
 	</security-role>
 	<security-role>
-		<role-name>user</role-name>
+		<role-name>get-user</role-name>
 	</security-role>
+	<security-role>
+		<role-name>put-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>post-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>pgm-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>tran-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>region-user</role-name>
+	</security-role>
+	
 
 
 </web-app>

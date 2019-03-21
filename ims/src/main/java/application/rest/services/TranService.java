@@ -53,10 +53,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 import om.exception.OmCommandGenerationException;
@@ -71,6 +74,7 @@ import utils.Type2CommandSerializable;
 @Stateless
 @Path("/{plex}/transaction")
 @Tag(name = "Transaction")
+@SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
 @CheckHeader
 public class TranService {
 
@@ -82,7 +86,7 @@ public class TranService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin", "user"})
+	@RolesAllowed({"ims-admin", "tran-user", "get-user"})
 	@Operation(operationId= "querytran", summary = "Query information about IMS transactions across IMSplex using 'QUERY TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -145,6 +149,8 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -341,7 +347,7 @@ public class TranService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "tran-user", "post-user"})
 	@Operation(operationId ="createtran", summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region using 'CREATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -504,6 +510,8 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -720,7 +728,7 @@ public class TranService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "tran-user", "post-user"})
 	@Operation(operationId="deletetran", summary = "Delete IMS transactions using 'DELETE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -742,6 +750,8 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -809,7 +819,7 @@ public class TranService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "tran-user", "put-user"})
 	@Operation(operationId="updatetran", summary = "Update, start or stop IMS transaction resources using 'UPDATE TRAN' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -997,6 +1007,8 @@ public class TranService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 

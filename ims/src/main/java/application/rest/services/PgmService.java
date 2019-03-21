@@ -78,12 +78,14 @@ import utils.Type2CommandSerializable;
 /**
  * Restful interface for IMS commands pertaining to program resources
  * @author jerryli
+ * blah
  *
  */
 @Stateless
 @Path("/{plex}/program")
 @Tag(name = "Program")
 @SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
+@RolesAllowed({"ims-admin", "get-user", "pgm-user"})
 @CheckHeader
 public class PgmService {
 
@@ -99,7 +101,6 @@ public class PgmService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin", "user"})
 	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
@@ -150,6 +151,12 @@ public class PgmService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
 
 
 			QueryPgm pgm = new QueryPgm();
@@ -301,7 +308,7 @@ public class PgmService {
 	@Path("/")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "post-user", "pgm-user"})
 	@Operation(operationId = "createpgm", summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -366,6 +373,8 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -467,7 +476,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "pgm-user", "post-user"})
 	@Operation(operationId="deletepgm", summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -490,6 +499,8 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -557,7 +568,7 @@ public class PgmService {
 	@Path("/")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({"ims-admin", "pgm-user", "put-user"})
 	@Operation(operationId = "updatepgm", summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
@@ -626,6 +637,8 @@ public class PgmService {
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
+			@HeaderParam("username") String username,
+			@HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -641,6 +654,12 @@ public class PgmService {
 				mcSpec.setHostname(hostname);
 				mcSpec.setPort(Integer.parseInt(port));
 				mcSpec.setImsPlexName(plex);
+				
+				
+				if (username != null && password != null) {
+					mcSpec.setRacfUsername(username);
+					mcSpec.setRacfPassword(password);
+				}
 
 				UpdatePgm pgm = new UpdatePgm();
 				if (names != null) {
