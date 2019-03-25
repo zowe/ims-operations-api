@@ -85,7 +85,6 @@ import utils.Type2CommandSerializable;
 @Path("/{plex}/program")
 @Tag(name = "Program")
 @SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
-@RolesAllowed({"ims-admin", "get-user", "pgm-user"})
 @CheckHeader
 public class PgmService {
 
@@ -101,6 +100,7 @@ public class PgmService {
 	@Path("/")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"ims-admin", "get-user", "pgm-user"})
 	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  

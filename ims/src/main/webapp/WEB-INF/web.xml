@@ -12,40 +12,35 @@
 		<welcome-file>default.htm</welcome-file>
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
-	
-	
-	<!-- No restrictions on the Swagger Doc -->
-	  <security-constraint>
-		<web-resource-collection>
-			<web-resource-name>Open API YAML</web-resource-name>
-			<url-pattern>*.yaml</url-pattern>
-		</web-resource-collection>
-	</security-constraint>
+
+
+	<!-- No restrictions on the Swagger Doc <security-constraint> <web-resource-collection> 
+		<web-resource-name>Open API YAML</web-resource-name> <url-pattern>*.yaml</url-pattern> 
+		</web-resource-collection> </security-constraint> <security-constraint> <web-resource-collection> 
+		<web-resource-name>Open API JSON</web-resource-name> <url-pattern>*.json</url-pattern> 
+		</web-resource-collection> </security-constraint> -->
+
+	<!-- Restrictions on Swagger UI <security-constraint> <web-resource-collection> 
+		<web-resource-name>Swagger UI</web-resource-name> <url-pattern>/ims</url-pattern> 
+		</web-resource-collection> <auth-constraint> <role-name>ims-admin</role-name> 
+		</auth-constraint> </security-constraint> -->
+
 	<security-constraint>
 		<web-resource-collection>
-			<web-resource-name>Open API JSON</web-resource-name>
-			<url-pattern>*.json</url-pattern>
-		</web-resource-collection>
-	</security-constraint>
-	
-	<!-- Restrictions on Swagger UI -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>Swagger UI</web-resource-name>
-			<url-pattern>/ims</url-pattern>
+			<web-resource-name>Basic Authorization</web-resource-name>
+			<description />
+			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
-        <role-name>ims-admin</role-name>
-    </auth-constraint>
+			<role-name>ims-admin</role-name>
+			<role-name>get-user</role-name>
+			<role-name>put-user</role-name>
+			<role-name>post-user</role-name>
+			<role-name>pgm-user</role-name>
+			<role-name>tran-user</role-name>
+			<role-name>region-user</role-name>
+		</auth-constraint>
 	</security-constraint>
-	
-<!-- 	<security-constraint>
-    <web-resource-collection>
-        <web-resource-name>Basic Authorization</web-resource-name>
-        <description/>
-        <url-pattern>/*</url-pattern>
-    </web-resource-collection>
-</security-constraint> -->
 
 	<login-config>
 		<auth-method>BASIC</auth-method>
@@ -72,7 +67,7 @@
 	<security-role>
 		<role-name>region-user</role-name>
 	</security-role>
-	
+
 
 
 </web-app>
