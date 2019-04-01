@@ -388,6 +388,12 @@ public class PgmService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
 
 			CreatePgm pgm = new CreatePgm();
 			if (names != null) {
@@ -514,6 +520,12 @@ public class PgmService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
 
 			DeletePgm pgm = new DeletePgm();
 			if (names != null) {
@@ -659,6 +671,7 @@ public class PgmService {
 				if (username != null && password != null) {
 					mcSpec.setRacfUsername(username);
 					mcSpec.setRacfPassword(password);
+					mcSpec.setRacfEnabled(true);
 				}
 
 				UpdatePgm pgm = new UpdatePgm();

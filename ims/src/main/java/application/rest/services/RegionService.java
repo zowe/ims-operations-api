@@ -102,6 +102,13 @@ public class RegionService {
 		mcSpec.setHostname(hostname);
 		mcSpec.setPort(Integer.parseInt(port));
 		mcSpec.setImsPlexName(plex);
+		
+		if (username != null && password != null) {
+			mcSpec.setRacfUsername(username);
+			mcSpec.setRacfPassword(password);
+			mcSpec.setRacfEnabled(true);
+		}
+		
 		StringBuilder sb = new StringBuilder("CMD((STOP REGION ");
 		if (regNumber != null) {
 			String[] regNumbers = regNumber.split("\\s*,\\s*");

@@ -163,6 +163,13 @@ public class TranService {
 		mcSpec.setHostname(hostname);
 		mcSpec.setPort(Integer.parseInt(port));
 		mcSpec.setImsPlexName(plex);
+		
+		if (username != null && password != null) {
+			mcSpec.setRacfUsername(username);
+			mcSpec.setRacfPassword(password);
+			mcSpec.setRacfEnabled(true);
+		}
+		
 		QueryTran tran = new QueryTran();
 
 		try {
@@ -525,6 +532,12 @@ public class TranService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
 
 			CreateTran tran = new CreateTran();
 			if (names != null) {
@@ -765,6 +778,12 @@ public class TranService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
 
 			DeleteTran tran = new DeleteTran();
 			if (names != null) {
@@ -1009,6 +1028,9 @@ public class TranService {
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 			@HeaderParam("username") String username,
 			@HeaderParam("password") String password,
+			
+			
+			
 
 			@Parameter(in = ParameterIn.PATH)
 			@PathParam("plex") 
@@ -1023,6 +1045,13 @@ public class TranService {
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));
 			mcSpec.setImsPlexName(plex);
+			
+			if (username != null && password != null) {
+				mcSpec.setRacfUsername(username);
+				mcSpec.setRacfPassword(password);
+				mcSpec.setRacfEnabled(true);
+			}
+			
 
 			UpdateTran tran = new UpdateTran();
 			if (names != null) {
