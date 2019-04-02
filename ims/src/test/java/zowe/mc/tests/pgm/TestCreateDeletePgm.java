@@ -1,3 +1,7 @@
+/**
+ *  Copyright IBM Corporation 2018, 2019
+ */
+
 package zowe.mc.tests.pgm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
