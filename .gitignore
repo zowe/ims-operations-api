@@ -3,8 +3,8 @@
 .classpath
 clientdb.xml
 */RemoteSystemsTempFiles/
-*/.recommenders
-*/.metadata
+*/.recommenders/
+*/.metadata/
 */Servers/
 */.classpath
 */.settings/
