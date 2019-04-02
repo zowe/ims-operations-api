@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;Liberty Runtime/servers/ZoweMCDevServer/resources/resources&apos;" deleteContents="false" description="Delete resource &apos;Liberty Runtime/servers/ZoweMCDevServer/resources/resources&apos;" element1="/Liberty Runtime/servers/ZoweMCDevServer/resources/resources" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1547685770582"/>
-</session>

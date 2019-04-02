@@ -1,5 +1,0 @@
-contextsDir=/usr/local/apache-tomee-plume-8.0.0-M1/conf/Catalina/localhost
-eclipse.preferences.version=1
-tomcatConfigFile=/usr/local/apache-tomee-plume-8.0.0-M1/conf/server.xml
-tomcatDir=/usr/local/apache-tomee-plume-8.0.0-M1
-tomcatVersion=tomcatV9

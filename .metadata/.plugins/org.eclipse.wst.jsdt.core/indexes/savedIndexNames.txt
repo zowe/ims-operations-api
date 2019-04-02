@@ -1,7 +1,0 @@
-INDEX VERSION 1.4+/Users/jerryli/Documents/Zowe/.metadata/.plugins/org.eclipse.wst.jsdt.core/indexes
-4002291672.index
-2529119847.index
-4153334816.index
-4213142352.index
-2546970230.index
-2269947319.index
