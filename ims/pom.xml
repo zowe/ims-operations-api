@@ -54,20 +54,6 @@
 
 	<dependencies>
 
-		<!-- J2EE -->
-		<dependency>
-			<groupId>com.ibm</groupId>
-			<artifactId>imsico</artifactId>
-			<version>1515</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>j2ee</groupId>
-			<artifactId>j2ee</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- JUnit -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
