@@ -1,5 +1,29 @@
-/*
-!*.java
+# Compiled class file
+*.class
+.classpath
+clientdb.xml
+RemoteSystemsTempFiles/
+.recommenders
+.metadata
+Servers/
+/test/
+*/.classpath
+*/.settings/
+*/.factorypath
+*/.project
+*/target/classes
 
+# Log file
+*.log
+
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
 
 
