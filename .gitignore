@@ -2,16 +2,15 @@
 *.class
 .classpath
 clientdb.xml
-RemoteSystemsTempFiles/
-.recommenders
-.metadata
-Servers/
-/test/
+*/RemoteSystemsTempFiles/
+*/.recommenders
+*/.metadata
+*/Servers/
 */.classpath
 */.settings/
 */.factorypath
 */.project
-*/target/classes
+*/target/
 
 # Log file
 *.log
