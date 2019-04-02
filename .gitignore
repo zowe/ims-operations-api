@@ -7,10 +7,11 @@ RemoteSystemsTempFiles/
 .metadata
 Servers/
 /test/
-.classpath
-.settings/
-.factorypath
-.project
+*/.classpath
+*/.settings/
+*/.factorypath
+*/.project
+*/target/classes
 
 # Log file
 *.log
