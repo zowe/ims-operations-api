@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<servers>
+  <server auto-publish-setting="2" auto-publish-time="1" hostname="localhost" id="Liberty Server at localhost" looseConfig="true" name="Liberty Server at localhost" publishWithError="false" runtime-id="Liberty Runtime" server-type="com.ibm.ws.st.server.wlp" server-type-id="com.ibm.ws.st.server.wlp" serverName="TMRADevServer" serverType="libertyServer" start-timeout="60" stop-timeout="15" stopOnShutdown="false" timestamp="25" userDirId="Liberty Runtime">
+    <list key="modules"/>
+  </server>
+  <server auto-publish-setting="2" auto-publish-time="1" hostname="localhost" id="ZoweMCDevServer" looseConfig="true" name="ZoweMCDevServer" publishWithError="false" runtime-id="Liberty Runtime" server-type="com.ibm.ws.st.server.wlp" server-type-id="com.ibm.ws.st.server.wlp" serverName="ZoweMCDevServer" serverType="libertyServer" start-timeout="60" stop-timeout="15" stopOnShutdown="false" timestamp="33" userDirId="Liberty Runtime">
+    <list key="modules" value0="ims::org.eclipse.jst.jee.server:ims::jst.web::3.1"/>
+  </server>
+</servers>

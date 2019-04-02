@@ -1,0 +1,4 @@
+eclipse.preferences.version=1
+org.eclipse.rse.internal.files.ui.view.SystemViewRemoteFileAdapter\:org.eclipse.rse.internal.ui.view.search.SystemSearchTableView=org.eclipse.rse.ui.file.classification;org.eclipse.rse.ui.file.lastmodified;org.eclipse.rse.ui.file.size;org.eclipse.rse.ui.file.canonicalpath;org.eclipse.rse.ui.file.extension;org.eclipse.rse.ui.file.permissions;org.eclipse.rse.ui.file.owner;org.eclipse.rse.ui.file.group
+org.eclipse.rse.internal.files.ui.view.SystemViewRemoteSearchResultAdapter\:org.eclipse.rse.internal.ui.view.search.SystemSearchTableView=null
+org.eclipse.rse.preferences.order.connections=jerrys-mbp.Local

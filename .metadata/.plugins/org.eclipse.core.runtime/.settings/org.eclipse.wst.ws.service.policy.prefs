@@ -1,0 +1,7 @@
+com.ibm.ast.ws.jaxws.annotations.v7.jaxws.com.ibm.ast.ws.jaxws.annotations.v7.jaxws216rules=org.eclipse.wst.true
+com.ibm.ast.ws.jaxws.annotations.v7.jaxws.default.value.key=com.ibm.ast.ws.jaxws.annotations.v7.default
+eclipse.preferences.version=1
+org.eclipse.wst.ws.service.policy.ui.servicepols.wsiprofilecomp.wsiap.defaultProtocol=http\://schemas.xmlsoap.org/wsdl/soap/
+org.eclipse.wst.ws.service.policy.ui.servicepols.wsiprofilecomp.wsibp12.defaultProtocol=http\://schemas.xmlsoap.org/wsdl/soap/
+org.eclipse.wst.ws.service.policy.ui.servicepols.wsiprofilecomp.wsibp20.defaultProtocol=http\://schemas.xmlsoap.org/wsdl/soap12/
+org.eclipse.wst.ws.service.policy.ui.servicepols.wsiprofilecomp.wsissbp.defaultProtocol=http\://schemas.xmlsoap.org/wsdl/soap/

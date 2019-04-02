@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="false" key="com.ibm.etools.j2ee.manifest.ui.ImplementationVersionPageCommon"/>
+	<item value="false" key="com.ibm.etools.j2ee.manifest.ui.SectionDependenciesCommon"/>
+	<item value="false" key="com.ibm.etools.j2ee.manifest.ui.SectionMainClassCommon"/>
+	<item value="false" key="com.ibm.etools.j2ee.manifest.ui.SectionUsageCommon"/>
+	<item value="false" key="com.ibm.etools.j2ee.manifest.ui.AnnotationScanningOptionPageCommon"/>
+</section>

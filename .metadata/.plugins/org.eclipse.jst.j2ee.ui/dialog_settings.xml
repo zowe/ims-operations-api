@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="true" key="J2EE_EXPORT_OVERWRITE"/>
+	<item value="false" key="J2EE_EXPORT_SOURCE"/>
+	<list key="J2EE_IMPORT_null">
+		<item value="/Users/jerryli/Downloads/ims.war"/>
+	</list>
+	<list key="J2EE_EXPORT_JST_EAR">
+		<item value="/Users/jerryli/Downloads/mcEAR.ear"/>
+	</list>
+	<list key="MRU_RUNTIME_STORE">
+		<item value="Liberty Runtime"/>
+	</list>
+</section>

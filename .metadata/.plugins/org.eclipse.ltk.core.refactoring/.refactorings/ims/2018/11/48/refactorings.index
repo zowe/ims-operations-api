@@ -1,0 +1,25 @@
+1543263254892	Rename type 'ProgramResponse'
+1543270669651	Move method
+1543274921007	Rename field 'MESSAGE_TITTLE'
+1543478072811	Rename method 'trimKeys'
+1543479540534	Delete element
+1543479559946	Move compilation unit
+1543479574506	Move compilation units
+1543479595040	Move compilation units
+1543483534495	Rename local variable 'result'
+1543483543154	Rename local variable 'resultArray'
+1543483893253	Rename local variable 'resopnseJSONArray'
+1543484551210	Move compilation units
+1543489016354	Move compilation unit
+1543489029760	Move compilation unit
+1543489705169	Rename type 'ConnectionTest'
+1543490416796	Rename type 'MCTestSuite'
+1543520007354	Rename type 'StartProgramResponse'
+1543520491009	Rename local variable 'queryProgramResponses'
+1543533498332	Rename local variable 'result'
+1543535832123	Rename method 'testBadConnection'
+1543535900026	Rename method 'testImsConnection'
+1543539961002	Rename type 'QueryTest'
+1543539974265	Rename type 'StartTest'
+1543541845547	Rename field 'mbr'
+1543541924360	Rename field 'any'

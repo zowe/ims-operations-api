@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="WorkbenchPreferenceDialogSettings">
+		<item value="312" key="DIALOG_X_ORIGIN"/>
+		<item value="0" key="DIALOG_Y_ORIGIN"/>
+	</section>
+	<section name="org.eclipse.ui.preferences.keysPreferencePage">
+		<item value="true" key="actionSetFilter"/>
+		<item value="true" key="uncategorizedFilter"/>
+		<item value="true" key="internalFilter"/>
+	</section>
+	<section name="org.eclipse.ui.internal.QuickAccess">
+		<item value="563" key="dialogHeight"/>
+		<item value="900" key="dialogWidth"/>
+		<list key="textEntries">
+		</list>
+		<list key="orderedElements">
+		</list>
+		<list key="orderedProviders">
+		</list>
+		<list key="textArray">
+		</list>
+	</section>
+	<section name="NewWizardAction">
+		<item value="org.eclipse.m2e.core.wizards.Maven2ProjectWizard" key="NewWizardSelectionPage.STORE_SELECTED_ID"/>
+		<list key="NewWizardSelectionPage.STORE_EXPANDED_CATEGORIES_ID">
+			<item value="org.eclipse.m2e"/>
+		</list>
+	</section>
+	<section name="ImportExportAction">
+		<item value="org.eclipse.ui.wizards.import.ExternalProject" key="ImportExportPage.STORE_SELECTED_IMPORT_WIZARD_ID"/>
+		<list key="ImportExportPage.STORE_EXPANDED_IMPORT_CATEGORIES">
+			<item value="org.eclipse.ui.Basic"/>
+			<item value="org.eclipse.jst.ejb.ui"/>
+			<item value="org.eclipse.egit.ui.internal.clone.gitclonecategory"/>
+			<item value="org.eclipse.buildship.ui.importwizards"/>
+			<item value="org.eclipse.jst.j2ee.internal"/>
+			<item value="org.eclipse.m2e"/>
+			<item value="org.eclipse.oomph.importWizards"/>
+			<item value="com.ibm.etools.aries.category.import"/>
+			<item value="org.eclipse.pde.ui.PluginDevelopment"/>
+			<item value="org.eclipse.team.ui.importWizards"/>
+			<item value="org.eclipse.wst.web.ui"/>
+		</list>
+	</section>
+</section>

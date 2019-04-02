@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename local variable &apos;messageTitle&apos; in &apos;utils.RestUtils.processCommandOutput(...)&apos; to &apos;messageElement&apos;&#x0A;- Original project: &apos;mc&apos;&#x0A;- Original element: &apos;utils.RestUtils.processCommandOutput(JSONObject).messageTitle&apos;&#x0A;- Renamed element: &apos;messageTitle&apos;&#x0A;- Update references to refactored element" description="Rename local variable &apos;messageTitle&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src\/main\/java&lt;utils{RestUtils.java[RestUtils~processCommandOutput~QJSONObject;@messageTitle!1054!1121!1065!1076!QJSONObject;!0!false" name="messageElement" references="true" stamp="1541544050591" version="1.0"/>
+</session>

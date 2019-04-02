@@ -1,0 +1,4 @@
+1553644649967	Delete resource 'Liberty Runtime/servers/ZoweMCDevServer/dropins/ims-1.0.0.war'
+1553645123217	Delete resource 'Liberty Runtime/servers/ZoweMCDevServer/resources/security'
+1553645463269	Delete resource 'Liberty Runtime/servers/ZoweMCDevServer/resources/keystore.jks'
+1553645538844	Delete resource 'Liberty Runtime/servers/ZoweMCDevServer/resources/security/keystore.jks'

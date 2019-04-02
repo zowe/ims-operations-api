@@ -1,0 +1,14 @@
+allowClasspathDep=true
+appClientContent=src/main/java
+appClientOutput=target/classes
+dynWebOutput=target/classes
+dynWebSource=src/main/java
+earContent=src/main/application
+eclipse.preferences.version=1
+ejbContent=src/main/java
+ejbOutput=target/classes
+jcaContent=src/main/rar
+jcaOutput=target/classes
+org.eclipse.jst.j2ee.preferences.useEARLibraries=false
+org.eclipse.jst.j2ee.preferences.useWebAppLibraries=false
+webContent=src/main/webapp

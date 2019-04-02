@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<list key="com.ibm.ws.st.ui.internal.config.addConfigElementDialog.history">
+		<item value="containerAuthData"/>
+		<item value="keyStore"/>
+		<item value="basicRegistry"/>
+		<item value="dataSource"/>
+		<item value="quickStartSecurity"/>
+		<item value="library"/>
+		<item value="variable"/>
+	</list>
+</section>
