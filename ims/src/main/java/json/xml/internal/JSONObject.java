@@ -11,11 +11,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-// IBM Confidential OCO Source Material
-// (C) COPYRIGHT International Business Machines Corp. 2006
-// The source code for this program is not published or otherwise divested
-// of its trade secrets, irrespective of what has been deposited with the
-// U.S. Copyright Office.
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
