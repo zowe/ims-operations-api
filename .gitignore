@@ -1,9 +1,5 @@
 *
 !*.java
 !pom.xml
-!/ims/src/main/java/resources/*.properties
-!/ims/src/main/java/resources/*.txt
-!/ims/src/main/java/resources/schema/*.xsd
-
 
 
