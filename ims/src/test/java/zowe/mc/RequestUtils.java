@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -32,8 +34,16 @@ import application.rest.responses.tran.update.UpdateTransactionOutput;
 
 public class RequestUtils {
 	
+	private static String port;
+	
+	public  RequestUtils() {
+		ResourceBundle appProperties = ResourceBundle.getBundle("application.properties");
+		port = appProperties.getString("server.port");
+		
+	}
+	
 	public static Response postRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8081/");
+		WebTarget webTarget = client.target("http://localhost:" + port);
 
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
@@ -51,7 +61,7 @@ public class RequestUtils {
 	}
 	
 	public static Response deleteRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8081/");
+		WebTarget webTarget = client.target("http://localhost:" + port);
 
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
@@ -69,7 +79,7 @@ public class RequestUtils {
 	}
 
 	public static Response putRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8081/");
+		WebTarget webTarget = client.target("http://localhost:" + port);
 
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
@@ -90,7 +100,7 @@ public class RequestUtils {
 	 * @return
 	 */
 	public static Response getRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:8081");
+		WebTarget webTarget = client.target("http://localhost:" + port +"/");
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
