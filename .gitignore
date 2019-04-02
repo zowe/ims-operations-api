@@ -1,19 +1,19 @@
-# Compiled class file
-*.class
-.classpath
-clientdb.xml
-*/RemoteSystemsTempFiles/
-*/.recommenders/
-*/.metadata/
-*/Servers/
-*/.classpath
-*/.settings/
-*/.factorypath
-*/.project
-*/target/
+
+**/clientdb.xml
+**/RemoteSystemsTempFiles/
+**/.recommenders/
+**/.metadata/
+**/Servers/
+**/.classpath
+**/.settings/
+**/.factorypath
+**/.project
+**/target/
 
 # Log file
 *.log
+
+*.class
 
 
 # Package Files #
