@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package zowe.mc.tests.tran;
 
@@ -10,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -35,18 +40,16 @@ import zowe.mc.TestProperties;
 public class TestQueryTran {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestQueryTran.class);
-	private static Client client;
 
 
 	@BeforeAll
 	public static void setUp() {
-		client = ClientBuilder.newClient();
 		
 		logger.info("Need to create program first");
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"names", "JUNIT"};
 		queryParams.add(names);
-		RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program", client);
+		RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program");
 		
 		
 		List<String[]> queryParams1 = new ArrayList<>();
@@ -54,7 +57,7 @@ public class TestQueryTran {
 		String[] pgm1 = new String[] {"pgm", "JUNIT"};
 		queryParams1.add(names1);
 		queryParams1.add(pgm1);
-		RequestUtils.postRequest(queryParams1, "/" + TestProperties.plex + "/transaction", client);
+		RequestUtils.postRequest(queryParams1, "/" + TestProperties.plex + "/transaction");
 	}
 	
 	/**
@@ -68,7 +71,7 @@ public class TestQueryTran {
 		
 		logger.info("TESTING Query TRAN");
 		
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/transaction", client);
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -92,7 +95,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction", client);
+		Response response = RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -108,7 +111,7 @@ public class TestQueryTran {
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "PGM"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/transaction", client);
+		Response response2= RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -124,7 +127,7 @@ public class TestQueryTran {
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "AOCMD"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, "/" + TestProperties.plex + "/transaction", client);
+		Response response3= RequestUtils.getRequest(queryParams3, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -149,7 +152,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"names", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction", client);
+		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

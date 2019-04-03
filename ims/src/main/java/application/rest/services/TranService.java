@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package application.rest.services;
 
@@ -42,9 +49,14 @@ import commands.query.tran.QueryTran.ConvOptions;
 import commands.query.tran.QueryTran.FpOptions;
 import commands.query.tran.QueryTran.RemoteOptions;
 import commands.query.tran.QueryTran.RespOptions;
+import commands.query.tran.QueryTran.ShowOptions;
+import commands.query.tran.QueryTran.StatusOptions;
 import commands.type2.Type2Command;
 import commands.update.tran.UpdateTran;
+import commands.update.tran.UpdateTran.OptionOptions;
 import commands.update.tran.UpdateTran.ScopeOptions;
+import commands.update.tran.UpdateTran.StartOptions;
+import commands.update.tran.UpdateTran.StopOptions;
 import exceptions.RestException;
 import icon.helpers.MCInteraction;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -188,7 +200,7 @@ public class TranService {
 				qcnt.setQCNTValue(qcntval);
 				tran.setQCNT(qcnt);
 			}
-			ArrayList<QueryTran.StatusOptions> statusOptions = new ArrayList();
+			ArrayList<QueryTran.StatusOptions> statusOptions = new ArrayList<StatusOptions>();
 			if (status != null) {
 				List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
 				for (String s : statusList) {
@@ -209,7 +221,7 @@ public class TranService {
 				tran.setRESP(RespOptions.fromValue(resp));
 			}
 
-			ArrayList<QueryTran.ShowOptions> showOptions = new ArrayList();
+			ArrayList<QueryTran.ShowOptions> showOptions = new ArrayList<ShowOptions>();
 			if (show != null) {
 				List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
 				for (String s : showList) {
@@ -1059,7 +1071,7 @@ public class TranService {
 				tran.getNAME().addAll(nameList);
 			}
 
-			ArrayList<UpdateTran.StartOptions> startOptions = new ArrayList();
+			ArrayList<UpdateTran.StartOptions> startOptions = new ArrayList<StartOptions>();
 			if (start != null) {
 				List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
 				for (String s : startList) {
@@ -1067,7 +1079,7 @@ public class TranService {
 				}
 				tran.getSTART().addAll(startOptions);
 			}
-			ArrayList<UpdateTran.StopOptions> stopOptions = new ArrayList();
+			ArrayList<UpdateTran.StopOptions> stopOptions = new ArrayList<StopOptions>();
 			if (stop != null) {
 				List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
 				for (String s : stopList) {
@@ -1080,7 +1092,7 @@ public class TranService {
 				tran.getCLASS().addAll(clazz);
 			}
 
-			ArrayList<UpdateTran.OptionOptions> optionOptions = new ArrayList();
+			ArrayList<UpdateTran.OptionOptions> optionOptions = new ArrayList<OptionOptions>();
 			if (option != null) {
 				List<String> optionList = Arrays.asList(option.split("\\s*,\\s*"));
 				for (String s : optionList) {

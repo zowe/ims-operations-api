@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package zowe.mc.tests.tran;
 
@@ -9,8 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -34,14 +39,12 @@ import zowe.mc.TestProperties;
 @ExtendWith({SuiteExtension.class})
 public class TestUpdateTran {
 	private static final Logger logger = LoggerFactory.getLogger(TestUpdateTran.class);
-	private static Client client;
 	
 	/**
 	 * Setup rest client
 	 */
 	@BeforeAll
 	public static void setUp() {
-		client = ClientBuilder.newClient();
 	}
 
 	/**
@@ -58,7 +61,7 @@ public class TestUpdateTran {
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
-		Response responses = RequestUtils.putRequest(queryParams, "/" + TestProperties.plex + "/transaction", client);
+		Response responses = RequestUtils.putRequest(queryParams, "/" + TestProperties.plex + "/transaction");
 		UpdateTransactionOutput upr = RequestUtils.validateUTRSuccess(responses);
 		logger.info(upr.toString());
 		
@@ -69,7 +72,7 @@ public class TestUpdateTran {
 		String[] show = new String[] {"attributes", "STATUS"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
-		Response responses2 = RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/transaction", client);
+		Response responses2 = RequestUtils.getRequest(queryParams2, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(responses2);
 		for (QueryTransaction r : qpr.getData()) {
 			assertEquals("STOSCHD", r.getLstt());
@@ -82,7 +85,7 @@ public class TestUpdateTran {
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
-		Response responses3 = RequestUtils.putRequest(queryParams3, "/" + TestProperties.plex + "/transaction", client);
+		Response responses3 = RequestUtils.putRequest(queryParams3, "/" + TestProperties.plex + "/transaction");
 		UpdateTransactionOutput upr2 = RequestUtils.validateUTRSuccess(responses3);
 		logger.info(upr2.toString());
 		
@@ -93,7 +96,7 @@ public class TestUpdateTran {
 		String[] show2 = new String[] {"attributes", "STATUS"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);
-		Response responses4 = RequestUtils.getRequest(queryParams4, "/" + TestProperties.plex + "/transaction", client);
+		Response responses4 = RequestUtils.getRequest(queryParams4, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(responses4);
 		for (QueryTransaction r : qpr2.getData()) {
 			assertEquals(null, r.getLstt());

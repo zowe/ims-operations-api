@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package json.java;
 
@@ -29,7 +36,7 @@ import json.java.internal.SerializerVerbose;
  * 
  * Instances of this class are not thread-safe.
  */
-public class JSONArray extends ArrayList implements JSONArtifact
+public class JSONArray extends ArrayList<Object> implements JSONArtifact
 {
 
     /**
@@ -77,7 +84,7 @@ public class JSONArray extends ArrayList implements JSONArtifact
      * (non-Javadoc)
      * @see java.util.ArrayList#addAll(java.util.Collection)
      */
-    public boolean addAll(Collection collection)
+    public boolean addAll(Collection<?> collection)
     {
         checkElements(collection);
         return super.addAll(collection);
@@ -87,7 +94,7 @@ public class JSONArray extends ArrayList implements JSONArtifact
      * (non-Javadoc)
      * @see java.util.ArrayList#addAll(int, java.util.Collection)
      */
-    public boolean addAll(int index, Collection collection)
+    public boolean addAll(int index, Collection<?> collection)
     {
         checkElements(collection);
         return super.addAll(index, collection);
@@ -223,7 +230,7 @@ public class JSONArray extends ArrayList implements JSONArtifact
 
         //Try to avoid double-buffering or buffering in-memory
         //writers.
-        Class writerClass = writer.getClass();
+        Class<? extends Writer> writerClass = writer.getClass();
         if (!StringWriter.class.isAssignableFrom(writerClass) &&
             !CharArrayWriter.class.isAssignableFrom(writerClass) &&
             !BufferedWriter.class.isAssignableFrom(writerClass)) {
@@ -284,9 +291,9 @@ public class JSONArray extends ArrayList implements JSONArtifact
     /**
      * 
      */
-    private void checkElements(Collection collection)
+    private void checkElements(Collection<?> collection)
     {
-        for (Iterator iter = collection.iterator(); iter.hasNext(); )
+        for (Iterator<?> iter = collection.iterator(); iter.hasNext(); )
         {
             if (!JSONObject.isValidObject(iter.next())) throw new IllegalArgumentException("invalid type of element");
         }

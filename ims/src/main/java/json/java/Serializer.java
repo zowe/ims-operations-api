@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package json.java;
 
@@ -203,14 +210,14 @@ public class Serializer
         writeRawString("{");
         indentPush();
 
-        Iterator iter = null;
+        Iterator<?> iter = null;
         if (object instanceof OrderedJSONObject)
         {
             iter = ((OrderedJSONObject)object).getOrder();
         }
         else
         {
-            List propertyNames = getPropertyNames(object);
+            List<?> propertyNames = getPropertyNames(object);
             iter = propertyNames.iterator();
         }
 
@@ -253,7 +260,7 @@ public class Serializer
         writeRawString("[");
         indentPush();
 
-        for (Iterator iter=value.iterator(); iter.hasNext(); )
+        for (Iterator<?> iter=value.iterator(); iter.hasNext(); )
         {
             Object element = iter.next();
             if (!JSONObject.isValidObject(element)) throw new IOException("attempting to serialize array with an invalid element: '" + value + "'");
@@ -317,9 +324,9 @@ public class Serializer
     /**
      * Method to get a list of all the property names stored in a map.
      */
-    public List getPropertyNames(Map map)
+    public List<?> getPropertyNames(Map<?, ?> map)
     {
-        return new ArrayList(map.keySet());
+        return new ArrayList<Object>(map.keySet());
     }
 
 }

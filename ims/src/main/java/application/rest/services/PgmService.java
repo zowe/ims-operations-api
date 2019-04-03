@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package application.rest.services;
 
@@ -166,7 +173,7 @@ public class PgmService {
 				pgm.getNAME().addAll(nameList);
 			}
 
-			ArrayList<ShowOptions> showOptions = new ArrayList();
+			ArrayList<ShowOptions> showOptions = new ArrayList<ShowOptions>();
 			if (show != null) {
 				List<String> showList = Arrays.asList(show.split("\\s*,\\s*"));
 				for (String s : showList) {
@@ -175,7 +182,7 @@ public class PgmService {
 				pgm.getSHOW().addAll(showOptions);
 			}
 
-			ArrayList<StatusOptions> statusOptions = new ArrayList();
+			ArrayList<StatusOptions> statusOptions = new ArrayList<StatusOptions>();
 			if (status != null) {
 				List<String> statusList = Arrays.asList(status.split("\\s*,\\s*"));
 				for (String s : statusList) {
@@ -679,7 +686,7 @@ public class PgmService {
 					List<String> nameList = Arrays.asList(names.split("\\s*,\\s*"));
 					pgm.getNAME().addAll(nameList);
 				}
-				ArrayList<UpdatePgm.StartOptions> startOptions = new ArrayList();
+				ArrayList<UpdatePgm.StartOptions> startOptions = new ArrayList<StartOptions>();
 				if (start != null) {
 					List<String> startList = Arrays.asList(start.split("\\s*,\\s*"));
 					for (String s : startList) {
@@ -687,7 +694,7 @@ public class PgmService {
 					}
 					pgm.getSTART().addAll(startOptions);
 				}
-				ArrayList<UpdatePgm.StopOptions> stopOptions = new ArrayList();
+				ArrayList<UpdatePgm.StopOptions> stopOptions = new ArrayList<StopOptions>();
 				if (stop != null) {
 					List<String> stopList = Arrays.asList(stop.split("\\s*,\\s*"));
 					for (String s : stopList) {

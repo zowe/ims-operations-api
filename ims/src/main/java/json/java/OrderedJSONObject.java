@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package json.java;
 
@@ -28,7 +35,7 @@ public class OrderedJSONObject extends JSONObject
 {
 
     private static final long serialVersionUID = -3269263069889337299L;
-    private ArrayList order                    = null;
+    private ArrayList<Object> order                    = null;
 
     /**
      * Create a new instance of this class. 
@@ -36,7 +43,7 @@ public class OrderedJSONObject extends JSONObject
     public OrderedJSONObject()
     {
         super();
-        this.order = new ArrayList();
+        this.order = new ArrayList<Object>();
     }
 
     /**
@@ -159,8 +166,8 @@ public class OrderedJSONObject extends JSONObject
     public Object clone()
     {
         OrderedJSONObject clone = (OrderedJSONObject)super.clone();
-        Iterator order = clone.getOrder();
-        ArrayList orderList = new ArrayList();
+        Iterator<Object> order = clone.getOrder();
+        ArrayList<Object> orderList = new ArrayList<Object>();
         while (order.hasNext())
         {
             orderList.add(order.next());
@@ -173,7 +180,7 @@ public class OrderedJSONObject extends JSONObject
      * Method to obtain the order in which the items will be serialized.
      * @return An iterator that represents the attribute names in the order that they will be serialized.
      */
-    public Iterator getOrder()
+    public Iterator<Object> getOrder()
     {
         return this.order.iterator();
     }

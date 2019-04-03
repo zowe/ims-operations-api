@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package zowe.mc.tests.pgm;
 
@@ -8,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -32,12 +37,10 @@ import zowe.mc.TestProperties;
 public class TestStartPgm {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestStartPgm.class);
-	private static Client client;
 
 
 	@BeforeAll
 	public static void setUp() {
-		client = ClientBuilder.newClient();
 	}
 	
 	/**
@@ -48,7 +51,7 @@ public class TestStartPgm {
 	public void testStartPgm() {
 		logger.info("TESTING START PGM");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/program/start", client);
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/program/start");
 		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {

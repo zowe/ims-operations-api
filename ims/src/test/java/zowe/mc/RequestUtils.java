@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package zowe.mc;
 
@@ -9,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -34,17 +41,19 @@ import application.rest.responses.tran.update.UpdateTransactionOutput;
 
 public class RequestUtils {
 	
-	private static String port;
+	private static String port; 
+	private static Client client;
 	
-	public  RequestUtils() {
-		ResourceBundle appProperties = ResourceBundle.getBundle("application.properties");
+	static {
+		ResourceBundle appProperties = ResourceBundle.getBundle("application");
 		port = appProperties.getString("server.port");
-		
+		client = ClientBuilder.newClient();
 	}
 	
-	public static Response postRequest(List<String[]> queryParams, String path, Client client) {
+	public static Response postRequest(List<String[]> queryParams, String path) {
+		
 		WebTarget webTarget = client.target("http://localhost:" + port);
-
+		
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
@@ -60,9 +69,10 @@ public class RequestUtils {
 		
 	}
 	
-	public static Response deleteRequest(List<String[]> queryParams, String path, Client client) {
+	public static Response deleteRequest(List<String[]> queryParams, String path) {
+		
 		WebTarget webTarget = client.target("http://localhost:" + port);
-
+		
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
@@ -78,9 +88,10 @@ public class RequestUtils {
 		
 	}
 
-	public static Response putRequest(List<String[]> queryParams, String path, Client client) {
+	public static Response putRequest(List<String[]> queryParams, String path) {
 		WebTarget webTarget = client.target("http://localhost:" + port);
-
+	
+		
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
@@ -99,8 +110,9 @@ public class RequestUtils {
 	 * @param queryParams
 	 * @return
 	 */
-	public static Response getRequest(List<String[]> queryParams, String path, Client client) {
-		WebTarget webTarget = client.target("http://localhost:" + port +"/");
+	public static Response getRequest(List<String[]> queryParams, String path) {
+		WebTarget webTarget = client.target("http://localhost:" + port);
+		
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}

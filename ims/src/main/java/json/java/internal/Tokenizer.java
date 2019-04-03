@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package json.java.internal;
 
@@ -46,7 +53,7 @@ public class Tokenizer
     public Tokenizer(Reader reader) throws IOException {
         super();
 
-        Class readerClass= reader.getClass();
+        Class<? extends Reader> readerClass= reader.getClass();
         //In-memory readers don't need to be buffered.  Also, skip PushbackReaders
         //because they probably already wrap a buffered stream.  And lastly, anything
         //that extends from a BufferedReader also doesn't need buffering!

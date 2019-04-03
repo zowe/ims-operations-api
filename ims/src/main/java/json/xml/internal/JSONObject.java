@@ -1,6 +1,13 @@
+
 /**
- *  Copyright IBM Corporation 2018, 2019
- */
+* This program and the accompanying materials are made available under the terms of the
+* Eclipse Public License v2.0 which accompanies this distribution, and is available at
+* https://www.eclipse.org/legal/epl-v20.html
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Copyright IBM Corporation 2019
+*/
 
 package json.xml.internal;
 
@@ -44,7 +51,7 @@ public class JSONObject
     /**
      * All children JSON objects referenced.  Effectively the child tags of an XML tag.
      */
-    private Hashtable jsonObjects = null;
+    private Hashtable<String, Vector<JSONObject>> jsonObjects = null;
 
     /**
      * Any XML freeform text to associate with the JSON object,
@@ -60,7 +67,7 @@ public class JSONObject
     {
         this.objectName  = objectName;
         this.attrs       = attrs;
-        this.jsonObjects = new Hashtable();
+        this.jsonObjects = new Hashtable<String, Vector<JSONObject>>();
     }
 
     /**
@@ -71,14 +78,14 @@ public class JSONObject
     {
         if (logger.isLoggable(Level.FINER)) logger.entering(className, "addJSONObject(JSONObject)");
 
-        Vector vect = (Vector) this.jsonObjects.get(obj.objectName);
+        Vector<JSONObject> vect = (Vector<JSONObject>) this.jsonObjects.get(obj.objectName);
         if (vect != null)
         {
             vect.add(obj);
         }
         else
         {
-            vect = new Vector();
+            vect = new Vector<JSONObject>();
             vect.add(obj);
             this.jsonObjects.put(obj.objectName, vect);
         }
@@ -248,7 +255,7 @@ public class JSONObject
 
         if (attrs != null)
         {
-            Enumeration props = attrs.propertyNames();
+            Enumeration<?> props = attrs.propertyNames();
 
             if (props != null && props.hasMoreElements())
             {
@@ -411,11 +418,11 @@ public class JSONObject
 
         if (!jsonObjects.isEmpty())
         {
-            Enumeration keys = jsonObjects.keys();
+            Enumeration<String> keys = jsonObjects.keys();
             while (keys.hasMoreElements())
             {
                 String objName = (String)keys.nextElement();
-                Vector vect = (Vector)jsonObjects.get(objName);
+                Vector<?> vect = (Vector<?>)jsonObjects.get(objName);
                 if (vect != null && !vect.isEmpty())
                 {
                     /**
