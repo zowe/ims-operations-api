@@ -797,7 +797,7 @@ public class TranService {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "tran-user", "post-user"})
-	@Operation(operationId="deletetran", summary = "Delete IMS transactions using 'DELETE TRAN' IMS command",
+	@Operation(operationId="deletetran", summary = "Delete IMS transactions by using the 'DELETE TRAN' IMS command. For more information on each parameter, see the documentation for the 'DELETE TRAN' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = DeleteTransactionOutput.class))),
