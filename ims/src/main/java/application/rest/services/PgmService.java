@@ -108,7 +108,7 @@ public class PgmService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "get-user", "pgm-user"})
-	@Operation(operationId="querypgm", summary = "Query information about IMS program resources using 'QUERY PGM' IMS command",
+	@Operation(operationId="querypgm", summary = "Query information about IMS program resources by using the 'QUERY PGM' IMS command. For more information on each parameter, see the documentation for the 'QUERY PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  
 			content = @Content(schema = @Schema(implementation = QueryProgramOutput.class))),
@@ -135,16 +135,17 @@ public class PgmService {
 			@QueryParam("status") 
 			String status,
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "string")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
 			@QueryParam("route") 
 			String imsmbr, 
 
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -316,7 +317,7 @@ public class PgmService {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "post-user", "pgm-user"})
-	@Operation(operationId = "createpgm", summary = "Create and define IMS program resources for application programs using 'CREATE PGM' IMS command",
+	@Operation(operationId = "createpgm", summary = "Create and define IMS program resources for application programs by using the 'CREATE PGM' IMS command. For more information on each parameter, see the documentation for the 'CREATE PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -327,10 +328,6 @@ public class PgmService {
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr, 
 
 			@Parameter(description = "Specifies the name of the descriptor to use as a model to define this resource.")
 			@QueryParam("desc")
@@ -378,12 +375,17 @@ public class PgmService {
 			@QueryParam("transtat") 
 			String transtat,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -490,7 +492,7 @@ public class PgmService {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "pgm-user", "post-user"})
-	@Operation(operationId="deletepgm", summary = "Delete IMS program resources using 'DELETE PGM' IMS command",
+	@Operation(operationId="deletepgm", summary = "Delete IMS program resources by using the 'DELETE PGM' IMS command. For more information on each parameter, see the documentation for the 'DELETE PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateProgramOutput.class))),
@@ -502,20 +504,22 @@ public class PgmService {
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr, 
 
 			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}), description = "Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values.")
 			@QueryParam("option") 
 			String option,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -588,7 +592,7 @@ public class PgmService {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "pgm-user", "put-user"})
-	@Operation(operationId = "updatepgm", summary = "Update, start or stop IMS program resources using 'UPDATE PGM' IMS command",
+	@Operation(operationId = "updatepgm", summary = "Update, start or stop IMS program resources by using the 'UPDATE PGM' IMS command. For more information on each parameter, see the documentation for the 'UPDATE PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = UpdateProgram.class))),
@@ -599,22 +603,18 @@ public class PgmService {
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
 			@QueryParam("names") 
 			String names, 
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr,
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
+			
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies attributes that are to be started.", array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"SCHD", "TRACE", "REFRESH"})))
 			@QueryParam("start") 
 			String start,
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies attributes that are to be stopped.", array=@ArraySchema(schema = 
 			@Schema(allowableValues = {"SCHD", "TRACE"})))
 			@QueryParam("stop") 
 			String stop,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(description = "Specifies whether the program runs in a BMP type region (Y) or not (N).", schema = @Schema(allowableValues = {"N", "Y"}))
 			@QueryParam("bmptype") 
 			String bmptype,
 
@@ -622,44 +622,49 @@ public class PgmService {
 			@QueryParam("dopt") 
 			String dopt,
 
-			@Parameter(schema = @Schema(allowableValues = {"E", "N"}), description = "Specifies the dynamic option.")
+			@Parameter(schema = @Schema(allowableValues = {"E", "N"}), description = "Specifies the Fast Path option.")
 			@QueryParam("fp") 
 			String fp,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies the generated PSB option.") 
 			@QueryParam("gpsb") 
 			String gpsb,
 
-			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}))
+			@Parameter(schema = @Schema(allowableValues = {"ASSEM", "COBOL", "JAVA", "PASCAL", "PLI"}), description = "Specifies the language interface of the program for a GPSB, or defines a DOPT(Y) program as using the Java™ language. In order to define a DOPT program using the Java language, the program must be defined with DOPT(Y) and LANG(JAVA). DOPT PSBs are not loaded at IMS restart; they are loaded every time the program is scheduled. When the program is scheduled for the first time, IMS does not know the language until after the program is scheduled in a region and the PSB is loaded. Unless LANG(JAVA) is defined for the DOPT(Y) program, the program is incorrectly scheduled in a non-Java region.")
 			@QueryParam("lang") 
 			String lang,
 
-			@Parameter(schema = @Schema(allowableValues = {"ON", "OFF"}))
+			@Parameter(schema = @Schema(allowableValues = {"ON", "OFF"}), description = "Specifies that the LOCK status is to be set on or off. This parameter cannot be specified with any other SET attribute. This parameter can be specified with the START or STOP keyword.")
 			@QueryParam("lock") 
 			String lock,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies the resident option. The RESIDENT(N) option takes effect immediately. The RESIDENT(Y) option takes effect at the next restart, unless an error is encountered such as no ACB for the PSB for the program, or if the program was updated as RESIDENT(Y) after the checkpoint from which this IMS is performing emergency restart.")
 			@QueryParam("resident") 
 			String resident,
 
-			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}))
+			@Parameter(schema = @Schema(allowableValues = {"PARALLEL", "SERIAL"}), description = "Specifies whether this application program can be scheduled into more than one message region or batch message region simultaneously.")
 			@QueryParam("schdtype") 
 			String schdtype,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description = "Specifies whether transaction level statistics should be logged. The value specified has meaning only if the program is a JBP or a non-message driven BMP. If Y is specified, transaction level statistics are written to the log in an X'56FA' log record.")
 			@QueryParam("transtat") 
 			String transtat,
 
-			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}))
+			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}), description = "Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is only valid with NAME(*). ALLRSP is ignored for other NAME values.")
 			@QueryParam("option") 
 			String option,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 

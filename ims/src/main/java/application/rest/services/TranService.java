@@ -99,37 +99,33 @@ public class TranService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "tran-user", "get-user"})
-	@Operation(operationId= "querytran", summary = "Query information about IMS transactions across IMSplex using 'QUERY TRAN' IMS command",
+	@Operation(operationId= "querytran", summary = "Query information about IMS transactions across an IMSplex by using the 'QUERY TRAN' IMS command. For more information on each parameter, see the documentation for the 'QUERY TRAN' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = QueryTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
 			@QueryParam("names") 
 			String names, 
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(type = "integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(type = "integer")), description="Displays transactions that possess at least one of the specified classes.")
 			@QueryParam("class") 
 			List<Integer> clazz,
 
-			@Parameter(schema = @Schema(allowableValues = {"LT", "LE", "GT", "GE", "EQ", "NE"}))
+			@Parameter(schema = @Schema(allowableValues = {"LT", "LE", "GT", "GE", "EQ", "NE"}), description="Selects transactions that have a queue count less than (LT), less than or equal to (LE), greater than (GT), greater than or equal to (GE), equal to (EQ), or not equal to (NE) the value that is specified for the 'qcntval' parameter.")
 			@QueryParam("qcntcomp")
 			String qcntcomp,
 
-			@Parameter()
+			@Parameter(description="Specifies the queue count number that is used to display transactions. In the 'qcntcomp' parameter, you select whether the transactions that are displayed have a queue count that is less than (LT), less than or equal to (LE), greater than (GT), greater than or equal to (GE), equal to (EQ), or not equal to (NE) the number that you specify for this parameter.  If LT is specified for the 'qcntcomp' parameter, the number that you specify for this parameter cannot be 1.")
 			@QueryParam("qcntval")
 			Integer qcntval,
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "string")))
-			@QueryParam("route") 
-			String imsmbr, 
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,
 			array=@ArraySchema(schema = @Schema(allowableValues = 
 		{"AFFIN", "BAL", "CONV", "CPIC", "DYN", "IOPREV", "LCK", "NOTINIT", "QERR", "QSTP", "SUSPEND", 
-				"STOQ", "STOSCHD", "TRACE", "USTO"})))
+				"STOQ", "STOSCHD", "TRACE", "USTO"})), description="Selects transactions for display that possess at least one of the specified transaction statuses.")
 			@QueryParam("status")
 			String status,
 
@@ -137,15 +133,15 @@ public class TranService {
 			@QueryParam("conv")
 			String conv,
 
-			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}))
+			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}), description="Selects transactions for display that possess the Fast Path option specified. If more than one FP option is specified, selects transactions for display that possess at least one of the Fast Path options specified.")
 			@QueryParam("fp")
 			String fp,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Selects transactions for display that possess the remote option specified.")
 			@QueryParam("remote")
 			String remote,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Selects transactions for display that possess the response mode option specified.")
 			@QueryParam("resp")
 			String resp,
 
@@ -155,16 +151,21 @@ public class TranService {
 				"EDITRTN", "EDITUC", "EMHBSZ", "EXPRTIME", "FP", "GLOBAL", "IMSID", "INQ", "LCT", "LOCAL", 
 				"LPRI", "MAXRGN", "MODEL", "MSGTYPE", "MSNAME", "NPRI", "PARLIM", "PGM", "PLCT", "PLCTTIME",
 				"PSB", "QCNT", "RECOVER", "REMOTE", "RESP", "RGC", "SEGNO", "SEGSZ", "SERIAL", "SPASZ", "SPATRUNC", 
-				"STATUS", "TIMESTAMP", "TRANSTAT", "WFI", "WORK", "EXPORTNEEDED"})))
+				"STATUS", "TIMESTAMP", "TRANSTAT", "WFI", "WORK", "EXPORTNEEDED"})), description="Specifies the transaction output fields to be returned. The transaction name is always returned along with the name of the IMS that created the output and the completion code. If this parameter is not specified, only the transaction names are returned if the QCNT, CLASS, or STATUS filter is also not specified. The only value that is supported for this parameter when the QCNT parameter is specified is the AFFIN value. No other SHOW options are supported with the QCNT() filter because of performance reasons.")
 			@QueryParam("attributes")
 			String show,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -367,20 +368,16 @@ public class TranService {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "tran-user", "post-user"})
-	@Operation(operationId ="createtran", summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region using 'CREATE TRAN' IMS command",
+	@Operation(operationId ="createtran", summary = "Create an IMS transaction code that associates an application program resource (PGM) to be scheduled for execution in an IMS message processing region by using the 'CREATE TRAN' IMS command. For more information on each parameter, see the documentation for the 'CREATE TRAN' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = CreateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
 			@QueryParam("names") 
 			String names,
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr, 
 
 			@Parameter()
 			@QueryParam("desc")
@@ -390,127 +387,153 @@ public class TranService {
 			@QueryParam("rsc")
 			String rsc,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "CMD", "TRAN", "Y", "-1"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "CMD", "TRAN", "Y", "-1"}), description="Specifies the AOI option that you want to change, which indicates whether the transaction can issue the type-1 AOI CMD call or the type-2 AOI ICMD call.")
 			@QueryParam("aocmd") 
 			String aocmd,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "999"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "999"), description="Selects the transactions associated with the specified class or classes to be updated.")
 			@QueryParam("class")
 			Integer clazz,
 
-			@Parameter(schema = @Schema(allowableValues = {"SNGL", "MULT"}))
+			@Parameter(schema = @Schema(allowableValues = {"SNGL", "MULT"}), description="Specifies when database updates and non-express output messages are committed. This parameter affects emergency restart.")
 			@QueryParam("cmtmode")
 			String cmtmode,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the conversation option.")
 			@QueryParam("conv")
 			String conv,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the log write-ahead option.")
 			@QueryParam("dclwa")
 			String dclwa,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the MSC directed routing option.")
 			@QueryParam("dirroute")
 			String dirroute,
 
-			@Parameter()
+			@Parameter(description="Specifies the 1- to 8-character name of your transaction input edit routine that edits messages before the program receives the message. This name must begin with an alphabetic character. The specified edit routine (load module) must reside on the USERLIB data set before IMS system definition stage 2 execution. This routine cannot be the same one defined by the system definition TYPE EDIT= parameter.")
 			@QueryParam("editrtn")
 			String editrtn,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the edit to uppercase option.")
 			@QueryParam("edituc")
 			String edituc,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "30720"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "30720"), description="Specifies the EMH buffer size required to run the Fast Path transaction. This overrides the EMHL execution parameter. If EMHBSZ is not specified, the EMHL execution parameter value is used. The value can be a number from 0 to 30 720.")
 			@QueryParam("emhbsz")
 			Integer emhbsz,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the elapsed time in seconds that IMS can use to cancel the input transaction. The value can be a number, in seconds, which can range from 0 to 65535. The default is 0, which means that no expiration time is set for this transaction.")
 			@QueryParam("exprtime")
 			Integer exprtime,
 
-			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}))
+			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}), description="Specifies the Fast Path option. E: The transaction is processed exclusively as Fast Path. The program must be defined as Fast Path exclusive. N: The transaction is not a candidate for Fast Path processing. The program must be defined as not Fast Path. P: The transaction is a potential candidate for Fast Path processing. Fast Path-potential transactions must be able to run under two applications: a Fast Path exclusive application and a non-Fast Path application.")
 			@QueryParam("fp")
 			String fp,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the inquiry option.")
 			@QueryParam("inq")
 			String inq,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "65535"), description="Specifies the limit count. This is the number that, when compared to the number of input transactions queued and waiting to be processed, determines whether the normal or limit priority value is assigned to this transaction. The value can be a number from 1 to 65535. The default is 65535.")
 			@QueryParam("lct")
 			Integer lct,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"), description="Specifies the limit priority. This is the scheduling priority to which this transaction is raised when the number of input transactions enqueued and waiting to be processed is equal to or greater than the limit count value. The scheduling priority is an attribute used to select a transaction for scheduling. A transaction of higher priority is scheduled before a lower priority one, if they are defined with the same class. The value can be a number from 0 through 14.")
 			@QueryParam("lpri")
 			Integer lpri,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0"), description="Specifies a new value for the maximum number of regions that can be simultaneously scheduled for a given transaction. The value of this parameter must be between 0 and the number specified on the MAXPST=control region parameter.")
 			@QueryParam("maxrgn")
 			Integer maxrgn,
 
-			@Parameter(schema = @Schema(allowableValues = {"MULTSEG", "SNGLSEG"}))
+			@Parameter(schema = @Schema(allowableValues = {"MULTSEG", "SNGLSEG"}), description="Specifies the message type (single segment or multiple segment). It specifies the time at which an incoming message is considered complete and available to be routed to an application program for subsequent processing.")
 			@QueryParam("msgtype")
 			String msgtype,
 
-			@Parameter()
+			@Parameter(description="Specifies the one- to eight-character name of the logical link path in a multiple IMS system configuration (MSC).")
 			@QueryParam("msname")
 			String msname,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"), description="Specifies the normal scheduling priority. The scheduling priority is an attribute used to select a transaction for scheduling. A transaction of higher priority is scheduled before a lower priority one, if they are defined with the same class. The normal priority is assigned to the transaction as the scheduling priority when the number of input transactions enqueued and waiting to be processed is less than the limit count value. The value can be a number from 0 through 14. The default is 1.")
 			@QueryParam("npri")
 			Integer npri,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the parallel processing limit count. This is the maximum number of messages that can currently be queued, but not yet processed, by each active message region currently scheduled for this transaction. This is the threshold value to be used when the associated application is defined with a scheduling type of parallel. An additional region is scheduled whenever the current transaction enqueue count exceeds this parameter value multiplied by the number of regions currently scheduled for this transaction.\n" + 
+					"\n" + 
+					"The value can be a number from 0 to 32767 or 65535.")
 			@QueryParam("parlim")
 			Integer parlim,
 
-			@Parameter(required = true)
+			@Parameter(required = true, description="Specifies the name of the application program associated with the transaction.")
 			@QueryParam("pgm")
 			String pgm,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the processing limit count. This is maximum number of messages sent to the application program by the IMS for processing without reloading the application program. The value must be a number from 0 through 65535. ")
 			@QueryParam("plct")
 			Integer plct,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "6553500"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "6553500"), description="Specifies the processing limit count time. This is the amount of time (in hundredths of seconds) allowable to process a single transaction (or message). The number specifies the maximum CPU time allowed for each message to be processed in the message processing region.\n" + 
+					"\n" + 
+					"Batch Message Programs (BMPs) are not affected by this setting.\n" + 
+					"\n" + 
+					"The value can be a number, in hundredths of seconds, that can range from 1 to 6553500. A value of 6553500 means no time limit is placed on the application program.")
 			@QueryParam("plcttime")
 			Integer plcttime,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the recovery option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction should not be recovered.\n" + 
+					"Y\n" + 
+					"    The transaction should be recovered during an IMS emergency or normal restart.")
 			@QueryParam("recover")
 			String recover,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the remote option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction is not remote. The transaction is local and runs on the local system.\n" + 
+					"Y\n" + 
+					"    The transaction is remote. The transaction runs on a remote system.")
 			@QueryParam("remote")
 			String remote,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the response mode option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction is not response mode. For terminals specifying or accepting a default of OPTIONS=TRANRESP, input should not stop after this transaction is entered.\n" + 
+					"Y\n" + 
+					"    The transaction is response mode. The terminal from which the transaction is entered is held and prevents further input until a response is received.")
 			@QueryParam("resp")
 			String resp,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the segment number. This is the maximum number of application program output segments that are allowed into the message queues per Get Unique (GU) call from the application program. The value can be a number from 0 through 65535.")
 			@QueryParam("segno")
 			Integer segno,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the segment size. This is the maximum number of bytes allowed in any one output segment. The value can be a number from 0 through 65535.")
 			@QueryParam("segsz")
 			Integer segsz,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the serial option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    Messages for the transaction are not processed serially. Message processing can be processed in parallel. Messages are placed on the suspend queue after a U3303 pseudoabend. Scheduling continues until repeated failures result in the transaction being stopped with a USTOP.\n" + 
+					"Y\n" + 
+					"    Messages for the transaction are processed serially. U3303 pseudoabends do not cause the message to be placed on the suspend queue but rather on the front of the transaction message queue, and the transaction is stopped with a USTOP. The USTOP of the transaction is removed when the transaction or the class is started with a /START or UPD TRAN command.")
 			@QueryParam("serial")
 			String serial,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"), description="Specifies the system identification (SYSID) of the local system in a multiple-IMS system (MSC) configuration. The local system is the originating system to which responses are returned. The value can be a number from 1 to 2036, if MSC is enabled, or 0, if MSC is not enabled. The local SYSID can be defined in any or all of the MSNAMEs or transactions.")
 			@QueryParam("sidl")
 			Integer sidl,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"), description="Specifies the system identification (SYSID) of the remote system in a multiple-IMS system (MSC) configuration. The remote system is the system on which the application program executes. The value can be a number from 1 to 2036, if MSC is enabled, or 0, if MSC is not enabled. The remote SYSID specified must also be defined for an MSNAME.")
 			@QueryParam("sidr")
 			Integer sidr,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "16", maximum = "32767"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "16", maximum = "32767"), description="Specifies the scratchpad area (SPA) size, in bytes, for a conversational transaction. The value can be a number from 16 and 32767.")
 			@QueryParam("spasz")
 			Integer spasz,
 
@@ -527,12 +550,17 @@ public class TranService {
 			String wfi,
 
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -851,200 +879,227 @@ public class TranService {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "tran-user", "put-user"})
-	@Operation(operationId="updatetran", summary = "Update, start or stop IMS transaction resources using 'UPDATE TRAN' IMS command",
+	@Operation(operationId="updatetran", summary = "Update, start or stop IMS transaction resources by using the 'UPDATE TRAN' IMS command. For more information on each parameter, see the documentation for the 'UPDATE TRAN' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
 			content = @Content(schema = @Schema(implementation = UpdateTransactionOutput.class))),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
 			@QueryParam("names") 
 			String names,
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr,
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "integer")))
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "integer")), description="Selects the transactions associated with the specified class or classes to be updated.")
 			@QueryParam("class") 
 			List<Integer> clazz, 
 
-			@Parameter(schema = @Schema(allowableValues = {"AFFIN", "ALLRSP"}), description = "ALLRSP: Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values."
-					+ " AFFIN: AFFIN is valid with START(SCHD) or STOP(SCHD).\n" + 
-					"When used with START(SCHD), OPTION(AFFIN) indicates that the transaction has local affinity to the IMS™ and that an inform request should be performed to register interest in the local affinity queue.")
+			@Parameter(schema = @Schema(allowableValues = {"AFFIN", "ALLRSP"}), description = "Specifies the additional functions to be performed. ALLRSP: Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. This value is valid only if a wildcard (*) is specified on the 'name' parameter. This value is ignored for other 'name' parameter values. AFFIN: AFFIN is valid with START(SCHD) or STOP(SCHD). When used with START(SCHD), this value indicates that the transaction has local affinity to the IMS™ and that an inform request should be performed to register interest in the local affinity queue.")
 			@QueryParam("option") 
 			String option,
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
-			@Schema(allowableValues = {"ALL", "ACTIVE"})))
+			@Schema(allowableValues = {"ALL", "ACTIVE"})), description="Specifies where IMS should apply the change.")
 			@QueryParam("scope") 
 			String scope,
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
-			@Schema(allowableValues = {"Q", "SCHD", "SUSPEND", "TRACE"})))
+			@Schema(allowableValues = {"Q", "SCHD", "SUSPEND", "TRACE"})), description="Specifies the attributes to be started.")
 			@QueryParam("start") 
 			String start,
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = 
-			@Schema(allowableValues = {"Q", "SCHD", "TRACE"})))
+			@Schema(allowableValues = {"Q", "SCHD", "TRACE"})), description="Specifies the attributes to be stopped.")
 			@QueryParam("stop") 
 			String stop,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "CMD", "TRAN", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "CMD", "TRAN", "Y"}), description="Specifies the AOI option that you want to change, which indicates whether the transaction can issue the type-1 AOI CMD call or the type-2 AOI ICMD call.")
 			@QueryParam("aocmd") 
 			String aocmd,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "999"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "999"), description="Specifies the transaction class, which is an attribute used to select a transaction for scheduling. A transaction can be scheduled if there is a message processing region available for that class. The value can be a number from 1 to 999. This value must not exceed the value given (by specification or default) on the MAXCLAS= keyword of the IMSCTRL macro.")
 			@QueryParam("setClass")
 			Integer setClazz,
 
-			@Parameter(schema = @Schema(allowableValues = {"SNGL", "MULT"}))
+			@Parameter(schema = @Schema(allowableValues = {"SNGL", "MULT"}), description="Specifies when database updates and non-express output messages are committed. This parameter affects emergency restart.")
 			@QueryParam("cmtmode")
 			String cmtmode,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the conversation option.")
 			@QueryParam("conv")
 			String conv,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"), description="Specifies a new value for the current priority of a transaction. The CPRI parameter is not allowed for BMP transactions, because BMP transactions should always have a priority of 0. The new CPRI value takes effect the next time the transaction is scheduled. Valid CPRI parameters are numeric values from 0 to 14.")
 			@QueryParam("cpri")
 			Integer cpri,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the log write-ahead option.")
 			@QueryParam("dclwa")
 			String dclwa,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the MSC directed routing option.")
 			@QueryParam("dirroute")
 			String dirroute,
 
-			@Parameter()
+			@Parameter(description="Specifies the 1- to 8-character name of your transaction input edit routine that edits messages before the program receives the message. This name must begin with an alphabetic character. The specified edit routine (load module) must reside on the USERLIB data set before IMS system definition stage 2 execution. This routine cannot be the same one defined by the system definition TYPE EDIT= parameter.")
 			@QueryParam("editrtn")
 			String editrtn,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the edit to uppercase option.")
 			@QueryParam("edituc")
 			String edituc,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "30720"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "30720"), description="Specifies the EMH buffer size required to run the Fast Path transaction. This overrides the EMHL execution parameter. If EMHBSZ is not specified, the EMHL execution parameter value is used. The value can be a number from 0 to 30 720.")
 			@QueryParam("emhbsz")
 			Integer emhbsz,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the elapsed time in seconds that IMS can use to cancel the input transaction. The value can be a number, in seconds, which can range from 0 to 65535. The default is 0, which means that no expiration time is set for this transaction.")
 			@QueryParam("exprtime")
 			Integer exprtime,
 
-			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}))
+			@Parameter(schema = @Schema(allowableValues = {"E", "N", "P"}), description="Specifies the Fast Path option. E: The transaction is processed exclusively as Fast Path. The program must be defined as Fast Path exclusive. N: The transaction is not a candidate for Fast Path processing. The program must be defined as not Fast Path. P: The transaction is a potential candidate for Fast Path processing. Fast Path-potential transactions must be able to run under two applications: a Fast Path exclusive application and a non-Fast Path application.")
 			@QueryParam("fp")
 			String fp,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the inquiry option.")
 			@QueryParam("inq")
 			String inq,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "65535"), description="Specifies the limit count. This is the number that, when compared to the number of input transactions queued and waiting to be processed, determines whether the normal or limit priority value is assigned to this transaction. The value can be a number from 1 to 65535. The default is 65535.")
 			@QueryParam("lct")
 			Integer lct,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"), description="Specifies the limit priority. This is the scheduling priority to which this transaction is raised when the number of input transactions enqueued and waiting to be processed is equal to or greater than the limit count value. The scheduling priority is an attribute used to select a transaction for scheduling. A transaction of higher priority is scheduled before a lower priority one, if they are defined with the same class. The value can be a number from 0 through 14.")
 			@QueryParam("lpri")
 			Integer lpri,
 
-			@Parameter(schema = @Schema(allowableValues = {"ON", "OFF"}))
+			@Parameter(schema = @Schema(allowableValues = {"ON", "OFF"}), description="Specifies that the LOCK status is to be set on or off.")
 			@QueryParam("lock") 
 			String lock,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0"), description="Specifies a new value for the maximum number of regions that can be simultaneously scheduled for a given transaction. The value of this parameter must be between 0 and the number specified on the MAXPST=control region parameter.")
 			@QueryParam("maxrgn")
 			Integer maxrgn,
 
-			@Parameter(schema = @Schema(allowableValues = {"MULTSEG", "SNGLSEG"}))
+			@Parameter(schema = @Schema(allowableValues = {"MULTSEG", "SNGLSEG"}), description="Specifies the message type (single segment or multiple segment). It specifies the time at which an incoming message is considered complete and available to be routed to an application program for subsequent processing.")
 			@QueryParam("msgtype")
 			String msgtype,
 
-			@Parameter()
+			@Parameter(description="Specifies the one- to eight-character name of the logical link path in a multiple IMS system configuration (MSC).")
 			@QueryParam("msname")
 			String msname,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "14"), description="Specifies the normal scheduling priority. The scheduling priority is an attribute used to select a transaction for scheduling. A transaction of higher priority is scheduled before a lower priority one, if they are defined with the same class. The normal priority is assigned to the transaction as the scheduling priority when the number of input transactions enqueued and waiting to be processed is less than the limit count value. The value can be a number from 0 through 14. The default is 1.")
 			@QueryParam("npri")
 			Integer npri,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the parallel processing limit count. This is the maximum number of messages that can currently be queued, but not yet processed, by each active message region currently scheduled for this transaction. This is the threshold value to be used when the associated application is defined with a scheduling type of parallel. An additional region is scheduled whenever the current transaction enqueue count exceeds this parameter value multiplied by the number of regions currently scheduled for this transaction.\n" + 
+					"\n" + 
+					"The value can be a number from 0 to 32767 or 65535.")
 			@QueryParam("parlim")
 			Integer parlim,
 
-			@Parameter()
+			@Parameter(description="Specifies the name of the application program associated with the transaction.")
 			@QueryParam("pgm")
 			String pgm,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the processing limit count. This is maximum number of messages sent to the application program by the IMS for processing without reloading the application program. The value must be a number from 0 through 65535.")
 			@QueryParam("plct")
 			Integer plct,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "6553500"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "6553500"), description="Specifies the processing limit count time. This is the amount of time (in hundredths of seconds) allowable to process a single transaction (or message). The number specifies the maximum CPU time allowed for each message to be processed in the message processing region.\n" + 
+					"\n" + 
+					"Batch Message Programs (BMPs) are not affected by this setting.\n" + 
+					"\n" + 
+					"The value can be a number, in hundredths of seconds, that can range from 1 to 6553500. A value of 6553500 means no time limit is placed on the application program.")
 			@QueryParam("plcttime")
 			Integer plcttime,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the recovery option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction should not be recovered.\n" + 
+					"Y\n" + 
+					"    The transaction should be recovered during an IMS emergency or normal restart. ")
 			@QueryParam("recover")
 			String recover,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the remote option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction is not remote. The transaction is local and runs on the local system.\n" + 
+					"Y\n" + 
+					"    The transaction is remote. The transaction runs on a remote system. ")
 			@QueryParam("remote")
 			String remote,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the response mode option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    The transaction is not response mode. For terminals specifying or accepting a default of OPTIONS=TRANRESP, input should not stop after this transaction is entered.\n" + 
+					"Y\n" + 
+					"    The transaction is response mode. The terminal from which the transaction is entered is held and prevents further input until a response is received.")
 			@QueryParam("resp")
 			String resp,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the segment number. This is the maximum number of application program output segments that are allowed into the message queues per Get Unique (GU) call from the application program. The value can be a number from 0 through 65535.")
 			@QueryParam("segno")
 			Integer segno,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "0", maximum = "65535"), description="Specifies the segment size. This is the maximum number of bytes allowed in any one output segment. The value can be a number from 0 through 65535.")
 			@QueryParam("segsz")
 			Integer segsz,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the serial option.\n" + 
+					"\n" + 
+					"N\n" + 
+					"    Messages for the transaction are not processed serially. Message processing can be processed in parallel. Messages are placed on the suspend queue after a U3303 pseudoabend. Scheduling continues until repeated failures result in the transaction being stopped with a USTOP.\n" + 
+					"Y\n" + 
+					"    Messages for the transaction are processed serially. U3303 pseudoabends do not cause the message to be placed on the suspend queue but rather on the front of the transaction message queue, and the transaction is stopped with a USTOP. The USTOP of the transaction is removed when the transaction or the class is started with a /START or UPD TRAN command.")
 			@QueryParam("serial")
 			String serial,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"), description="Specifies the system identification (SYSID) of the local system in a multiple-IMS system (MSC) configuration. The local system is the originating system to which responses are returned. The value can be a number from 1 to 2036, if MSC is enabled, or 0, if MSC is not enabled. The local SYSID can be defined in any or all of the MSNAMEs or transactions.")
 			@QueryParam("sidl")
 			Integer sidl,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "1", maximum = "2036"), description="Specifies the system identification (SYSID) of the remote system in a multiple-IMS system (MSC) configuration. The remote system is the system on which the application program executes. The value can be a number from 1 to 2036, if MSC is enabled, or 0, if MSC is not enabled. The remote SYSID specified must also be defined for an MSNAME.")
 			@QueryParam("sidr")
 			Integer sidr,
 
-			@Parameter(schema = @Schema(type = "integer", minimum = "16", maximum = "32767"))
+			@Parameter(schema = @Schema(type = "integer", minimum = "16", maximum = "32767"), description="Specifies the scratchpad area (SPA) size, in bytes, for a conversational transaction. The value can be a number from 16 and 32767.")
 			@QueryParam("spasz")
 			Integer spasz,
 
-			@Parameter(schema = @Schema(allowableValues = {"S", "R"}))
+			@Parameter(schema = @Schema(allowableValues = {"S", "R"}), description="Specifies the scratchpad area (SPA) truncation option of a conversational transaction. This defines whether the SPA data should be truncated or preserved across a program switch to a transaction that is defined with a smaller SPA.\n" + 
+					"\n" + 
+					"S\n" + 
+					"    IMS preserves all of the data in the SPA, even when a program switch is made to a transaction that is defined with a smaller SPA. The transaction with the smaller SPA does not see the truncated data, but when the transaction switches to a transaction with a larger SPA, the truncated data is used.\n" + 
+					"R\n" + 
+					"    The truncated data is not preserved.")
 			@QueryParam("spatrunc")
 			String spatrunc,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies whether transaction level statistics should be logged for message driven programs. If Y is specified, transaction level statistics are written to the log in a X'56FA' log record.")
 			@QueryParam("transtat")
 			String transtat,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the wait-for input option. This attribute does not apply to Fast Path transactions, which always behave as wait-for-input transactions.")
 			@QueryParam("wfi")
 			String wfi,
 
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
-			
-			
-			
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 

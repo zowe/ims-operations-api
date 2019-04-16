@@ -1,13 +1,13 @@
 
 /**
-* This program and the accompanying materials are made available under the terms of the
-* Eclipse Public License v2.0 which accompanies this distribution, and is available at
-* https://www.eclipse.org/legal/epl-v20.html
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Copyright IBM Corporation 2019
-*/
+ * This program and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v20.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Copyright IBM Corporation 2019
+ */
 
 package filters;
 
@@ -38,24 +38,28 @@ public class AuthRequestFilter implements ContainerRequestFilter {
 
 		}
 
-		List<String> authHeader = headers.get("Authorization");
-		if (authHeader != null) {
 
-			String auth = authHeader.get(0);
-			StringTokenizer st = new StringTokenizer(auth);
-			if (st.hasMoreTokens()) {
-				String basic = st.nextToken();
+		if (headers.get("username") == null && headers.get("password") == null) {
 
-				if (basic.equalsIgnoreCase("Basic")) {
-					String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
-					int p = credentials.indexOf(":");
-					if (p != -1) {
-						String username = credentials.substring(0, p).trim();
-						String password = credentials.substring(p + 1).trim();
+			List<String> authHeader = headers.get("Authorization");
+			if (authHeader != null) {
 
-						headers.add("username", username);
-						headers.add("password", password);
+				String auth = authHeader.get(0);
+				StringTokenizer st = new StringTokenizer(auth);
+				if (st.hasMoreTokens()) {
+					String basic = st.nextToken();
 
+					if (basic.equalsIgnoreCase("Basic")) {
+						String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
+						int p = credentials.indexOf(":");
+						if (p != -1) {
+							String username = credentials.substring(0, p).trim();
+							String password = credentials.substring(p + 1).trim();
+
+							headers.add("username", username);
+							headers.add("password", password);
+
+						}
 					}
 				}
 			}

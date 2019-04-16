@@ -63,46 +63,48 @@ public class RegionService {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "region-user", "put-user"})
-	@Operation(operationId="stoprgn", summary = "Stop IMS message and application processing regions using 'START/STOP REGION' IMS command",
+	@Operation(operationId="stoprgn", summary = "Stop IMS message and application processing regions by using the '/STOP REGION' IMS command. For more information on each parameter, see the documentation for the '/STOP REGION' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response stop(
 
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Region Number Identifier. Can specify a Region Number or a Job Name, but NOT BOTH.",
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the identifier of the region that you want to terminate. You can specify multiple identifiers to terminate multiple regions. If you specify this parameter, do not specify the job_name parameter.",
 			array=@ArraySchema(schema = @Schema(type = "integer"), maxItems = 2))
 			@QueryParam("reg_num") 
 			String regNumber,
 
-			@Parameter(description = "Can specify a Region Number or a Job Name, but NOT BOTH.", schema = @Schema(maxLength = 8))
+			@Parameter(description = "Specifies the name of the job for the region that you want to terminate. You can specify multiple job names to terminate multiple regions. If you specify this parameter, do not specify the reg_num parameter.", schema = @Schema(maxLength = 8))
 			@QueryParam("job_name") 
 			String jobName,
 
-			@Parameter(description = "Specify a transaction to abnormally terminate")
+			@Parameter(description = "Specifies the transaction code of a program that you want to abnormally terminate.")
 			@QueryParam("abdump") 
 			String abdump,
 
-			@Parameter(description = "Specify a program in WFI mode to stop its message processing within the specified region")
+			@Parameter(description = "Specifies the transaction code of a program that is in wait-for-input (WFI) mode and that you want to stop processing within the specified region.")
 			@QueryParam("transaction") 
 			String transaction,
 
-			@Parameter()
+			@Parameter(description="Specifies whether to abnormally terminate a region when a program that is running in the region cannot be terminated with the 'abdump' parameter.")
 			@QueryParam("cancel") 
 			boolean cancel,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
-			
-			@Parameter(in = ParameterIn.PATH)
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
-			String plex,
-			
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr) {
+			String plex
+			) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -179,37 +181,39 @@ public class RegionService {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "region-user", "put-user"})
-	@Operation(operationId="startrgn", summary = "Start IMS message and application processing regions using 'START/STOP REGION' IMS command",
+	@Operation(operationId="startrgn", summary = "Start IMS message and application processing regions by using the '/START REGION' IMS command. For more information on each parameter, see the documentation for the '/START REGION' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
 
-			@Parameter(description = "Region Number Identifier", required = true)
+			@Parameter(required = true, description ="Specifies the name of the IMS PROCLIB member that contains the JCL used to start the region. If no member name is specified, the default member name is used.")
 			@QueryParam("member_name") 
 			String memName,
 
-			@Parameter(description = "")
+			@Parameter(description = "Specifies the job name that overrides the JOB statement value specified in the JCL of the default or specified member.")
 			@QueryParam("job_name") 
 			String jobName,
 
-			@Parameter()
+			@Parameter(description="Specifies whether IMS overrides the symbolic IMSID parameter in the JCL of the default or specified member. If you specify a value for the job_name parameter, the value of this parameter is 'true' by default.")
 			@QueryParam("local") 
 			boolean local,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
-			
-			@Parameter(in = ParameterIn.PATH)
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
-			String plex,
-			
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr) {
+			String plex
+			) {
 
 
 		MCInteraction mcSpec = new MCInteraction();
@@ -261,7 +265,7 @@ public class RegionService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "region-user", "get-user"})
-	@Operation(operationId="disrgn", summary = "Display region and DC information associated with an IMS™ system. The region is scheduled to an application program and the IMS resources are assigned.",
+	@Operation(operationId="disrgn", summary = "Display region information associated with an IMS™ system by using the '/DISPLAY ACT' IMS command. The region is scheduled to an application program and the IMS resources are assigned. For more information on each parameter, see the documentation for the '/DISPLAY ACT' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request"),
 			@ApiResponse(responseCode = "400", description = "Request Error"),
@@ -271,22 +275,23 @@ public class RegionService {
 			@QueryParam("dc") 
 			boolean dc,
 			
-			@Parameter(description = "")
+			@Parameter(description = "Displays the active regions.")
 			@QueryParam("region") 
 			boolean region,
 			
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
-			
-			@Parameter(in = ParameterIn.PATH)
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
-			
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr,
 			
 			@Context 
 			UriInfo uriInfo) {
