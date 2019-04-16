@@ -139,7 +139,7 @@ public class TestQueryPgm
 		logger.info("TESTING Query PGM with bad pgm name");
 		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] show = new String[] {"names", "FOO"};
+		String[] show = new String[] {"name", "FOO"};
 		queryParams.add(show);
 		Response response= RequestUtils.getRequest(queryParams,  "/" + TestProperties.plex + "/program");
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);

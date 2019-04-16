@@ -54,7 +54,7 @@ public class TestCreateDeleteTran
 
 		logger.info("Need to create program first");
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "JUNIT"};
+		String[] names = new String[] {"name", "JUNIT"};
 		queryParams.add(names);
 		RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program");
 		//CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
@@ -79,7 +79,7 @@ public class TestCreateDeleteTran
 
 
 		List<String[]> queryParams1 = new ArrayList<>();
-		String[] names1 = new String[] {"names", "TEST"};
+		String[] names1 = new String[] {"name", "TEST"};
 		String[] pgm1 = new String[] {"pgm", "JUNIT"};
 		queryParams1.add(names1);
 		queryParams1.add(pgm1);
@@ -96,7 +96,7 @@ public class TestCreateDeleteTran
 		}
 
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"names", "TEST"};
+		String[] names2 = new String[] {"name", "TEST"};
 		queryParams2.add(names2);
 		Response response2 = RequestUtils.deleteRequest(queryParams2, "/" + TestProperties.plex + "/transaction");
 		DeleteTransactionOutput dtr = RequestUtils.validateDTRSuccess(response2);
@@ -120,7 +120,7 @@ public class TestCreateDeleteTran
 	@AfterAll
 	public static void takeDown() {
 		List<String[]> queryParams3 = new ArrayList<>();
-		String[] names3 = new String[] {"names", "JUNIT"};
+		String[] names3 = new String[] {"name", "JUNIT"};
 		queryParams3.add(names3);
 		RequestUtils.deleteRequest(queryParams3, "/" + TestProperties.plex + "/transaction");
 	}

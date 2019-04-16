@@ -58,7 +58,7 @@ public class TestUpdatePgm {
 		//First we stop the program
 		logger.info("Testing Update PGM by stopping scheduling of a program");		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "DBF*"};
+		String[] names = new String[] {"name", "DBF*"};
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
@@ -69,7 +69,7 @@ public class TestUpdatePgm {
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"names", "DBF*"};
+		String[] names2 = new String[] {"name", "DBF*"};
 		String[] show = new String[] {"attributes", "ALL"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
@@ -82,7 +82,7 @@ public class TestUpdatePgm {
 		//First we start the program
 		logger.info("Testing Update PGM by starting scheduling of a program");		
 		List<String[]> queryParams3 = new ArrayList<>();
-		String[] names3 = new String[] {"names", "DBF*"};
+		String[] names3 = new String[] {"name", "DBF*"};
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
@@ -93,7 +93,7 @@ public class TestUpdatePgm {
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams4 = new ArrayList<>();
-		String[] names4 = new String[] {"names", "DBF*"};
+		String[] names4 = new String[] {"name", "DBF*"};
 		String[] show2 = new String[] {"attributes", "ALL"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);

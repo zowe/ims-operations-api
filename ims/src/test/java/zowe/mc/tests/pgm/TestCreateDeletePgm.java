@@ -60,12 +60,12 @@ public class TestCreateDeletePgm
 		logger.info("TESTING CREATE and DELETE PGM");
 		
 		List<String[]> queryParamspre = new ArrayList<>();
-		String[] namespre = new String[] {"names", "TEST"};
+		String[] namespre = new String[] {"name", "TEST"};
 		queryParamspre.add(namespre);
 		RequestUtils.deleteRequest(queryParamspre, "/" + TestProperties.plex + "/program");
 		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "TEST"};
+		String[] names = new String[] {"name", "TEST"};
 		queryParams.add(names);
 		Response response = RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program");
 		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
@@ -80,7 +80,7 @@ public class TestCreateDeletePgm
 		}
 		
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"names", "TEST"};
+		String[] names2 = new String[] {"name", "TEST"};
 		queryParams2.add(names2);
 		Response response2 = RequestUtils.deleteRequest(queryParams2, "/" + TestProperties.plex + "/program");
 		DeleteProgramOutput dpr2 = RequestUtils.validateDPRSuccess(response2);

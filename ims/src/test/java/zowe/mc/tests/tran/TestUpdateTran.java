@@ -57,7 +57,7 @@ public class TestUpdateTran {
 		//First we stop the transaction
 		logger.info("Testing Update TRAN by stopping scheduling of a transaction");		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "JUNIT"};
+		String[] names = new String[] {"name", "JUNIT"};
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
@@ -68,7 +68,7 @@ public class TestUpdateTran {
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"names", "JUNIT"};
+		String[] names2 = new String[] {"name", "JUNIT"};
 		String[] show = new String[] {"attributes", "STATUS"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
@@ -81,7 +81,7 @@ public class TestUpdateTran {
 		//First we start the transaction
 		logger.info("Testing Update TRAN by starting scheduling of a transaction");		
 		List<String[]> queryParams3 = new ArrayList<>();
-		String[] names3 = new String[] {"names", "JUNIT"};
+		String[] names3 = new String[] {"name", "JUNIT"};
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
@@ -92,7 +92,7 @@ public class TestUpdateTran {
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams4 = new ArrayList<>();
-		String[] names4 = new String[] {"names", "JUNIT"};
+		String[] names4 = new String[] {"name", "JUNIT"};
 		String[] show2 = new String[] {"attributes", "STATUS"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);

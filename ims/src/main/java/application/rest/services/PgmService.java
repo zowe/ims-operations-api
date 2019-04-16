@@ -118,7 +118,7 @@ public class PgmService {
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,
@@ -244,7 +244,7 @@ public class PgmService {
 	public Response start(
 			@Parameter(style = ParameterStyle.FORM,  explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is 'ALL' which returns all program resources.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 
 
@@ -326,7 +326,7 @@ public class PgmService {
 	public Response create(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 
 			@Parameter(description = "Specifies the name of the descriptor to use as a model to define this resource.")
@@ -501,7 +501,7 @@ public class PgmService {
 	public Response delete(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 
 
@@ -601,7 +601,7 @@ public class PgmService {
 	public Response update(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, required = true, array=@ArraySchema(schema = @Schema(maxLength = 8)),
 			description = "Specifies the 1-8 character name of the program. Wildcards can be specified in the name. The name is a repeatable parameter. The default is NAME(*) which returns all program resources.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 			
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies attributes that are to be started.", array=@ArraySchema(schema = 

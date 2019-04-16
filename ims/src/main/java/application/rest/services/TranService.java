@@ -107,7 +107,7 @@ public class TranService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response query(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names, 
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(type = "integer")), description="Displays transactions that possess at least one of the specified classes.")
@@ -129,7 +129,12 @@ public class TranService {
 			@QueryParam("status")
 			String status,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description=" *Specifies the conversation option.*\n" + 
+					"\n" + 
+					"   *N*\n" + 
+					"       *The transaction is not conversational.*\n" + 
+					"   *Y*\n" + 
+					"       *The transaction is conversational.*")
 			@QueryParam("conv")
 			String conv,
 
@@ -282,7 +287,7 @@ public class TranService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response start(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema = @Schema(maxLength = 8)))
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names,
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,array=@ArraySchema(schema=@Schema(type="string")))
@@ -376,14 +381,14 @@ public class TranService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response create(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names,
 
-			@Parameter()
+			@Parameter(description = "Specifies the name of the descriptor to use as a model to define this resource.")
 			@QueryParam("desc")
 			String desc,
 
-			@Parameter()
+			@Parameter(description = "Specifies the name of the resource to use as a model to define this resource.")
 			@QueryParam("rsc")
 			String rsc,
 
@@ -399,7 +404,12 @@ public class TranService {
 			@QueryParam("cmtmode")
 			String cmtmode,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the conversation option.")
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description=" *Specifies the conversation option.*\n" + 
+					"\n" + 
+					"   *N*\n" + 
+					"       *The transaction is not conversational.*\n" + 
+					"   *Y*\n" + 
+					"       *The transaction is conversational.*")
 			@QueryParam("conv")
 			String conv,
 
@@ -537,15 +547,20 @@ public class TranService {
 			@QueryParam("spasz")
 			Integer spasz,
 
-			@Parameter(schema = @Schema(allowableValues = {"S", "R"}))
+			@Parameter(schema = @Schema(allowableValues = {"S", "R"}), description="Specifies the scratchpad area (SPA) truncation option of a conversational transaction. This defines whether the SPA data should be truncated or preserved across a program switch to a transaction that is defined with a smaller SPA.\n" + 
+					"\n" + 
+					"S\n" + 
+					"    IMS preserves all of the data in the SPA, even when a program switch is made to a transaction that is defined with a smaller SPA. The transaction with the smaller SPA does not see the truncated data, but when the transaction switches to a transaction with a larger SPA, the truncated data is used.\n" + 
+					"R\n" + 
+					"    The truncated data is not preserved.")
 			@QueryParam("spatrunc")
 			String spatrunc,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies whether transaction level statistics should be logged for message driven programs. If Y is specified, transaction level statistics are written to the log in a X'56FA' log record.")
 			@QueryParam("transtat")
 			String transtat,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}))
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the wait-for input option. This attribute does not apply to Fast Path transactions, which always behave as wait-for-input transactions.")
 			@QueryParam("wfi")
 			String wfi,
 
@@ -789,24 +804,25 @@ public class TranService {
 			@ApiResponse(responseCode = "400", description = "Request Error"),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response delete(
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,  array=@ArraySchema(schema = @Schema(maxLength = 8)))
-			@QueryParam("names") 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE,  array=@ArraySchema(schema = @Schema(maxLength = 8)), description=" Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
+			@QueryParam("name") 
 			String names,
-
-			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema=@Schema(type="string")))
-			@QueryParam("route") 
-			String imsmbr, 
 
 			@Parameter(schema = @Schema(allowableValues = {"ALLRSP"}), description = "Indicates that the response lines are to be returned for all resources that are processed on the command. The default action is to return response lines only for the resources that resulted in an error. It is valid only with NAME(*). ALLRSP is ignored for other NAME values.")
 			@QueryParam("option") 
 			String option,
 
+			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, description = "Specifies the ID of the IMS system in the IMSplex that the API call is routed to.", array=@ArraySchema(schema = @Schema(type = "string")))
+			@QueryParam("route") 
+			String imsmbr, 
+
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
-			@HeaderParam("username") String username,
-			@HeaderParam("password") String password,
+		
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
 
-			@Parameter(in = ParameterIn.PATH)
+			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
 			String plex,
 
@@ -887,7 +903,7 @@ public class TranService {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error")})
 	public Response update(
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(maxLength = 8)), description="Specifies the 1-8 character name of the transaction. Wildcards can be specified. The parameter is repeatable. If the value specified for this parameter is a specific or wildcard name, responses are returned for all the resource names that are processed.")
-			@QueryParam("names") 
+			@QueryParam("name") 
 			String names,
 
 			@Parameter(style = ParameterStyle.FORM, explode = Explode.FALSE, array=@ArraySchema(schema = @Schema(type = "integer")), description="Selects the transactions associated with the specified class or classes to be updated.")
@@ -925,7 +941,12 @@ public class TranService {
 			@QueryParam("cmtmode")
 			String cmtmode,
 
-			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description="Specifies the conversation option.")
+			@Parameter(schema = @Schema(allowableValues = {"N", "Y"}), description=" *Specifies the conversation option.*\n" + 
+					"\n" + 
+					"   *N*\n" + 
+					"       *The transaction is not conversational.*\n" + 
+					"   *Y*\n" + 
+					"       *The transaction is conversational.*")
 			@QueryParam("conv")
 			String conv,
 

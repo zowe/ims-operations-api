@@ -47,13 +47,13 @@ public class TestQueryTran {
 		
 		logger.info("Need to create program first");
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"names", "JUNIT"};
+		String[] names = new String[] {"name", "JUNIT"};
 		queryParams.add(names);
 		RequestUtils.postRequest(queryParams, "/" + TestProperties.plex + "/program");
 		
 		
 		List<String[]> queryParams1 = new ArrayList<>();
-		String[] names1 = new String[] {"names", "JUNIT"};
+		String[] names1 = new String[] {"name", "JUNIT"};
 		String[] pgm1 = new String[] {"pgm", "JUNIT"};
 		queryParams1.add(names1);
 		queryParams1.add(pgm1);
@@ -150,7 +150,7 @@ public class TestQueryTran {
 		logger.info("TESTING Query PGM with bad pgm name");
 		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] show = new String[] {"names", "FOO"};
+		String[] show = new String[] {"name", "FOO"};
 		queryParams.add(show);
 		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/transaction");
 		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
