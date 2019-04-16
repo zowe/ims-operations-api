@@ -15,7 +15,9 @@ Also, because you can write scripts that use the Zowe CLI commands, which, in tu
 You can use the REST APIs that are provided with IMS Operations API to perform the following tasks:
 
 •	Create, define, manage, query, and delete IMS program resources for application programs.
+
 •	Create, manage, query, and delete IMS transactions and transaction resources.
+
 •	Start, stop, and display information about IMS message and application processing regions.
 
 ### Scenario: Updating an existing IMS application by using the IMS Operations API
