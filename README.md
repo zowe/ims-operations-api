@@ -91,7 +91,7 @@ Install the IMS Operations API on a Java web application server of your choice. 
 2.	If you are using Tomcat Web Application Manager for the first time, define your username and password in the `$CATALINA_HOME$\conf\tomcat-users.xml` file.
 3.	In a web browser, enter the following URL:  
    ```http://localhost:8080/manager```
-4.	In the Deploy section, select the ims.war file, and then click **Deploy**. After the ims.war file is successfully deployed, the IMS Operations API is displayed in the **Applications** section of the Tomcat Web Application Manager.
+4.	In the **Deploy** section, select the ims.war file, and then click **Deploy**. After the ims.war file is successfully deployed, the IMS Operations API is displayed in the **Applications** section of the Tomcat Web Application Manager.
 
 ### Installing on Websphere Liberty
 
