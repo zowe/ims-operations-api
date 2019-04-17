@@ -77,7 +77,7 @@ Download and import the project *ims* from this Github repository into your pref
 
 ## Installing the IMS Operations API
 
-Install the IMS Operations API on a Java web application server. In this section, we provide instructions on how to install the service on either WebSphere Liberty or TomEE. 
+Install the IMS Operations API on a Java web application server of your choice. In this section, we provide instructions on how to install the service on either WebSphere Liberty or TomEE. 
 
 ### Installing on TomEE
 
