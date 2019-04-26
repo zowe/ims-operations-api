@@ -33,13 +33,13 @@ To refresh existing IMS application resources, Susan issues the stop region API 
 <p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/start?jobname={jobname}</code>
 
 •	Verify the application region status
-<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/region</code>
+<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/region</code>
 
 If the transaction or program resource does not run properly, Susan might need to restart the resource. Susan might need to restart the resource. To check the status of the resources, she can invoke the following APIs:
 
-<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/pgm?names={appname}&show=STATUS</code>
+<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/pgm?names={appname}&show=STATUS</code>
 
-<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/tran?names={traname}&show=STATUS</code>
+<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/tran?names={traname}&show=STATUS</code>
   
 To start or stop the resources, Susan can invoke additional APIs outlined in the OpenAPI documentation. 
 
