@@ -48,7 +48,7 @@ To start or stop the resources, Susan can invoke additional APIs outlined in the
 To use the IMS Operations API to deploy IMS applications and manage application resources, perform the following high-level steps:
 
 1.	[Ensure that all prerequisites are met.](#prerequisites)
-2.	[Download the IMS Operations API.](#downloading-the-ims-operations-api)
+2.	[Building the IMS Operations API.](#downloading-the-ims-operations-api)
 3.	[Install the IMS Operations API on your Java application server.](#installing-the-ims-operations-api)
 4.	[View and test the IMS Operations API in Swagger UI.](#viewing-and-testing-the-ims-operations-api)
 5.	[Call the IMS Operations API.](#calling-the-ims-operations-api)
