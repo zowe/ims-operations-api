@@ -55,22 +55,19 @@ To use the IMS Operations API to deploy IMS applications and manage application 
 
 Before you install the IMS Operations API, ensure that the following prerequisites are met:
 
+•	[Maven](https://maven.apache.org/) is installed. Maven is used to build the IMS Operations API war file. 
+
 •	IMS V14.1.0 or later is installed and running in your mainframe environment.
 
 •	The [IMS type-2 command environment](https://www.ibm.com/support/knowledgecenter/en/SSEPH2_15.1.0/com.ibm.ims15.doc.sag/system_intro/ims_typ2cmdenvion.htm) is set up.
 
 •	[IMS Connect](https://www.ibm.com/support/knowledgecenter/en/SSEPH2_15.1.0/com.ibm.ims15.doc.ccg/ims_ct_intro.htm) is configured and [IMS Connect support for IMSplex is installed](https://www.ibm.com/support/knowledgecenter/en/SSEPH2_15.1.0/com.ibm.ims15.doc.ccg/ims_ct_imsplex_install.htm).
 
-•	[Maven](https://maven.apache.org/) is installed.
-
 •	A Java web application server, such as [WebSphere Liberty](https://developer.ibm.com/wasdev/downloads/download-latest-stable-websphere-liberty-runtime/) or [Apache TomEE version 8.0.0-M1 or later](http://tomee.apache.org/download-ng.html), is installed.
 
-## Downloading the IMS Operations API
+## Building the IMS Operations API
 
-Use Git to clone this remote repository:
-
-
-
+IMS Operations API uses Maven to build a deployable war file. Simply run a Maven build on the project and specify your required goals.  
 
 ## Installing the IMS Operations API
 
