@@ -27,20 +27,22 @@ Susan, an application developer, needs to add a new feature to an existing IMS a
 To refresh existing IMS application resources, Susan issues the stop region API followed by the start region API:
 
 •	Stop the IMS application region
-<p><t><code>{host}:{port}/ims/apis/v1/{imsplex}/region/stop?jobname={jobname}</code>
+<p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/stop?jobname={jobname}</code>
 
 •	Start the IMS application region
-<p><t><code>{host}:{port}/ims/apis/v1/{imsplex}/region/start?jobname={jobname}</code>
+<p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/start?jobname={jobname}</code>
 
 •	Verify the application region status
-<p><t><code>{host}:{port}/ims/apis/v1/{imsplex}/region</code>
+<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/region</code>
 
-If the transaction or program resource does not run properly, Susan might need to restart the resource. To do this, she can invoke the following APIs to start, stop, or query the transaction or program resources:
+If the transaction or program resource does not run properly, Susan might need to restart the resource. Susan might need to restart the resource. To check the status of the resources, she can invoke the following APIs:
 
-<p><t><code>{host}:{port}/ims/apis/v1/{imsplex}/pgm?names={appname}&show=STATUS</code>
+<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/pgm?names={appname}&show=STATUS</code>
 
-<p><t><code>{host}:{port}/ims/apis/v1/{imsplex}/tran?names={traname}&show=STATUS</code>
+<p><t><code>QUERY {host}:{port}/ims/apis/v1/{imsplex}/tran?names={traname}&show=STATUS</code>
   
+To start or stop the resources, Susan can invoke additional APIs outlined in the OpenAPI documentation. 
+
 ## Procedure
 
 To use the IMS Operations API to deploy IMS applications and manage application resources, perform the following high-level steps:
