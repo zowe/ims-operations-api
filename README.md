@@ -67,13 +67,10 @@ Before you install the IMS Operations API, ensure that the following prerequisit
 
 ## Downloading the IMS Operations API
 
-Download and import the project *ims* from this Github repository into your preferred Integrated Development Environment (IDE), such as Eclipse, by using one of the following methods:
+Use Git to clone this remote repository:
 
-•	In the upper-right corner of this Github repository, click **Clone or download > Download ZIP**.  
-     ![clone repo image](https://github.ibm.com/ims/ims-operations-api/blob/master/wiki/clonepicture.png)
- 
-•	Issue the following Git command:  
-   ```git clone https://github.com/zowe/ims-operations-api.git```
+
+
 
 ## Installing the IMS Operations API
 
