@@ -43,16 +43,6 @@ If the transaction or program resource does not run properly, Susan might need t
   
 To start or stop the resources, Susan can invoke additional APIs outlined in the OpenAPI documentation. 
 
-## Procedure
-
-To use the IMS Operations API to deploy IMS applications and manage application resources, perform the following high-level steps:
-
-1.	[Ensure that all prerequisites are met.](#prerequisites)
-2.	[Building the IMS Operations API.](#downloading-the-ims-operations-api)
-3.	[Install the IMS Operations API on your Java application server.](#installing-the-ims-operations-api)
-4.	[View and test the IMS Operations API in Swagger UI.](#viewing-and-testing-the-ims-operations-api)
-5.	[Call the IMS Operations API.](#calling-the-ims-operations-api)
-
 ## Prerequisites
 
 Before you install the IMS Operations API, ensure that the following prerequisites are met:
@@ -66,6 +56,17 @@ Before you install the IMS Operations API, ensure that the following prerequisit
 •	[IMS Connect](https://www.ibm.com/support/knowledgecenter/en/SSEPH2_15.1.0/com.ibm.ims15.doc.ccg/ims_ct_intro.htm) is configured and [IMS Connect support for IMSplex is installed](https://www.ibm.com/support/knowledgecenter/en/SSEPH2_15.1.0/com.ibm.ims15.doc.ccg/ims_ct_imsplex_install.htm).
 
 •	A Java web application server, such as [WebSphere Liberty](https://developer.ibm.com/wasdev/downloads/download-latest-stable-websphere-liberty-runtime/) or [Apache TomEE version 8.0.0-M1 or later](http://tomee.apache.org/download-ng.html), is installed.
+
+## Procedure
+
+To use the IMS Operations API to deploy IMS applications and manage application resources, perform the following high-level steps:
+
+1.	[Ensure that all prerequisites are met.](#prerequisites)
+2.	[Building the IMS Operations API.](#building-the-ims-operations-api)
+3.	[Install the IMS Operations API on your Java application server.](#installing-the-ims-operations-api)
+4.	[View and test the IMS Operations API in Swagger UI.](#viewing-and-testing-the-ims-operations-api)
+5.	[Call the IMS Operations API.](#calling-the-ims-operations-api)
+
 
 ## Building the IMS Operations API
 
