@@ -62,15 +62,15 @@
 .*                                                                      00620000
 .*************************************************************@SCPYRT** 00630000
 .*                                                                    * 00640000
-.*  Licensed Materials - Property of IBM                              * 00650000
-.*                                                                    * 00660000
-.*  5635-A06                                                          * 00670000
-.*                                                                    * 00680000
-.*      Copyright IBM Corp. 1974,2013 All Rights Reserved             * 00690000
-.*                                                                    * 00700000
-.*  US Government Users Restricted Rights - Use, duplication or       * 00710000
-.*  disclosure restricted by GSA ADP Schedule contract with           * 00720000
-.*  IBM Corp.                                                         * 00730000
+.*  This program and the accompanying materials are made available    * 00650000
+.*  under the terms of the Eclipse Public License v2.0 which          * 00660000
+.*  accompanies this distribution, and is available at                * 00670000
+.*  https://www.eclipse.org/legal/epl-v20.html                        * 00680000
+.*                 													  * 00690000
+.*  SPDX-License-Identifier: EPL-2.0                                  * 00700000
+.*   															      * 00710000
+.*  Copyright IBM Corporation 2019    							      * 00720000
+.*                                                      		      * 00730000
 .*                                                                    * 00740000
 .*************************************************************@ECPYRT** 00750000
 .*                                                                      00760000
