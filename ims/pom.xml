@@ -19,34 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>tmra-releases</id>
-			<name>artifactory-dal10-01-node-05.swg-devops.com-releases</name>
-			<url>https://na.artifactory.swg-devops.com:443/artifactory/sys-ims-devops-squad-tmra-maven-local</url>
-		</repository>
-		<repository>
-			<id>tmra-snapshots</id>
-			<name>artifactory-dal10-01-node-05.swg-devops.com-snapshots</name>
-			<url>https://na.artifactory.swg-devops.com:443/artifactory/sys-ims-devops-squad-tmra-maven-local</url>
-		</repository>
-		<repository>
-			<id>zowe</id>
-			<name>sys-zowe-ext-maven-local</name>
-			<url>https://eu.artifactory.swg-devops.com:443/artifactory/sys-zowe-ext-maven-local</url>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<!-- <repository> <id>tmra-releases</id> <name>artifactory-dal10-01-node-05.swg-devops.com-releases</name> 
-			<url>https://na.artifactory.swg-devops.com:443/artifactory/sys-ims-devops-squad-tmra-maven-local</url> 
-			</repository> -->
-		<repository>
-			<id>zowe</id>
-			<name>sys-zowe-ext-maven-local</name>
-			<url>https://eu.artifactory.swg-devops.com:443/artifactory/sys-zowe-ext-maven-local</url>
-		</repository>
-	</distributionManagement>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -91,11 +63,11 @@
 			<version>2.1.1</version>
 		</dependency>
 
-		<!-- MC code dependencies -->
+		<!--  MC code dependencies  -->
 		<dependency>
-			<groupId>com.ibm</groupId>
+			<groupId>com.ibm.ims</groupId>
 			<artifactId>IMSConnectAPI</artifactId>
-			<version>1.0</version>
+			<version>3.2</version>
 		</dependency>
 
 		<!-- Logging (conflicts with log4j embedded in Spring Boot so we remove 
@@ -181,6 +153,21 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<additionalJOption>-Xdoclint:none</additionalJOption>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<archive>
@@ -189,12 +176,8 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<!-- <resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>  -->
+		<!-- <resources> <resource> <directory>src/main/resources</directory> <filtering>true</filtering> 
+			</resource> </resources> -->
 
 
 	</build>
