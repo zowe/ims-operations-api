@@ -53,6 +53,7 @@ public class OmInteractionContext {
 	 * 10 attributes.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public ArrayList<String> getResourceAttributes(){
 		return (ArrayList<String>) this.context.getMessage(resourceAttributes);
 	}

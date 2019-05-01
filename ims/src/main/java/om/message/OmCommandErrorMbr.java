@@ -117,7 +117,8 @@ public final class OmCommandErrorMbr {
         this.mbr.put(OmCommandErrorMbr.omMemberRsntxt,rsntxt);
     }
     
-    public Collection<String> getOmMemberMsg() {
+    @SuppressWarnings("unchecked") 
+	public Collection<String> getOmMemberMsg() {
         return (Collection<String>) this.mbr.get(OmCommandErrorMbr.omMemberMsg);
     }
     

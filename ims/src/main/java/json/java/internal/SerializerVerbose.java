@@ -84,9 +84,10 @@ public class SerializerVerbose extends Serializer
     /**
      * Method to get a list of all the property names stored in a map.
      */
-    public List getPropertyNames(Map map)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public List getPropertyNames(Map map)
     {
-        List propertyNames = super.getPropertyNames(map);
+		List propertyNames = super.getPropertyNames(map);
 
         Collections.sort(propertyNames);
 

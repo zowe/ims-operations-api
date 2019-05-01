@@ -75,6 +75,7 @@ public class Type2CommandSerializable {
 	 * @return
 	 * @throws OmCommandGenerationException 
 	 */
+	@SuppressWarnings("unchecked")
 	public String fromType2CommandObject(Object type2Command) throws OmCommandGenerationException {
 		if (logger.isDebugEnabled()) {
 			logger.debug(">> fromType2CommandObject()");

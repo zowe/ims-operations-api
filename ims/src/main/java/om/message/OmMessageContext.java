@@ -251,6 +251,7 @@ public class OmMessageContext{
 	 * Get the command error for this om interaction
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Collection<OmCommandErrorMbr> getOmCommandErrorMbrs(){
 	    //return this.omCmderrMbrs;
 	    return ((Collection<OmCommandErrorMbr>)this.omExcutionMessage.getMessage(this.omCmderrMbr));

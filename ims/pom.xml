@@ -63,7 +63,7 @@
 			<version>2.1.1</version>
 		</dependency>
 
-		<!--  MC code dependencies  -->
+		<!-- MC code dependencies -->
 		<dependency>
 			<groupId>com.ibm.ims</groupId>
 			<artifactId>IMSConnectAPI</artifactId>
@@ -176,8 +176,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<!-- <resources> <resource> <directory>src/main/resources</directory> <filtering>true</filtering> 
-			</resource> </resources> -->
 
 
 	</build>
