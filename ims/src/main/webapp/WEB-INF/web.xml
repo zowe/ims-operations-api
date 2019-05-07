@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	<display-name>IMS Operations</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+
+	<!-- No restrictions on the Swagger Doc <security-constraint> <web-resource-collection> 
+		<web-resource-name>Open API YAML</web-resource-name> <url-pattern>*.yaml</url-pattern> 
+		</web-resource-collection> </security-constraint> <security-constraint> <web-resource-collection> 
+		<web-resource-name>Open API JSON</web-resource-name> <url-pattern>*.json</url-pattern> 
+		</web-resource-collection> </security-constraint> -->
+
+	<!-- Restrictions on Swagger UI <security-constraint> <web-resource-collection> 
+		<web-resource-name>Swagger UI</web-resource-name> <url-pattern>/ims</url-pattern> 
+		</web-resource-collection> <auth-constraint> <role-name>ims-admin</role-name> 
+		</auth-constraint> </security-constraint> -->
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Basic Authorization</web-resource-name>
+			<description />
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>ims-admin</role-name>
+			<role-name>get-user</role-name>
+			<role-name>put-user</role-name>
+			<role-name>post-user</role-name>
+			<role-name>pgm-user</role-name>
+			<role-name>tran-user</role-name>
+			<role-name>region-user</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>default</realm-name>
+	</login-config>
+	<security-role>
+		<role-name>ims-admin</role-name>
+	</security-role>
+	<security-role>
+		<role-name>get-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>put-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>post-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>pgm-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>tran-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>region-user</role-name>
+	</security-role>
+
+
+
+</web-app>
