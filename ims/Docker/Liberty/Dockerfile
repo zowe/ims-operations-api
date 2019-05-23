@@ -7,3 +7,5 @@ COPY key.jks /config/resources/security/
 COPY --chown=1001:0  ims.war /config/apps/
 COPY --chown=1001:0  server.xml /config/
 ENV LICENSE accept
+
+# end dockerfile
