@@ -27,34 +27,18 @@
     <keyStore id="key" password="password"/>
     
     <basicRegistry id="basic" >
-		<user name="omar" password="password"/>
-		<user name="postman" password="pass123"/>
-		<user name="pgmer" password="p123"/>
+		<user name="admin" password="password"/>
 	</basicRegistry>
 	
 	<application type="war" id="ims" name="ims" location="${server.config.dir}/apps/ims.war">
 	   <application-bnd>
 	       <security-role name="ims-admin">
-	           <user name="omar" />
-	           <user name="postman" />
+	           <user name="admin" />
 	           <!-- <group name="users" /> -->
 	       </security-role>
 	   </application-bnd>
 	</application>
 	
-	<!-- <webApplication id="ims" location="/config/dropins" name="ims">
-    <application-bnd>
-           <security-role name="ims-admin">
-               <user name="omar"/>
-           </security-role>
-           <security-role name="post-user">
-               <user name="postman"/>
-           </security-role>
-           <security-role name="pgm-user">
-               <user name="pgmer"/>
-           </security-role>
-       </application-bnd>
-    </webApplication> -->
 	
     <keyStore id="defaultKeyStore" password="password"/>
 </server>
