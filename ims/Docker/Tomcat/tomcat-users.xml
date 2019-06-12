@@ -30,5 +30,5 @@
 		roles="tomee-admin,manager-gui" /> -->
 
 	<role rolename="manager-gui"/>
-	<user password="Jl2567889" roles="manager-gui" username="th365thli"/>
+	<user password="password" roles="manager-gui" username="admin"/>
 </tomcat-users>
