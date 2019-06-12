@@ -21,9 +21,8 @@
 		that surrounds them. You will also need to set the passwords to something 
 		appropriate. -->
 
-	<user password="password" roles="get-user" username="jerry"/>
+	
 	<user password="password" roles="ims-admin" username="admin"/>
-	<user password="all1sdun" roles="pgm-user" username="omvsadm"/> 
 	<user password="password" roles="tran-user" username="tran"/> 
 
 	<!-- Activate those lines to get access to TomEE GUI if added (tomee-webaccess) -->
