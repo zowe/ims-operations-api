@@ -24,6 +24,7 @@
 	
 	<user password="password" roles="ims-admin" username="admin"/>
 	<user password="password" roles="tran-user" username="tran"/> 
+	<user password="password" roles="pgm-user" username="pgm"/> 
 
 	<!-- Activate those lines to get access to TomEE GUI if added (tomee-webaccess) -->
 	<!-- <role rolename="tomee-admin" /> <user username="tomee" password="tomee" 
