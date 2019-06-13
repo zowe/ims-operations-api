@@ -1,0 +1,44 @@
+<server description="new server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jaxrs-2.1</feature>
+        <!-- <feature>cdi-2.0</feature>  -->
+        <feature>localConnector-1.0</feature>
+        <feature>jca-1.7</feature>
+        <feature>jndi-1.0</feature>
+        <feature>mdb-3.2</feature>
+        <feature>ejb-3.2</feature>
+        <feature>jsf-2.3</feature>
+        <feature>appSecurity-2.0</feature>
+    </featureManager>
+
+    <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
+    <httpEndpoint host="*" httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
+                  
+    <!-- Automatically expand WAR files and EAR files -->
+    <applicationManager autoExpand="true"/>
+
+	<!-- Liberty scans for dependencies but sometimes we don't need them -->
+    <logging hideMessage="SRVE9967W"/>
+    
+    <applicationMonitor updateTrigger="mbean"/>
+    
+    <keyStore id="key" password="password"/>
+    
+    <basicRegistry id="basic" >
+		<user name="admin" password="password"/>
+	</basicRegistry>
+	
+	<application type="war" id="ims" name="ims" location="${server.config.dir}/apps/ims.war">
+	   <application-bnd>
+	       <security-role name="ims-admin">
+	           <user name="admin" />
+	           <!-- <group name="users" /> -->
+	       </security-role>
+	   </application-bnd>
+	</application>
+	
+	
+    <keyStore id="defaultKeyStore" password="password"/>
+</server>
