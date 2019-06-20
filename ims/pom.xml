@@ -156,6 +156,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<additionalJOption>-Xdoclint:none</additionalJOption>
+					<source>1.8</source>
 				</configuration>
 				<executions>
 					<execution>
