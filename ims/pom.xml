@@ -123,7 +123,8 @@
 
 
 	<build>
-		<!-- <finalName>${project.name}##${version}</finalName> -->
+		<finalName>${project.name}</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -150,6 +151,25 @@
 				<configuration>
 					<skipTests>true</skipTests>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="${project.build.directory}/ims.war"
+									todir="${project.basedir}/Docker/Tomcat/" />
+								<copy file="${project.build.directory}/ims.war"
+									todir="${project.basedir}/Docker/Liberty/" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
