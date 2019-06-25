@@ -46,7 +46,7 @@ public enum OM_EXCEPTION {
     /* *******************************************************************************/
     final static Logger logger             = LoggerFactory.getLogger(OM_EXCEPTION.class);
     private ClassLoader classLoader        = this.getClass().getClassLoader();
-    private String      resourceBundleName = this.getClass().getName();
+    private String      resourceBundleName = "OM_EXCEPTION";
 
     /**
      * <pre>

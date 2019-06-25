@@ -46,7 +46,7 @@ public enum OM_DATASTORE {
     /* *******************************************************************************/
     final static Logger logger             = LoggerFactory.getLogger(OM_DATASTORE.class);
     private ClassLoader classLoader        = this.getClass().getClassLoader();
-    private String      resourceBundleName = this.getClass().getName();
+    private String      resourceBundleName = "OM_DATASTORE";
 
     /**
      * <pre>
