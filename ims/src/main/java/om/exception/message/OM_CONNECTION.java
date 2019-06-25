@@ -48,7 +48,7 @@ public enum OM_CONNECTION {
     /* *******************************************************************************/
     final static Logger logger             = LoggerFactory.getLogger(OM_CONNECTION.class);
     private ClassLoader classLoader        = this.getClass().getClassLoader();
-    private String      resourceBundleName = this.getClass().getSimpleName();
+    private String      resourceBundleName = "OM_CONNECTION";
 
     /**
      * <pre>

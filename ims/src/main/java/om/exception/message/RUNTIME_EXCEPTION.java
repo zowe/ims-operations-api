@@ -46,7 +46,7 @@ public enum RUNTIME_EXCEPTION {
     /* *******************************************************************************/
     final static Logger logger             = LoggerFactory.getLogger(RUNTIME_EXCEPTION.class);
     private ClassLoader classLoader        = this.getClass().getClassLoader();
-    private String      resourceBundleName = this.getClass().getName();
+    private String      resourceBundleName = "RUNTIME_EXCEPTION";
 
     /**
      * <pre>

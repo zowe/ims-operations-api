@@ -119,7 +119,11 @@
 			<artifactId>javax.el</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+
+
 	</dependencies>
+
+
 
 
 	<build>
@@ -176,6 +180,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<additionalJOption>-Xdoclint:none</additionalJOption>
+					<source>1.8</source>
 				</configuration>
 				<executions>
 					<execution>
