@@ -31,6 +31,8 @@
 
   eureka:
       instance:
+          nonSecurePortEnabled: false
+          securePortEnabled: true       
           appname: ${mfaas.discovery.serviceId}
           hostname: ${mfaas.service.hostname}
           statusPageUrlPath: ${mfaas.discovery.endpoints.statusPage}
@@ -78,12 +80,6 @@
   ##############################################################################################
   # Application configuration section
   ##############################################################################################
-  server:
-      # address: ${mfaas.service.ipAddress}
-      port: ${mfaas.server.port}
-      servlet:
-          contextPath: ${mfaas.server.contextPath}
-
   spring:
       application:
           name: ${mfaas.discovery.serviceId}    
@@ -97,7 +93,7 @@
       serviceId: IMS
       serviceTitle: IMS Operations API
       serviceDescription: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-      discoveryEnabled: true
+      discoveryEnabled: false
       hostname: localhost
       port: 8081
       discoveryLocations: https://localhost:10011/eureka/
@@ -108,6 +104,11 @@
   ##############################################################################################
       
   server:
+   # address: ${mfaas.service.ipAddress}
+      port: ${mfaas.server.port}
+      servlet:
+          contextPath: ${mfaas.server.contextPath}
+   
       ssl:
           protocol: TLSv1.2
           ciphers: TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_EMPTY_RENEGOTIATION_INFO_SCSV
@@ -119,7 +120,4 @@
           trustStore: keystore/localhost.truststore.p12
           trustStoreType: PKCS12
           trustStorePassword: password
-  eureka:
-      instance:
-          nonSecurePortEnabled: false
-          securePortEnabled: true         
+  
