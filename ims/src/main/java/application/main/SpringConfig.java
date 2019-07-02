@@ -11,6 +11,9 @@
 
 package application.main;
 
+import java.io.File;
+import java.net.URL;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,10 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 public class SpringConfig extends ResourceConfig{
 
 	public SpringConfig() {
+		URL mySource = SpringConfig.class.getProtectionDomain().getCodeSource().getLocation();
+		File rootFolder = new File(mySource.getPath());
+		System.setProperty("app.root", rootFolder.getAbsolutePath());
+		
 		packages("application.resources");
 		register(OpenApiResource.class);
 		register(AcceptHeaderOpenApiResource.class);
