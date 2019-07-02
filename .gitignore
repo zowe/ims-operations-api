@@ -25,4 +25,4 @@
 *.tar.gz
 *.rar
 
-
+**/.DS_Store
