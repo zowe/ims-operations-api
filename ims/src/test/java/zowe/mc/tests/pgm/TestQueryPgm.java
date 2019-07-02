@@ -59,7 +59,7 @@ public class TestQueryPgm
 		logger.info("TESTING Query PGM");
 		
 		//QUERY PGM
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  "/" + TestProperties.plex + "/program");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -83,7 +83,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams,  "/" + TestProperties.plex + "/program");
+		Response response = RequestUtils.getRequest(queryParams,  TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -99,7 +99,7 @@ public class TestQueryPgm
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "DOPT"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2,  "/" + TestProperties.plex + "/program");
+		Response response2= RequestUtils.getRequest(queryParams2,  TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -115,7 +115,7 @@ public class TestQueryPgm
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "SCHDTYPE"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3,  "/" + TestProperties.plex + "/program");
+		Response response3= RequestUtils.getRequest(queryParams3,  TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr3 = RequestUtils.validateQPRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -141,7 +141,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"name", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams,  "/" + TestProperties.plex + "/program");
+		Response response= RequestUtils.getRequest(queryParams,  TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -164,7 +164,7 @@ public class TestQueryPgm
 		List<String[]> queryParams = new ArrayList<>();
 		String[] route = new String[] {"route", "FOO"};
 		queryParams.add(route);
-		Response response= RequestUtils.getRequest(queryParams, "/" + TestProperties.plex + "/program");
+		Response response= RequestUtils.getRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program");
 		QueryProgramOutput qpr = response.readEntity(QueryProgramOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

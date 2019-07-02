@@ -51,7 +51,7 @@ public class TestStartPgm {
 	public void testStartPgm() {
 		logger.info("TESTING START PGM");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/program/start");
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), TestProperties.contextPath + TestProperties.plex + "/program/start");
 		StartProgramOutput spr = RequestUtils.validateSPRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {

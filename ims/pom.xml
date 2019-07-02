@@ -135,7 +135,8 @@
 
 
 	<build>
-		<finalName>${project.name}</finalName>
+
+		<finalName>ims</finalName>
 
 		<plugins>
 			<plugin>

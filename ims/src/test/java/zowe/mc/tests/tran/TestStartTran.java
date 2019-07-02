@@ -51,7 +51,7 @@ public class TestStartTran {
 	public void testStartTran() {
 		logger.info("TESTING START TRAN");
 		
-		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), "/" + TestProperties.plex + "/transaction/start");
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), TestProperties.contextPath + TestProperties.plex + "/transaction/start");
 		StartTransactionOutput spr = RequestUtils.validateSTRSuccess(response);
 		logger.info(spr.toString());
 		for (String key : spr.getMessages().keySet()) {
