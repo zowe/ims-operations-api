@@ -27,7 +27,7 @@
       server:
           scheme: http
           port: ${environment.port}
-          contextPath: /ims
+          contextPath: /ims/apis/v1
 
   eureka:
       instance:
@@ -107,8 +107,7 @@
    # address: ${mfaas.service.ipAddress}
       port: ${mfaas.server.port}
       servlet:
-          contextPath: /ims/apis/v1
-          #contextPath: ${mfaas.server.contextPath}
+          contextPath: ${mfaas.server.contextPath}
    
       ssl:
           protocol: TLSv1.2
