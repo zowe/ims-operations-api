@@ -35,6 +35,7 @@
 
 	<dependencies>
 
+
 		<!-- JUnit -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -143,6 +144,12 @@
 		</dependency>
 		
 
+		<!-- Zowe API Mediation Layer -->
+		<dependency>
+			<groupId>com.ca.mfaas.sdk</groupId>
+			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
+			<version>1.1.0</version>
+		</dependency>
 
 	</dependencies>
 

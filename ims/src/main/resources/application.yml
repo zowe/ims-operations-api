@@ -96,7 +96,7 @@
       discoveryEnabled: true
       hostname: localhost
       port: 8081
-      discoveryLocations: https://eureka:password@192.86.32.67:7554/eureka
+      discoveryLocations: https://eureka:password@localhost:10011/eureka
       ipAddress: 127.0.0.1
     
   ##############################################################################################
