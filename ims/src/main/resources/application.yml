@@ -93,7 +93,7 @@
       serviceId: IMS
       serviceTitle: IMS Operations API
       serviceDescription: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-      discoveryEnabled: true
+      discoveryEnabled: false
       hostname: localhost
       port: 8081
       discoveryLocations: https://eureka:password@localhost:10011/eureka
