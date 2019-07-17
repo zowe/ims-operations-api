@@ -15,11 +15,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication
-@ComponentScan({"application.main", "application.services", "application.models", "application.resources", "application.rest", "filters"})
-public class MC {
+import com.ca.mfaas.enable.EnableApiDiscovery;
 
+@SpringBootApplication
+@ComponentScan({"com.ca.mfaas.enable", "com.ca.mfaas.product", "application.main", "application.services", "application.models", "application.resources", "application.rest", "filters"})
+@EnableApiDiscovery
+public class MC {
+	
 	public static void main(String[] args) {
 		SpringApplication.run(MC.class, args);
 	}
+	
 }

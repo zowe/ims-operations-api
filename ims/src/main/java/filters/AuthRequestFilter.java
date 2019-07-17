@@ -56,7 +56,7 @@ public class AuthRequestFilter implements ContainerRequestFilter {
 							String username = credentials.substring(0, p).trim();
 							String password = credentials.substring(p + 1).trim();
 
-							headers.add("username", username);
+							headers.add("user_id", username);
 							headers.add("password", password);
 
 						}

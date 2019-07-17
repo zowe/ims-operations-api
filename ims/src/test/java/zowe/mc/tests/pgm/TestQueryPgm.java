@@ -42,7 +42,6 @@ public class TestQueryPgm
 
 	private static final Logger logger = LoggerFactory.getLogger(TestQueryPgm.class);
 
-
 	/**
 	 * Setup rest client
 	 */

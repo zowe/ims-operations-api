@@ -167,8 +167,8 @@ public class TranService {
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 		
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = false) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = false) @HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
@@ -572,8 +572,8 @@ public class TranService {
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 		
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = false) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = false) @HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
@@ -819,8 +819,8 @@ public class TranService {
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 		
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = false) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = false) @HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 
@@ -1117,8 +1117,8 @@ public class TranService {
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect host address", required = true) @HeaderParam("hostname") String hostname,
 			@Parameter(in = ParameterIn.HEADER, description = "IMS Connect port number", required = true) @HeaderParam("port") String port,
 		
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = true) @HeaderParam("user_id") String username,
-			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = true) @HeaderParam("password") String password,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user ID", required = false) @HeaderParam("user_id") String username,
+			@Parameter(in = ParameterIn.HEADER, description = "The RACF user password", required = false) @HeaderParam("password") String password,
 
 			@Parameter(in = ParameterIn.PATH, description = "Specifies the IMSplex to which you are directing the API call.")
 			@PathParam("plex") 

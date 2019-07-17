@@ -96,7 +96,7 @@
       discoveryEnabled: true
       hostname: localhost
       port: 8081
-      discoveryLocations: https://localhost:10011/eureka/
+      discoveryLocations: https://eureka:password@192.86.32.67:7554/eureka
       ipAddress: 127.0.0.1
     
   ##############################################################################################
@@ -120,4 +120,5 @@
           trustStore: keystore/localhost.truststore.p12
           trustStoreType: PKCS12
           trustStorePassword: password
+          enabled: true
   
