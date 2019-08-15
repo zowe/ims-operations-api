@@ -10,6 +10,9 @@
 **/.project
 **/target/
 
+#Intellij
+.idea/
+
 # Log file
 *.log
 
