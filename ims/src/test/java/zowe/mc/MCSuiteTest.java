@@ -19,11 +19,9 @@ import org.junit.runner.RunWith;
 import zowe.mc.tests.TestOMConnection;
 import zowe.mc.tests.pgm.TestCreateDeletePgm;
 import zowe.mc.tests.pgm.TestQueryPgm;
-import zowe.mc.tests.pgm.TestStartPgm;
 import zowe.mc.tests.pgm.TestUpdatePgm;
 import zowe.mc.tests.tran.TestCreateDeleteTran;
 import zowe.mc.tests.tran.TestQueryTran;
-import zowe.mc.tests.tran.TestStartTran;
 import zowe.mc.tests.tran.TestUpdateTran;
 
 /**
@@ -36,12 +34,10 @@ import zowe.mc.tests.tran.TestUpdateTran;
 @RunWith(JUnitPlatform.class)
 @SelectClasses( { TestOMConnection.class, 
 				  TestQueryPgm.class , 
-				  TestStartPgm.class, 
 				  TestUpdatePgm.class,
 				  TestCreateDeletePgm.class,
 				  TestQueryTran.class,
 				  TestUpdateTran.class,
-				  TestStartTran.class,
 				  TestCreateDeleteTran.class} )
 public class MCSuiteTest {
 

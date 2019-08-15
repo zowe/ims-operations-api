@@ -114,14 +114,11 @@ public class TestCreateDeleteTran
 
 	}
 
-	/**
-	 * Setup rest client
-	 */
 	@AfterAll
 	public static void takeDown() {
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] names3 = new String[] {"name", "JUNIT"};
 		queryParams3.add(names3);
-		RequestUtils.deleteRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		RequestUtils.deleteRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/program");
 	}
 }
