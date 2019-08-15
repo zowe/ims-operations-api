@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.annotation.Secured;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -108,6 +109,7 @@ public class PgmService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@RolesAllowed({"ims-admin", "get-user", "pgm-user"})
+//	@Secured({"ims-admin", "get-user", "pgm-user"})
 	@Operation(operationId="querypgm", summary = "Query information about IMS program resources by using the 'QUERY PGM' IMS command. For more information on each parameter, see the documentation for the 'QUERY PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",  

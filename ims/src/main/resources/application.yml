@@ -82,8 +82,8 @@
   ##############################################################################################
   spring:
       application:
-          name: ${mfaas.discovery.serviceId}    
-          
+          name: ${mfaas.discovery.serviceId}
+                       
           
   ##############################################################################################
   # Local configuration section
@@ -122,4 +122,7 @@
           trustStoreType: PKCS12
           trustStorePassword: password
           enabled: false
+
+          
+
   
