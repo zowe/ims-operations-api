@@ -34,6 +34,7 @@ import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
+import application.springSecurity.AuthRequestFilter;
 
 
 
@@ -51,7 +52,11 @@ public class SpringConfig {
         final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
         factory.setApplication(new LibertyApp());
         factory.setServiceBeans(Arrays.<Object>asList(new PgmService(), new TranService(), new RegionService(), new OMServlet()));
+        //for JSON marshalling/unmarshalling into objects
         factory.setProvider(new JacksonJsonProvider());
+        //Server request filter
+        factory.setProvider(new AuthRequestFilter());
+        //OpenAPI 3.0
         factory.setFeatures(Arrays.asList(new OpenApiFeature()));
         factory.setBus(bus);
         return factory.create();

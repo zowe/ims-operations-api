@@ -1,4 +1,4 @@
-package springSecurity;
+package application.springSecurity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class MyUserDetailsService implements UserDetailsService {
 				springUsers = mapper.readValue(xml, SpringUsers.class);
 			}
 
-			for (springSecurity.User u : springUsers.getUser()) {
+			for (application.springSecurity.User u : springUsers.getUser()) {
 				if (u.getUsername().equals(username)) {
 					return new User(username, u.getPassword(), Arrays.asList(new SimpleGrantedAuthority(u.getRole())));
 				}

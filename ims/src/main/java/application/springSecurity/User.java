@@ -1,4 +1,4 @@
-package springSecurity;
+package application.springSecurity;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 

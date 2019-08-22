@@ -21,6 +21,7 @@ import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
+import application.springSecurity.AuthRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
@@ -50,7 +51,7 @@ public class LibertyApp extends Application{
 		resources.add(TranService.class);
 		resources.add(RegionService.class);
 		resources.add(OMServlet.class);
-		//resources.add(org.apache.cxf.interceptor.security.SecureAnnotationsInterceptor.class);
+		resources.add(AuthRequestFilter.class);
 		
 		return resources;
 	}

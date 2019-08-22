@@ -1,7 +1,8 @@
-package springSecurity;
+package application.springSecurity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.SecurityExpressionOperations;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,10 +22,16 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebSecurityExpressionRoot;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+@EnableWebMvc
+@ComponentScan
+@EnableGlobalMethodSecurity(
+		  prePostEnabled = true, 
+		  securedEnabled = true, 
+		  jsr250Enabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
@@ -32,10 +39,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests()
+		http.authorizeRequests()
 				.anyRequest().authenticated()
-				.and().httpBasic()
-				.authenticationEntryPoint(authEntryPoint);
+				.and()
+		          .formLogin()
+		          .and().httpBasic()
+		          .authenticationEntryPoint(authEntryPoint);
+				
+				
+				
+				//.and().httpBasic()
+				//.authenticationEntryPoint(authEntryPoint);
+	
 		
 		//POST request for manually clearing security context
 		http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
@@ -47,8 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 
 	@Autowired
-	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-	    auth.inMemoryAuthentication().withUser("admin").password("$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS").roles("ANON");
+	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	    auth.inMemoryAuthentication().withUser("Jerry").password("$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS").authorities("foo");
 	}
 	
 	@Bean

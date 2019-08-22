@@ -1,4 +1,4 @@
-package springSecurity;
+package application.springSecurity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
