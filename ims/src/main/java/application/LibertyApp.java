@@ -21,7 +21,6 @@ import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
-import filters.AuthRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
@@ -47,12 +46,11 @@ public class LibertyApp extends Application{
 		Set<Class<?>> resources = new HashSet<>();
 		resources.add(OpenApiResource.class);
 		resources.add(AcceptHeaderOpenApiResource.class);
-		resources.add(AuthRequestFilter.class);
 		resources.add(PgmService.class);
 		resources.add(TranService.class);
 		resources.add(RegionService.class);
 		resources.add(OMServlet.class);
-		resources.add(org.apache.cxf.interceptor.security.SecureAnnotationsInterceptor.class);
+		//resources.add(org.apache.cxf.interceptor.security.SecureAnnotationsInterceptor.class);
 		
 		return resources;
 	}

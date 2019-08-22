@@ -34,7 +34,6 @@ import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
-import filters.AuthRequestFilter;
 
 
 
@@ -51,7 +50,7 @@ public class SpringConfig {
     public Server jaxRsServer() {
         final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
         factory.setApplication(new LibertyApp());
-        factory.setServiceBeans(Arrays.<Object>asList(new AuthRequestFilter(), new PgmService(), new TranService(), new RegionService(), new OMServlet()));
+        factory.setServiceBeans(Arrays.<Object>asList(new PgmService(), new TranService(), new RegionService(), new OMServlet()));
         factory.setProvider(new JacksonJsonProvider());
         factory.setFeatures(Arrays.asList(new OpenApiFeature()));
         factory.setBus(bus);
