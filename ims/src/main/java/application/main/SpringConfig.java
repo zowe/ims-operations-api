@@ -12,38 +12,56 @@
 package application.main;
 
 
-import org.glassfish.jersey.server.ResourceConfig;
+
+import java.util.Arrays;
+
+import org.apache.cxf.Bus;
+import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.apache.cxf.jaxrs.openapi.OpenApiFeature;
+import org.apache.cxf.transport.servlet.CXFServlet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
+import application.LibertyApp;
+import application.rest.OMServlet;
+import application.rest.services.PgmService;
+import application.rest.services.RegionService;
+import application.rest.services.TranService;
 import filters.AuthRequestFilter;
-import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@Component
-@EnableSwagger2
-public class SpringConfig extends ResourceConfig{
 
+
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan(basePackages = "application")
+public class SpringConfig {
+
+	@Autowired
+    private Bus bus;
+	
+	
 	@Bean
-	public Docket apiDocket() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.select()
-				.apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.any())
-				.build();
-	}
-
-	public SpringConfig() {
-		packages("application.resources");
-		register(OpenApiResource.class);
-		register(AcceptHeaderOpenApiResource.class);
-		register(AuthRequestFilter.class);
-		packages("application");
-	}
+    public Server jaxRsServer() {
+        final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
+        factory.setApplication(new LibertyApp());
+        factory.setServiceBeans(Arrays.<Object>asList(new AuthRequestFilter(), new PgmService(), new TranService(), new RegionService(), new OMServlet()));
+        factory.setProvider(new JacksonJsonProvider());
+        factory.setFeatures(Arrays.asList(new OpenApiFeature()));
+        factory.setBus(bus);
+        return factory.create();
+    }
+    @Bean
+    public ServletRegistrationBean<CXFServlet> cxfServlet() {
+        final ServletRegistrationBean<CXFServlet> servletRegistrationBean = new ServletRegistrationBean<CXFServlet>(new CXFServlet());
+        servletRegistrationBean.setLoadOnStartup(1);
+        return servletRegistrationBean;
+    }
 
 }

@@ -18,7 +18,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>zowe</id>
@@ -26,7 +26,7 @@
 		</repository>
 	</distributionManagement>
 
-	<!--  For API Mediation Layer -->
+	<!-- For API Mediation Layer -->
 	<repositories>
 		<repository>
 			<id>Gizaartificatory</id>
@@ -34,16 +34,17 @@
 		</repository>
 	</repositories>
 
+
+
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.1.RELEASE</version>
+		<version>2.1.7.RELEASE</version>
 		<relativePath />
 	</parent>
 
-
 	<dependencies>
-
 
 		<!-- JUnit -->
 		<dependency>
@@ -100,32 +101,20 @@
 			<version>2.0.7</version>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.apache.cxf</groupId> <artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId> 
-			<version>3.2.4</version> </dependency> <dependency> <groupId>org.webjars</groupId> 
-			<artifactId>swagger-ui</artifactId> <version>3.13.6</version> </dependency> -->
 
-		<!-- Jersey Server -->
+		<!-- Zowe API Mediation Layer -->
 		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-server</artifactId>
-		</dependency>
-
-		<!-- Jersey Client -->
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
+			<groupId>com.ca.mfaas.sdk</groupId>
+			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 
 
-		<!-- Spring Boot (for testing) -->
+		<!-- Spring Boot with jax-rs (with Apache CXF implementation of JAX-RS) -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jersey</artifactId>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
+			<version>3.2.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -133,35 +122,38 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!-- Spring Boot Security -->
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
-			<version>2.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.web</groupId>
-			<artifactId>javax.el</artifactId>
-			<version>2.2.4</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
 
-		<!-- Zowe API Mediation Layer -->
+		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
+			from JAX-RS endpoints -->
 		<dependency>
-			<groupId>com.ca.mfaas.sdk</groupId>
-			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
-			<version>1.1.0</version>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId>
+			<version>3.2.4</version>
 		</dependency>
 
-
-		<!-- Zowe API Mediation Layer -->
+		<!-- Jackson JSON Provider needed to marshall/unmarshall JSON entities 
+			to response objects -->
 		<dependency>
-			<groupId>com.ca.mfaas.sdk</groupId>
-			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
-			<version>1.1.0</version>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+		</dependency>
+
+		<!-- Swagger UI for Spring Boot + Apach CXF -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+			<version>3.13.6</version>
 		</dependency>
 
 	</dependencies>
@@ -201,7 +193,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<!-- <skipTests>true</skipTests> -->
+					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -248,8 +240,8 @@
 					</archive>
 				</configuration>
 			</plugin>
-			
-			
+
+
 
 		</plugins>
 

@@ -32,7 +32,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.client.ClientProperties;
 
 import application.rest.responses.pgm.create.CreateProgramOutput;
 import application.rest.responses.pgm.delete.DeleteProgramOutput;
@@ -44,6 +43,9 @@ import application.rest.responses.tran.delete.DeleteTransactionOutput;
 import application.rest.responses.tran.query.QueryTransactionOutput;
 import application.rest.responses.tran.start.StartTransactionOutput;
 import application.rest.responses.tran.update.UpdateTransactionOutput;
+
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
 
 public class RequestUtils {
 
@@ -114,13 +116,14 @@ public class RequestUtils {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 
-
-		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+		webTarget.register(new JacksonJsonProvider());
+		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
 
-		Response responses = builder.post(Entity.json(null));
+		//Apache CXF does not like passing Entity.json(null)
+		Response responses = builder.post(Entity.text(""));
 		return responses;
 
 	}
@@ -133,8 +136,8 @@ public class RequestUtils {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 
-
-		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+		webTarget.register(new JacksonJsonProvider());
+		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
@@ -151,13 +154,14 @@ public class RequestUtils {
 		for (String[] sArray : queryParams) {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
-
-		Invocation.Builder builder =  webTarget.property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, true).path(path).request(MediaType.APPLICATION_JSON)
+		webTarget.register(new JacksonJsonProvider());
+		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
-
-		Response responses = builder.put(Entity.json(null));
+		
+		//Apache CXF does not like passing Entity.json(null)
+		Response responses = builder.put(Entity.text(""));
 		return responses;
 	}
 
@@ -174,6 +178,7 @@ public class RequestUtils {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 
+		webTarget.register(new JacksonJsonProvider());
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);

@@ -17,15 +17,13 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.ca.mfaas.enable.EnableApiDiscovery;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 @SpringBootApplication
 @ComponentScan({"com.ca.mfaas.enable", "com.ca.mfaas.product", "application.main", "application.services", "application.models", "application.resources", "application.rest", "filters"})
 @EnableApiDiscovery
-public class MC {
+public class ApiLauncher {
 	
 	public static void main(String[] args) {
-		SpringApplication.run(MC.class, args);
+		SpringApplication.run(ApiLauncher.class, args);
 	}
 	
 }

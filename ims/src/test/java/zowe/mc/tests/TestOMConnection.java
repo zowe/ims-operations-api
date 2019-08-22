@@ -17,13 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -59,7 +55,7 @@ public class TestOMConnection {
 		mcSpec.setHostname(TestProperties.hostname);
 		mcSpec.setPort(TestProperties.port);
 		mcSpec.setImsPlexName(TestProperties.plex);
-		client = ClientBuilder.newClient();
+		setClient(ClientBuilder.newClient());
 	}
 
 	/**
@@ -106,6 +102,14 @@ public class TestOMConnection {
 		for (String key : queryProgramResponses.getMessages().keySet()) {
 			assertEquals("4", queryProgramResponses.getMessages().get(key).getRc());
 		}
+	}
+
+	public static Client getClient() {
+		return client;
+	}
+
+	public static void setClient(Client client) {
+		TestOMConnection.client = client;
 	}
 
 }

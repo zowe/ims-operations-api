@@ -9,11 +9,11 @@
           endpoints:
               statusPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/info
               healthPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/health
-              homePage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/
+              homePage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.yaml
           info:
               serviceTitle:  ${environment.serviceTitle}
               description:  ${environment.serviceDescription}
-              # swaggerLocation: resource_location_of_your_static_swagger_doc.json
+              swaggerLocation: http://localhost:8081/ims/apis/v1/openapi.json
           fetchRegistry: false
           region: default
       service:
@@ -47,7 +47,7 @@
                   apiInfo:
                       - apiId: ${mfaas.discovery.serviceId}
                         gatewayUrl: api/v1
-                        swaggerUrl: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/api-doc
+                        swaggerUrl: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.json
                         documentationUrl: https://www.zowe.org
               mfaas:
                   api-info:
@@ -56,8 +56,8 @@
                               title: IMS Operations API
                               description: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
                               version: 1.0.0
-                              basePackage: application
-                              # apiPattern: /v1/.*  # alternative to basePackage for exposing endpoints which match the regex pattern to swagger JSON
+                              #basePackage: application
+                              apiPattern: /v1/.*  # alternative to basePackage for exposing endpoints which match the regex pattern to swagger JSON
                   discovery:
                       catalogUiTile:
                           id: ${mfaas.catalog-ui-tile.id}
@@ -93,7 +93,7 @@
       serviceId: IMS
       serviceTitle: IMS Operations API
       serviceDescription: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-      discoveryEnabled: true
+      discoveryEnabled: false
       hostname: localhost
       port: 8081
       discoveryLocations: https://localhost:10011/eureka
@@ -120,5 +120,4 @@
           trustStore: keystore/localhost.truststore.p12
           trustStoreType: PKCS12
           trustStorePassword: password
-          enabled: true
-  
+          enabled: false

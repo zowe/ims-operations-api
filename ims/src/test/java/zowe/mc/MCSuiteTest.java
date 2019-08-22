@@ -25,6 +25,9 @@ import zowe.mc.tests.tran.TestQueryTran;
 import zowe.mc.tests.tran.TestUpdateTran;
 
 /**
+ * These tests use Spring Boot with the Apache CXF implementation of JAX-RS
+ * 
+ * 
  * Right now we have to use JUnit 4 runner for test suites because test suites are
  * currently not supported in JUnit 5. Wondering if we should get rid of test suites 
  * since Maven runs all of the tests during build anyway.
