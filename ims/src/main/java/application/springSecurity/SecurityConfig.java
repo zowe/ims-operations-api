@@ -37,8 +37,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/**/program").hasAnyRole("get-user", "pgm-user", "ims-admin")
-		.antMatchers(HttpMethod.GET, "/**/transaction").hasAnyRole("get-user", "pgm-user", "ims-admin")
+		http.csrf().disable().authorizeRequests()
+		.antMatchers(HttpMethod.GET, "/**/program").hasAnyRole("get-user", "pgm-user", "ims-admin")
+		.antMatchers(HttpMethod.GET, "/**/transaction").hasAnyRole("get-user", "tran-user", "ims-admin")
+		.antMatchers(HttpMethod.GET, "/**/region").hasAnyRole("get-user", "region-user", "ims-admin")
+		.antMatchers(HttpMethod.PUT, "/**/program").hasAnyRole("put-user", "pgm-user", "ims-admin")
+		.antMatchers(HttpMethod.PUT, "/**/transaction").hasAnyRole("put-user", "tran-user", "ims-admin")
+		.antMatchers(HttpMethod.PUT, "/**/region").hasAnyRole("put-user", "region-user", "ims-admin")
+		.antMatchers(HttpMethod.POST, "/**/program").hasAnyRole("post-user", "pgm-user", "ims-admin")
+		.antMatchers(HttpMethod.POST, "/**/transaction").hasAnyRole("post-user", "tran-user", "ims-admin")
+		.antMatchers(HttpMethod.POST, "/**/region").hasAnyRole("post-user", "region-user", "ims-admin")
 		.anyRequest().authenticated()
 		//.and().formLogin().permitAll().defaultSuccessUrl("/api-docs")
 		.and().httpBasic()
@@ -47,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
 		//POST request for manually clearing security context
-		//http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
+		http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"));
 
 		//Want each request to be stateless, clears out security context, requiring authentication each time
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

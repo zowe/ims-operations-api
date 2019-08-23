@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.web.client.RestTemplate;
 
 import application.rest.responses.pgm.query.QueryProgram;
 import application.rest.responses.pgm.query.QueryProgramOutput;
@@ -56,6 +63,7 @@ public class TestQueryPgm
 	@Test
 	public void testQueryPgm() {
 		logger.info("TESTING Query PGM");
+		
 		
 		//QUERY PGM
 		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  TestProperties.contextPath + TestProperties.plex + "/program");

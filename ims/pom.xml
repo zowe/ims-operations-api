@@ -10,7 +10,7 @@
 	<groupId>com.ibm.zowe</groupId>
 	<artifactId>ims</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<!-- <name>ims</name> -->
 	<url>http://maven.apache.org</url>
@@ -36,7 +36,7 @@
 
 
 
-
+	<!-- Spring Boot dependencies -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -63,7 +63,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- javax REST -->
+		<!-- JAX-RS (Java REST) -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -80,25 +80,17 @@
 			<version>2.1.1</version>
 		</dependency>
 
-		<!-- MC code dependencies -->
+		<!-- IMS Connect API -->
 		<dependency>
 			<groupId>com.ibm.ims</groupId>
 			<artifactId>IMSConnectAPI</artifactId>
 			<version>3.2</version>
 		</dependency>
 
-		<!-- Logging (conflicts with log4j embedded in Spring Boot so we remove 
-			it for now) -->
+		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-		</dependency>
-
-		<!-- Swagger for Jersey -->
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-jaxrs2</artifactId>
-			<version>2.0.7</version>
 		</dependency>
 
 
@@ -109,8 +101,17 @@
 			<version>1.1.0</version>
 		</dependency>
 
+		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
+			from Apache CXF JAX-RS endpoints -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId>
+			<version>3.2.4</version>
+		</dependency>
 
-		<!-- Spring Boot with jax-rs (with Apache CXF implementation of JAX-RS) -->
+
+		<!-- Spring Boot with jax-rs (with Apache CXF implementation of JAX-RS) 
+			We also exclude the embedded logging (we want to use sl4j -->
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
@@ -123,7 +124,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Spring Boot Security -->
+		<!-- More Spring Boot (including security) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -133,14 +134,20 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-
-		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
-			from JAX-RS endpoints -->
+		<!-- Swagger UI for Spring Boot + Apache CXF -->
 		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId>
-			<version>3.2.4</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+			<version>3.23.5</version>
 		</dependency>
+
+		<!-- Swagger Core (includes Swagger UI) for JAX-RS -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-jaxrs2</artifactId>
+			<version>2.0.7</version>
+		</dependency>
+
 
 		<!-- Jackson JSON Provider needed to marshall/unmarshall JSON entities 
 			to response objects -->
@@ -149,18 +156,13 @@
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
 		</dependency>
 
-		<!-- Swagger UI for Spring Boot + Apache CXF -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>swagger-ui</artifactId>
-			<version>3.23.5</version>
-		</dependency>
 
-
+		<!-- For unmarshalling/marshalling xml files -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
+
 
 	</dependencies>
 
@@ -168,10 +170,6 @@
 
 
 	<build>
-
-		<!-- <resources> <resource> <directory>${project.basedir}</directory> <includes> 
-			<include>**/*.cer</include> <include>**/*.key</include> <include>**/*.p12</include> 
-			<include>src/main/resources</include> </includes> </resource> </resources> -->
 
 		<finalName>ims</finalName>
 
@@ -202,7 +200,7 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
@@ -220,7 +218,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -237,7 +235,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
@@ -245,12 +243,12 @@
 						<addMavenDescriptor>false</addMavenDescriptor>
 					</archive>
 				</configuration>
+			</plugin> -->
+			<!-- For compiling into a FAT runnable jar -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-
-
 		</plugins>
-
-
 	</build>
 </project>

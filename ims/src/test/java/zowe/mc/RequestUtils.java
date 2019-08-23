@@ -15,6 +15,7 @@ package zowe.mc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -32,6 +33,17 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import application.rest.responses.pgm.create.CreateProgramOutput;
 import application.rest.responses.pgm.delete.DeleteProgramOutput;
@@ -43,8 +55,6 @@ import application.rest.responses.tran.delete.DeleteTransactionOutput;
 import application.rest.responses.tran.query.QueryTransactionOutput;
 import application.rest.responses.tran.start.StartTransactionOutput;
 import application.rest.responses.tran.update.UpdateTransactionOutput;
-
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 
 public class RequestUtils {
@@ -65,27 +75,27 @@ public class RequestUtils {
 
 		if (appProperties.getString("server.ssl.enabled").equalsIgnoreCase("true")) {
 			urlPrefix = "https://";
-			
+
 			/*
 			 * For our junit test clients we don't care about if the certificate is valid or not.
 			 * We just want to test functionality of the REST APIs. To be clear, the below method of
 			 * ignoring ssl certificates is strongly not recommended to use in production client code,
 			 * however because these are just junit tests it's fine. 
 			 */
-			
+
 			try {
 				TrustManager[] trustManager = new X509TrustManager[] { new X509TrustManager() {
-				    @Override
-				    public X509Certificate[] getAcceptedIssuers() {
-				        return null;
-				    }
-				    @Override
-				    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+					@Override
+					public X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+					@Override
+					public void checkClientTrusted(X509Certificate[] certs, String authType) {
 
-				    }
-				    @Override
-				    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-				    }
+					}
+					@Override
+					public void checkServerTrusted(X509Certificate[] certs, String authType) {
+					}
 				}};
 
 				SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -104,7 +114,7 @@ public class RequestUtils {
 			urlPrefix = "http://";
 			client = clientBuilder.build();
 		}
-		
+
 
 	}
 
@@ -117,6 +127,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
+		webTarget.register(new Authenticator("admin", "password"));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -137,6 +148,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
+		webTarget.register(new Authenticator("admin", "password"));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -155,11 +167,12 @@ public class RequestUtils {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 		webTarget.register(new JacksonJsonProvider());
+		webTarget.register(new Authenticator("admin", "password"));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
-		
+
 		//Apache CXF does not like passing Entity.json(null)
 		Response responses = builder.put(Entity.text(""));
 		return responses;
@@ -171,7 +184,6 @@ public class RequestUtils {
 	 * @return
 	 */
 	public static Response getRequest(List<String[]> queryParams, String path) {
-
 		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
 
 		for (String[] sArray : queryParams) {
@@ -179,6 +191,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
+		webTarget.register(new Authenticator("admin", "password"));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
@@ -286,6 +299,39 @@ public class RequestUtils {
 		return queryTranResponses;
 	}
 
+	public static HttpComponentsClientHttpRequestFactory getClientHttpRequestFactory()
+	{
+		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory
+		= new HttpComponentsClientHttpRequestFactory();
+
+		clientHttpRequestFactory.setHttpClient(httpClient());
+
+		return clientHttpRequestFactory;
+	}
+
+	public static HttpClient httpClient()
+	{
+		CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+
+		credentialsProvider.setCredentials(AuthScope.ANY,
+				new UsernamePasswordCredentials("admin", "password"));
+
+		HttpClient client = HttpClientBuilder
+				.create()
+				.setDefaultCredentialsProvider(credentialsProvider)
+				.build();
+		return client;
+	}
+	
+	public static HttpHeaders createHeaders(String username, String password){
+		   return new HttpHeaders() {{
+		         String auth = username + ":" + password;
+		         byte[] encodedAuth = Base64.encodeBase64( 
+		            auth.getBytes(Charset.forName("US-ASCII")) );
+		         String authHeader = "Basic " + new String( encodedAuth );
+		         set( "Authorization", authHeader );
+		      }};
+		}
 
 
 }
