@@ -149,11 +149,11 @@
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
 		</dependency>
 
-		<!-- Swagger UI for Spring Boot + Apach CXF -->
+		<!-- Swagger UI for Spring Boot + Apache CXF -->
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>swagger-ui</artifactId>
-			<version>3.13.6</version>
+			<version>3.23.5</version>
 		</dependency>
 
 

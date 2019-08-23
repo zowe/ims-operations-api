@@ -34,9 +34,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -96,7 +93,6 @@ import utils.Type2CommandSerializable;
 @Tag(name = "Program")
 @SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
 @CheckHeader
-@RestController
 public class PgmService {
 
 	//@Autowired

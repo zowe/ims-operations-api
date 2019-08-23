@@ -33,7 +33,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
 			for (application.springSecurity.User u : springUsers.getUser()) {
 				if (u.getUsername().equals(username)) {
-					return new User(username, u.getPassword(), Arrays.asList(new SimpleGrantedAuthority(u.getRole())));
+					return new User(username, u.getPassword(), Arrays.asList(new SimpleGrantedAuthority("ROLE_" + u.getRole())));
 				}
 			}
 		} catch (IOException e) {
