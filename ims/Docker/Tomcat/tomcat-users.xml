@@ -27,9 +27,10 @@
 		appropriate. -->
 
 
-	<user password="password" roles="ims-admin" username="admin" />
-	<user password="password" roles="tran-user" username="tran" />
-	<user password="password" roles="pgm-user" username="pgm" />
+	<user username="admin" password="password" roles="ims-admin" />
+	<user username="tran" password="password" roles="tran-user" />
+	<user username="put" password="password" roles="put-user" />
+	<user username="pgm" password="password" roles="pgm-user" />
 
 	<!-- Activate those lines to get access to TomEE GUI if added (tomee-webaccess) -->
 	<!-- <role rolename="tomee-admin" /> <user username="tomee" password="tomee" 
