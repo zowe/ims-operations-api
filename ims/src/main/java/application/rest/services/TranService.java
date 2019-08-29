@@ -1171,7 +1171,7 @@ public class TranService {
 			ArrayList<UpdateTran.OptionOptions> optionOptions = new ArrayList<OptionOptions>();
 			if (option != null) {
 				List<String> optionList = Arrays.asList(option.split("\\s*,\\s*"));
-				for (String s : optionList) {
+				for(String s : optionList) {
 					optionOptions.add(UpdateTran.OptionOptions.fromValue(s));
 				}
 				tran.getOPTION().addAll(optionOptions);
@@ -1187,7 +1187,7 @@ public class TranService {
 				set.setAOCMD(UpdateTran.SET.AocmdOptions.fromValue(aocmd));
 				isSet = true;
 			}
-			if (!clazz.isEmpty()) {
+			if (setClazz != null) {
 				set.setCLASS(setClazz);
 				isSet = true;
 			}
