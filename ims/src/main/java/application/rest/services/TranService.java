@@ -1187,7 +1187,7 @@ public class TranService {
 				set.setAOCMD(UpdateTran.SET.AocmdOptions.fromValue(aocmd));
 				isSet = true;
 			}
-			if (!clazz.isEmpty()) {
+			if (setClazz != null) {
 				set.setCLASS(setClazz);
 				isSet = true;
 			}
