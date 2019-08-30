@@ -24,21 +24,21 @@
     
     <applicationMonitor updateTrigger="mbean"/>
     
-    <keyStore id="key" password="password"/>
+    <keyStore id="key" password="{xor}Lz4sLCgwLTs="/>
     
     <basicRegistry id="basic" >
-		<user name="admin" password="password"/>
+		<user name="admin" password="{xor}Lz4sLCgwLTs="/>
 	</basicRegistry>
 	
-	<application type="war" id="ims" name="ims" location="${server.config.dir}/apps/ims.war">
+	<webApplication  contextRoot="/ims" id="ims" name="ims" location="${server.config.dir}/apps/ims.war">
 	   <application-bnd>
 	       <security-role name="ims-admin">
 	           <user name="admin" />
 	           <!-- <group name="users" /> -->
 	       </security-role>
 	   </application-bnd>
-	</application>
+	</webApplication>
 	
 	
-    <keyStore id="defaultKeyStore" password="password"/>
+    <keyStore id="defaultKeyStore" password="{xor}Lz4sLCgwLTs="/>
 </server>

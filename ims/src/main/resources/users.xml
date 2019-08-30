@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+
+<Spring-Users>
+
+	<user username="admin" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="ims-admin" />
+	<user username="get" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="get-user" />
+	<user username="post" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="post-user" />
+	<user username="put" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="put-user" />
+	<user username="pgm" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="pgm-user" />
+	<user username="tran" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="tran-user" />
+	<user username="region" password="$2a$04$DUrbXnk6ean2t7kd65DRHO8YEncp1VLs1zsY1yk7g1Nh50GmvSvGS" role="region-user" />
+	
+
+</Spring-Users>

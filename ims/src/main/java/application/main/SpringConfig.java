@@ -1,32 +1,71 @@
 
 /**
-* This program and the accompanying materials are made available under the terms of the
-* Eclipse Public License v2.0 which accompanies this distribution, and is available at
-* https://www.eclipse.org/legal/epl-v20.html
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Copyright IBM Corporation 2019
-*/
+ * This program and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v20.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Copyright IBM Corporation 2019
+ */
 
 package application.main;
 
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.stereotype.Component;
 
-import filters.AuthRequestFilter;
-import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
-@Component
-public class SpringConfig extends ResourceConfig{
+import java.util.Arrays;
 
-	public SpringConfig() {
-		packages("application.resources");
-		register(OpenApiResource.class);
-		register(AcceptHeaderOpenApiResource.class);
-		register(AuthRequestFilter.class);
-		packages("application");
-	}
+import org.apache.cxf.Bus;
+import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.apache.cxf.jaxrs.openapi.OpenApiFeature;
+import org.apache.cxf.transport.servlet.CXFServlet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
+import application.LibertyApp;
+import application.rest.OMServlet;
+import application.rest.services.PgmService;
+import application.rest.services.RegionService;
+import application.rest.services.TranService;
+import application.springSecurity.AuthRequestFilter;
+
+
+
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan(basePackages = "application")
+public class SpringConfig {
+
+	@Autowired
+    private Bus bus;
+	
+	
+	@Bean
+    public Server jaxRsServer() {
+        final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
+        factory.setApplication(new LibertyApp());
+        factory.setServiceBeans(Arrays.<Object>asList(new PgmService(), new TranService(), new RegionService(), new OMServlet()));
+        //for JSON marshalling/unmarshalling into objects
+        factory.setProvider(new JacksonJsonProvider());
+        //Server request filter
+        factory.setProvider(new AuthRequestFilter());
+        //OpenAPI 3.0
+        factory.setFeatures(Arrays.asList(new OpenApiFeature()));
+        factory.setBus(bus);
+        return factory.create();
+    }
+    @Bean
+    public ServletRegistrationBean<CXFServlet> cxfServlet() {
+        final ServletRegistrationBean<CXFServlet> servletRegistrationBean = new ServletRegistrationBean<CXFServlet>(new CXFServlet());
+        servletRegistrationBean.setLoadOnStartup(1);
+        return servletRegistrationBean;
+    }
 
 }

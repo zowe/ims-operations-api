@@ -16,5 +16,19 @@ public class TestProperties {
 	public static final String hostname = "ec03173.vmec.svl.ibm.com";
 	public static final Integer port = 9999;
 	public static final String plex = "PLEX1";
+	
+	public static final String contextPath = "/ims/apis/v1/";
+	
+	
+	public static String restPort;
+	
+	public static String getRestPort() {
+		return restPort;
+	}
+	
+	public static void setRestPort(String port) {
+		restPort=port;
+	}
+	
 
 }
