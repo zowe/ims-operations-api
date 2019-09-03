@@ -9,6 +9,7 @@
 **/.factorypath
 **/.project
 **/target/
+**/application.yml
 
 #Intellij
 .idea/
