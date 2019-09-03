@@ -21,7 +21,7 @@ import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
-import application.springSecurity.AuthRequestFilter;
+import application.security.AuthRequestFilter;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
