@@ -40,7 +40,8 @@ import zowe.mc.TestProperties;
 public class TestQueryTran {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestQueryTran.class);
-
+	private final String DEFAULT_USER = "tran";
+	private final String DEFAULT_PASSWORD = "password";
 
 	@BeforeAll
 	public static void setUp() {
@@ -49,7 +50,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"name", "JUNIT"};
 		queryParams.add(names);
-		RequestUtils.postRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program");
+		RequestUtils.postRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program", "admin", "password");
 		
 		
 		List<String[]> queryParams1 = new ArrayList<>();
@@ -57,7 +58,7 @@ public class TestQueryTran {
 		String[] pgm1 = new String[] {"pgm", "JUNIT"};
 		queryParams1.add(names1);
 		queryParams1.add(pgm1);
-		RequestUtils.postRequest(queryParams1, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		RequestUtils.postRequest(queryParams1, TestProperties.contextPath + TestProperties.plex + "/transaction", "admin", "password");
 	}
 	
 	/**
@@ -71,7 +72,7 @@ public class TestQueryTran {
 		
 		logger.info("TESTING Query TRAN");
 		
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), TestProperties.contextPath + TestProperties.plex + "/transaction");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), TestProperties.contextPath + TestProperties.plex + "/transaction", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -95,7 +96,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"attributes", "TIMESTAMP"};
 		queryParams.add(show);
-		Response response = RequestUtils.getRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		Response response = RequestUtils.getRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/transaction", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryTransactionOutput qpr = RequestUtils.validateQTRSuccess(response);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());
@@ -111,7 +112,7 @@ public class TestQueryTran {
 		List<String[]> queryParams2 = new ArrayList<>();
 		String[] show2 = new String[] {"attributes", "PGM"};
 		queryParams2.add(show2);
-		Response response2= RequestUtils.getRequest(queryParams2, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		Response response2= RequestUtils.getRequest(queryParams2, TestProperties.contextPath + TestProperties.plex + "/transaction", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryTransactionOutput qpr2 = RequestUtils.validateQTRSuccess(response2);
 		/*Check if data is correct*/
 		logger.info(qpr2.toString());
@@ -127,7 +128,7 @@ public class TestQueryTran {
 		List<String[]> queryParams3 = new ArrayList<>();
 		String[] show3 = new String[] {"attributes", "AOCMD"};
 		queryParams3.add(show3);
-		Response response3= RequestUtils.getRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		Response response3= RequestUtils.getRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/transaction", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryTransactionOutput qpr3 = RequestUtils.validateQTRSuccess(response3);
 		/*Check if data is correct*/
 		logger.info(qpr3.toString());
@@ -152,7 +153,7 @@ public class TestQueryTran {
 		List<String[]> queryParams = new ArrayList<>();
 		String[] show = new String[] {"name", "FOO"};
 		queryParams.add(show);
-		Response response= RequestUtils.getRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		Response response= RequestUtils.getRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/transaction", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryTransactionOutput qpr = response.readEntity(QueryTransactionOutput.class);
 		/*Check if data is correct*/
 		logger.info(qpr.toString());

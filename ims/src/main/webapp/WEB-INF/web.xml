@@ -39,6 +39,7 @@
 			<role-name>pgm-user</role-name>
 			<role-name>tran-user</role-name>
 			<role-name>region-user</role-name>
+			<role-name>delete-user</role-name>
 		</auth-constraint>
 	</security-constraint>
 
@@ -57,6 +58,9 @@
 	</security-role>
 	<security-role>
 		<role-name>post-user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>delete-user</role-name>
 	</security-role>
 	<security-role>
 		<role-name>pgm-user</role-name>

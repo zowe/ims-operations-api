@@ -7,6 +7,7 @@
 	<user username="get" password="cGFzc3dvcmQ=" role="get-user" />
 	<user username="post" password="cGFzc3dvcmQ=" role="post-user" />
 	<user username="put" password="cGFzc3dvcmQ=" role="put-user" />
+	<user username="delete" password="cGFzc3dvcmQ=" role="delete-user" />
 	<user username="pgm" password="cGFzc3dvcmQ=" role="pgm-user" />
 	<user username="tran" password="cGFzc3dvcmQ=" role="tran-user" />
 	<user username="region" password="cGFzc3dvcmQ=" role="region-user" />
