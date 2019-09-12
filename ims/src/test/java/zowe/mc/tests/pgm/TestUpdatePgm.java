@@ -40,6 +40,8 @@ import zowe.mc.TestProperties;
 public class TestUpdatePgm {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestUpdatePgm.class);
+	private final String DEFAULT_USER = "admin";
+	private final String DEFAULT_PASSWORD = "password";
 	
 	/**
 	 * Setup rest client
@@ -62,7 +64,7 @@ public class TestUpdatePgm {
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
-		Response responses = RequestUtils.putRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program");
+		Response responses = RequestUtils.putRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
 		UpdateProgamOutput upr = RequestUtils.validateUPRSuccess(responses);
 		logger.info(upr.toString());
 		
@@ -73,7 +75,7 @@ public class TestUpdatePgm {
 		String[] show = new String[] {"attributes", "ALL"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
-		Response responses2 = RequestUtils.getRequest(queryParams2, TestProperties.contextPath + TestProperties.plex + "/program");
+		Response responses2 = RequestUtils.getRequest(queryParams2, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(responses2);
 		for (QueryProgram r : qpr.getData()) {
 			assert(r.getLstt().contains("STOSCHD"));
@@ -86,7 +88,7 @@ public class TestUpdatePgm {
 		String[] start = new String[] {"start", "SCHD"};
 		queryParams3.add(names3);
 		queryParams3.add(start);
-		Response responses3 = RequestUtils.putRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/program");
+		Response responses3 = RequestUtils.putRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
 		UpdateProgamOutput upr2 = RequestUtils.validateUPRSuccess(responses3);
 		logger.info(upr2.toString());
 		
@@ -97,7 +99,7 @@ public class TestUpdatePgm {
 		String[] show2 = new String[] {"attributes", "ALL"};
 		queryParams4.add(names4);
 		queryParams4.add(show2);
-		Response responses4 = RequestUtils.getRequest(queryParams4, TestProperties.contextPath + TestProperties.plex + "/program");
+		Response responses4 = RequestUtils.getRequest(queryParams4, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
 		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(responses4);
 		for (QueryProgram r : qpr2.getData()) {
 			assertEquals(null, r.getLstt());

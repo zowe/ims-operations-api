@@ -492,7 +492,7 @@ public class PgmService {
 	@Path("/")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"ims-admin", "pgm-user", "post-user"})
+	@RolesAllowed({"ims-admin", "pgm-user", "post-user", "delete-user"})
 	@Operation(operationId="deletepgm", summary = "Delete IMS program resources by using the 'DELETE PGM' IMS command. For more information on each parameter, see the documentation for the 'DELETE PGM' IMS command in IBM Knowledge Center.",
 	responses = { @ApiResponse(content = @Content(mediaType="application/json")),
 			@ApiResponse(responseCode = "200", description = "Successful Request",
