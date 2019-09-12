@@ -199,6 +199,32 @@ public class RequestUtils {
 		Response responses = builder.get();
 		return responses;
 	}
+	
+	
+	/**
+	 * Helper method for testing successful 200 rest requests. Specific to this class
+	 * @param queryParams
+	 * @param path
+	 * @param username 
+	 * @param password
+	 * @return
+	 */
+	public static Response customGetRequest(List<String[]> queryParams, String path, String username, String password) {
+		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
+
+		for (String[] sArray : queryParams) {
+			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
+		}
+
+		webTarget.register(new JacksonJsonProvider());
+		webTarget.register(new Authenticator(username, password));
+		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
+				.header("port", TestProperties.port)
+				.accept(MediaType.APPLICATION_JSON);
+
+		Response responses = builder.get();
+		return responses;
+	}
 
 	public static UpdateTransactionOutput validateUTRSuccess(Response responses) {
 		UpdateTransactionOutput updateTranResponses = responses.readEntity(UpdateTransactionOutput.class);
