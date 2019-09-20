@@ -12,6 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import application.rest.responses.pgm.create.CreateProgram;
+import application.rest.responses.pgm.create.CreateProgramOutput;
+import application.rest.responses.pgm.delete.DeleteProgram;
+import application.rest.responses.pgm.delete.DeleteProgramOutput;
+import application.rest.responses.tran.create.CreateTransaction;
+import application.rest.responses.tran.create.CreateTransactionOutput;
+import application.rest.responses.tran.delete.DeleteTransaction;
+import application.rest.responses.tran.delete.DeleteTransactionOutput;
+import application.rest.responses.tran.update.UpdateTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 import zowe.mc.TestProperties;
@@ -20,6 +29,18 @@ import zowe.mc.TestProperties;
 public class TestBasicAuthentication {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestBasicAuthentication.class);
+	private static final String ADMIN_USER = "admin";
+	private static final String GET_USER = "get";
+	private static final String POST_USER = "post";
+	private static final String PUT_USER = "put";
+	private static final String PGM_USER = "pgm";
+	private static final String REGION_USER = "region";
+	private static final String DELETE_USER = "delete";
+	private static final String TRAN_USER = "tran";
+	private static final String DEFAULT_PASSWORD = "password";
+	private static String PGM_PATH = TestProperties.contextPath + TestProperties.plex + "/program";
+	private static String TRAN_PATH = TestProperties.contextPath + TestProperties.plex + "/transaction";
+	private static String REGION_PATH = TestProperties.contextPath + TestProperties.plex + "/region";
 	
 	/**
 	 * Setup rest client
@@ -31,36 +52,27 @@ public class TestBasicAuthentication {
 	@Test
 	public void testNoCredentials() {
 		logger.info("TESTING No Credentials");
-		String path = TestProperties.contextPath + TestProperties.plex + "/program";
-		String username = null;
-		String password = null;
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.UNAUTHORIZED.getStatusCode());
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), PGM_PATH, null, null);
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
 	}
 	
 	@Test
 	public void testCorrectAdminCredentials() {
 		logger.info("TESTING Correct Admin Credentials");
-		String path = TestProperties.contextPath + TestProperties.plex + "/program";
-		String username = "admin";
-		String password = "password";
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 	}
 
 	@Test
 	public void testPgmUserAccessPgmGetService() {
-		logger.info("TESTING Pgm User Access Pgm Get Service");
-		String path = TestProperties.contextPath + TestProperties.plex + "/program";
-		String username = "pgm";
-		String password = "password";
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+		logger.info("TESTING Pgm User Access Pgm GET Service");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), PGM_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 	}
 	
 	@Test
 	public void testPgmUserAccessPgmPutService() {
-		logger.info("TESTING Pgm User Access Pgm Get Service");
+		logger.info("TESTING Pgm User Access Pgm PUT Service");
 		
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"name", "DBF*"};
@@ -68,80 +80,122 @@ public class TestBasicAuthentication {
 		queryParams.add(names);
 		queryParams.add(stop);
 		
-		String path = TestProperties.contextPath + TestProperties.plex + "/program";
-		String username = "pgm";
-		String password = "password";
-		Response response = RequestUtils.putRequest(queryParams, path, username, password);
-		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+		Response response = RequestUtils.putRequest(queryParams, PGM_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 	}
 	
 	@Test
-	// INCOMPLETE
 	public void testPgmUserAccessPgmPostService() {
-		/*
-		 * For Post Request, should we actually create a pgm and delete it? 
-		 * 
-		logger.info("TESTING Pgm User Access Pgm Get Service");
-		String path = TestProperties.contextPath + TestProperties.plex + "/program";
-		String username = "pgm";
-		String password = "password";
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
-		*/
+		logger.info("TESTING Pgm User Access Pgm POST Service");
+		/* 
+		 * For POST service, we must create and delete the resource that was created
+		 * NOTE: Using ADMIN_USER for portions of the test that require deleting resources.
+		 *  
+		 * */
+		
+		/* Delete the TEST pgm if already created */
+		List<String[]> queryParamspre = new ArrayList<>();
+		String[] namespre = new String[] {"name", "TEST"};
+		queryParamspre.add(namespre);
+		RequestUtils.deleteRequest(queryParamspre, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
+		
+		/* Create the TEST pgm */
+		List<String[]> queryParams = new ArrayList<>();
+		String[] names = new String[] {"name", "TEST"};
+		queryParams.add(names);
+		Response response = RequestUtils.postRequest(queryParams, PGM_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
+		
+		/* Verifying if pgm resource was created */
+		logger.info(cpr.toString());
+		for (CreateProgram q : cpr.getData()) {
+			assertEquals("0", q.getCc());
+			assertEquals("TEST", q.getPgm());
+		}
+		for (String key : cpr.getMessages().keySet()) {
+			assertEquals(null, cpr.getMessages().get(key).getRc());
+		}
+		
+		/* Deleting the TEST pgm */
+		List<String[]> queryParams2 = new ArrayList<>();
+		String[] names2 = new String[] {"name", "TEST"};
+		queryParams2.add(names2);
+		Response response2 = RequestUtils.deleteRequest(queryParams2, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
+		DeleteProgramOutput dpr2 = RequestUtils.validateDPRSuccess(response2);
+		
+		/* Verifying if pgm resource was deleted */
+		logger.info(dpr2.toString());
+		for (DeleteProgram q : dpr2.getData()) {
+			assertEquals("0", q.getCc());
+			assertEquals("TEST", q.getPgm());
+		}
+		for (String key : dpr2.getMessages().keySet()) {
+			assertEquals(null, dpr2.getMessages().get(key).getRc());
+		}
 	}
 	
 	@Test
 	public void testPgmUserAccessTranGetService() {
-		logger.info("TESTING Pgm User Access Tran Service");
-		String username = "pgm";
-		String password = "password";
-		String path = TestProperties.contextPath + TestProperties.plex + "/transaction";
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.FORBIDDEN.getStatusCode());
+		logger.info("TESTING Pgm User Access Tran GET Service");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), TRAN_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
 	}
 	
 	@Test
 	public void testPgmUserAccessTranPutService() {
-		return;
+		logger.info("TESTING Pgm User Access Tran PUT Service (stopping scheduling of a transaction)");		
+		List<String[]> queryParams = new ArrayList<>();
+		String[] names = new String[] {"name", "JUNIT"};
+		String[] stop = new String[] {"stop", "SCHD"};
+		queryParams.add(names);
+		queryParams.add(stop);
+		Response response = RequestUtils.putRequest(queryParams, TRAN_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
 	}
 	
 	@Test
-	//INCOMPLETE
 	public void testPgmUserAccessTranPostService() {
-		/*
-		 * Will this actually create a transaction? 
-		 * 
+		logger.info("TESTING Pgm User Access Tran POST Service");	
+		// Will use ADMIN_USER for any necessary delete requests
+		// Need to create a program first
+		logger.info("Creating test program 'JUNIT'");
 		List<String[]> queryParams = new ArrayList<>();
 		String[] names = new String[] {"name", "JUNIT"};
-		String[] pgm = new String[] {"pgm", "JUNIT"};
 		queryParams.add(names);
-		queryParams.add(pgm);
-		String path = TestProperties.contextPath + TestProperties.plex + "/transaction";
-		String username = "pgm";
-		String password = "password";
-		RequestUtils.postRequest(queryParams, path, username, password);
-		*/
+		RequestUtils.postRequest(queryParams, PGM_PATH, PGM_USER, DEFAULT_PASSWORD);
+		
+		// Attempt to create transaction
+		logger.info("Attempting to create test transaction");
+		List<String[]> queryParams1 = new ArrayList<>();
+		String[] names1 = new String[] {"name", "TEST"};
+		String[] pgm1 = new String[] {"pgm", "JUNIT"};
+		queryParams1.add(names1);
+		queryParams1.add(pgm1);
+		Response response1 = RequestUtils.postRequest(queryParams1, TRAN_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response1.getStatus());
+		
+		// Delete program that was created
+		logger.info("Deleting test program 'JUNIT'");
+		List<String[]> queryParams3 = new ArrayList<>();
+		String[] names3 = new String[] {"name", "JUNIT"};
+		queryParams3.add(names3);
+		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
 	}
 	
 	@Test
 	public void testPgmUserAccessRegionGetService() {
-		logger.info("TESTING Pgm User Access Region Service");
-		String username = "pgm";
-		String password = "password";
-		String path = TestProperties.contextPath + TestProperties.plex + "/region";
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), path, username, password);
-		assertEquals(response.getStatus(), Response.Status.FORBIDDEN.getStatusCode());
+		logger.info("TESTING Pgm User Access Region GET Service");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(), REGION_PATH, PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
 	}
 	
-//	@Test
-//	public void testPgmUserAccessRegionPostService() {
-//		return;
-//	}
-//	
-//	@Test
-//	public void testPgmUserAccessRegionPutService() {
-//		return;
-//	}
+	@Test
+	public void testPgmUserAccessRegionPutService() {
+		logger.info("TESTING Pgm User Access Region PUT Service");
+		Response response = RequestUtils.putRequest(new ArrayList<String[]>(), REGION_PATH + "/stop", PGM_USER, DEFAULT_PASSWORD);
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+	}
 	
 	
 	public void testIncorrectCredentials() {
