@@ -15,7 +15,7 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.runner.RunWith;
 
-
+import zowe.mc.tests.TestBasicAuthentication;
 import zowe.mc.tests.TestOMConnection;
 import zowe.mc.tests.pgm.TestCreateDeletePgm;
 import zowe.mc.tests.pgm.TestQueryPgm;
@@ -41,7 +41,8 @@ import zowe.mc.tests.tran.TestUpdateTran;
 				  TestCreateDeletePgm.class,
 				  TestQueryTran.class,
 				  TestUpdateTran.class,
-				  TestCreateDeleteTran.class} )
+				  TestCreateDeleteTran.class,
+				  TestBasicAuthentication.class} )
 public class MCSuiteTest {
 
 }
