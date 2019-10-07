@@ -45,12 +45,13 @@ import zowe.mc.tests.tran.TestUpdateTran;
 				  TestCreateDeletePgm.class,
 				  TestQueryTran.class,
 				  TestUpdateTran.class,
-				  TestCreateDeleteTran.class,
-				  TestBasicAuthenticationPgmUser.class,
-				  TestBasicAuthenticationDeleteUser.class,
-				  TestBasicAuthenticationRegionUser.class,
-				  TestBasicAuthenticationGetUser.class,
-				  TestBasicAuthenticationPostUser.class} )
+				  TestCreateDeleteTran.class
+//				  TestBasicAuthenticationPgmUser.class,
+//				  TestBasicAuthenticationDeleteUser.class,
+//				  TestBasicAuthenticationRegionUser.class,
+//				  TestBasicAuthenticationGetUser.class,
+//				  TestBasicAuthenticationPostUser.class
+				  } )
 public class MCSuiteTest {
 
 }
