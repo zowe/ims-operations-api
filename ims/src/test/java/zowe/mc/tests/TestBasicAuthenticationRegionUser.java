@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -148,7 +149,10 @@ public class TestBasicAuthenticationRegionUser {
 	}
 	
 	
-	
+	@AfterEach
+	public void sit() throws InterruptedException {
+		Thread.sleep(2000);
+	}
 	
 	
 }
