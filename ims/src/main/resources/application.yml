@@ -13,7 +13,7 @@
           info:
               serviceTitle:  ${environment.serviceTitle}
               description:  ${environment.serviceDescription}
-              swaggerLocation: http://localhost:8081/ims/apis/v1/openapi.json
+              swaggerLocation: http://localhost:8081/ims/api/v1/openapi.json
           fetchRegistry: false
           region: default
       service:
@@ -27,7 +27,7 @@
       server:
           scheme: http
           port: ${environment.port}
-          contextPath: /ims/apis/v1
+          contextPath: /ims/api/v1
 
   eureka:
       instance:
@@ -93,7 +93,7 @@
       serviceId: IMS
       serviceTitle: IMS Operations API
       serviceDescription: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-      discoveryEnabled: false
+      discoveryEnabled: true
       hostname: localhost
       port: 8081
       discoveryLocations: https://localhost:10011/eureka

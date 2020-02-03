@@ -30,7 +30,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
  * @author jerryli
  *
  */
-@ApplicationPath("/apis/v1")
+@ApplicationPath("/api/v1")
 public class LibertyApp extends Application{
 
 //	public LibertyConfig(@Context ServletConfig servletConfig) {

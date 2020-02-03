@@ -17,7 +17,7 @@ public class TestProperties {
 	public static final Integer port = 9999;
 	public static final String plex = "PLEX1";
 	
-	public static final String contextPath = "/ims/apis/v1/";
+	public static final String contextPath = "/ims/api/v1/";
 	
 	
 	public static String restPort;
