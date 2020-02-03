@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -175,6 +176,7 @@ public class TestBasicAuthenticationGetUser {
 		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
 	}
 	
+	//ERROR
 	@Test
 	public void testGetUserAccessTranDeleteService() {
 		logger.info("TESTING Get User Access Tran DELETE Service");	
@@ -237,6 +239,11 @@ public class TestBasicAuthenticationGetUser {
 		String[] names3 = new String[] {"name", "JUNIT"};
 		queryParams3.add(names3);
 		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
+	}
+	
+	@AfterEach
+	public void sit() throws InterruptedException {
+		Thread.sleep(2000);
 	}
 	
 }

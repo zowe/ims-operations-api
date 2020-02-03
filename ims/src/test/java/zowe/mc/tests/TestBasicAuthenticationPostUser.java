@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +62,7 @@ public class TestBasicAuthenticationPostUser {
 		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
 	}
 	
+	//ERROR
 	@Test
 	public void testPostUserAccessTranPostService() {
 		logger.info("TESTING Post User Access Tran POST Service");	
@@ -212,6 +214,7 @@ public class TestBasicAuthenticationPostUser {
 		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
 	}
 	
+	//ERROR
 	@Test
 	public void testPostUserAccessTranDeleteService() {
 		logger.info("TESTING Post User Access Tran DELETE Service");	
@@ -275,7 +278,10 @@ public class TestBasicAuthenticationPostUser {
 		RequestUtils.deleteRequest(queryParams3, PGM_PATH, ADMIN_USER, DEFAULT_PASSWORD);
 	}
 	
-	
+	@AfterEach
+	public void sit() throws InterruptedException {
+		Thread.sleep(2000);
+	}
 	
 	
 }

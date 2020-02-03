@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -188,15 +189,9 @@ public class TestBasicAuthenticationPgmUser {
 	}
 	
 
-	
-//	@AfterEach
-//	public void sit() {
-//		try {
-//			Thread.sleep(3000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
+	@AfterEach
+	public void sit() throws InterruptedException {
+		Thread.sleep(2000);
+	}
 	
 }

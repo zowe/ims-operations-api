@@ -64,6 +64,7 @@ public class TestBasicAuthenticationDeleteUser {
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 	}
 	
+	// ERROR
 	@Test
 	public void testDeleteUserAccessTranDeleteService() {
 		logger.info("TESTING Delete User Access Tran DELETE Service");	
@@ -239,7 +240,7 @@ public class TestBasicAuthenticationDeleteUser {
 	
 	@AfterEach
 	public void sit() throws InterruptedException {
-		Thread.sleep(10000);
+		Thread.sleep(2000);
 	}
 	
 	
