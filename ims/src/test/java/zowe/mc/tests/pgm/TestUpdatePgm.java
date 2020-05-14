@@ -24,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import application.rest.responses.pgm.create.CreateProgram;
+import application.rest.responses.pgm.create.CreateProgramOutput;
 import application.rest.responses.pgm.query.QueryProgram;
 import application.rest.responses.pgm.query.QueryProgramOutput;
 import application.rest.responses.pgm.update.UpdateProgamOutput;
@@ -41,6 +43,8 @@ public class TestUpdatePgm {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TestUpdatePgm.class);
 	private final String DEFAULT_USER = "admin";
+	private final String POST_USER = "post";
+	private final String DELETE_USER = "delete";
 	private final String DEFAULT_PASSWORD = "password";
 	
 	/**
@@ -55,12 +59,32 @@ public class TestUpdatePgm {
 	 * @throws Exception
 	 */
 	@Test
-	public void testUpdatePgmStopSchd() {
+	public void testUpdatePgmStop() {
+		
+		List<String[]> queryParamspre = new ArrayList<>();
+		String[] namespre = new String[] {"name", "TESTUPD"};
+		queryParamspre.add(namespre);
+		RequestUtils.deleteRequest(queryParamspre, TestProperties.contextPath + TestProperties.plex + "/program", DELETE_USER, DEFAULT_PASSWORD);
+		
+		List<String[]> qp = new ArrayList<>();
+		String[] nms = new String[] {"name", "TESTUPD"};
+		qp.add(nms);
+		Response rsp = RequestUtils.postRequest(qp, TestProperties.contextPath + TestProperties.plex + "/program", POST_USER, DEFAULT_PASSWORD);
+		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(rsp);
+		/*Check if data is correct*/
+		logger.info(cpr.toString());
+		for (CreateProgram q : cpr.getData()) {
+			assertEquals("0", q.getCc());
+			assertEquals("TESTUPD", q.getPgm());
+		}
+		for (String key : cpr.getMessages().keySet()) {
+			assertEquals(null, cpr.getMessages().get(key).getRc());
+		}
 
 		//First we stop the program
 		logger.info("Testing Update PGM by stopping scheduling of a program");		
 		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"name", "DBF*"};
+		String[] names = new String[] {"name", "TESTUPD"};
 		String[] stop = new String[] {"stop", "SCHD"};
 		queryParams.add(names);
 		queryParams.add(stop);
@@ -71,7 +95,7 @@ public class TestUpdatePgm {
 		//Then we verify it's status
 		logger.info("Verifying status");	
 		List<String[]> queryParams2 = new ArrayList<>();
-		String[] names2 = new String[] {"name", "DBF*"};
+		String[] names2 = new String[] {"name", "TESTUPD"};
 		String[] show = new String[] {"attributes", "ALL"};
 		queryParams2.add(names2);
 		queryParams2.add(show);
@@ -79,30 +103,6 @@ public class TestUpdatePgm {
 		QueryProgramOutput qpr = RequestUtils.validateQPRSuccess(responses2);
 		for (QueryProgram r : qpr.getData()) {
 			assert(r.getLstt().contains("STOSCHD"));
-		}
-		
-		//First we start the program
-		logger.info("Testing Update PGM by starting scheduling of a program");		
-		List<String[]> queryParams3 = new ArrayList<>();
-		String[] names3 = new String[] {"name", "DBF*"};
-		String[] start = new String[] {"start", "SCHD"};
-		queryParams3.add(names3);
-		queryParams3.add(start);
-		Response responses3 = RequestUtils.putRequest(queryParams3, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
-		UpdateProgamOutput upr2 = RequestUtils.validateUPRSuccess(responses3);
-		logger.info(upr2.toString());
-		
-		//Then we verify it's status
-		logger.info("Verifying status");	
-		List<String[]> queryParams4 = new ArrayList<>();
-		String[] names4 = new String[] {"name", "DBF*"};
-		String[] show2 = new String[] {"attributes", "ALL"};
-		queryParams4.add(names4);
-		queryParams4.add(show2);
-		Response responses4 = RequestUtils.getRequest(queryParams4, TestProperties.contextPath + TestProperties.plex + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
-		QueryProgramOutput qpr2 = RequestUtils.validateQPRSuccess(responses4);
-		for (QueryProgram r : qpr2.getData()) {
-			assertEquals(null, r.getLstt());
 		}
 		
 		

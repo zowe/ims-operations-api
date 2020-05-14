@@ -66,11 +66,11 @@ public class TestCreateDeletePgm
 		queryParamspre.add(namespre);
 		RequestUtils.deleteRequest(queryParamspre, TestProperties.contextPath + TestProperties.plex + "/program", DELETE_USER, DEFAULT_PASSWORD);
 		
-		List<String[]> queryParams = new ArrayList<>();
-		String[] names = new String[] {"name", "TEST"};
-		queryParams.add(names);
-		Response response = RequestUtils.postRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program", POST_USER, DEFAULT_PASSWORD);
-		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(response);
+		List<String[]> qp = new ArrayList<>();
+		String[] nms = new String[] {"name", "TEST"};
+		qp.add(nms);
+		Response rsp = RequestUtils.postRequest(qp, TestProperties.contextPath + TestProperties.plex + "/program", POST_USER, DEFAULT_PASSWORD);
+		CreateProgramOutput cpr = RequestUtils.validateCPRSuccess(rsp);
 		/*Check if data is correct*/
 		logger.info(cpr.toString());
 		for (CreateProgram q : cpr.getData()) {
