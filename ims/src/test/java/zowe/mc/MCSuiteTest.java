@@ -15,11 +15,11 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.runner.RunWith;
 
-import zowe.mc.tests.TestBasicAuthenticationDeleteUser;
-import zowe.mc.tests.TestBasicAuthenticationGetUser;
-import zowe.mc.tests.TestBasicAuthenticationPgmUser;
-import zowe.mc.tests.TestBasicAuthenticationPostUser;
-import zowe.mc.tests.TestBasicAuthenticationRegionUser;
+//import zowe.mc.tests.TestBasicAuthenticationDeleteUser;
+//import zowe.mc.tests.TestBasicAuthenticationGetUser;
+//import zowe.mc.tests.TestBasicAuthenticationPgmUser;
+//import zowe.mc.tests.TestBasicAuthenticationPostUser;
+//import zowe.mc.tests.TestBasicAuthenticationRegionUser;
 import zowe.mc.tests.TestOMConnection;
 import zowe.mc.tests.pgm.TestCreateDeletePgm;
 import zowe.mc.tests.pgm.TestQueryPgm;
