@@ -21,10 +21,12 @@ node('ibm-jenkins-slave-nvm') {
     packageName: 'org.zowe.plugins.ims_api',
     disablePax: true,
     extraInit: {
-      // find project version
-      def version = sh(script: 'cat pom.xml | grep \'<version>\' | head -1 | awk -F\'<\' \'{ print \$2; }\' | awk -F\'>\' \'{print \$2;}\'', returnStdout: true).trim()
-      def versionTrunks = lib.Utils.parseSemanticVersion(version)
-      pipeline.setVersion("${versionTrunks['major']}.${versionTrunks['minor']}.${versionTrunks['patch']}".toString())
+      dir('ims') {
+        // find project version
+        def version = sh(script: 'cat pom.xml | grep \'<version>\' | head -1 | awk -F\'<\' \'{ print \$2; }\' | awk -F\'>\' \'{print \$2;}\'', returnStdout: true).trim()
+        def versionTrunks = lib.Utils.parseSemanticVersion(version)
+        pipeline.setVersion("${versionTrunks['major']}.${versionTrunks['minor']}.${versionTrunks['patch']}".toString())
+      }
     }
   )
 
@@ -32,15 +34,19 @@ node('ibm-jenkins-slave-nvm') {
   pipeline.build(
     isSkippable   : false,
     operation     : {
+      dir('ims') {
         sh 'mvn compile'
+      }
     }
   )
 
   pipeline.test(
     name          : 'Unit and Integretion',
     operation     : {
+      dir('ims') {
         // FIXME: until we figure
         // sh 'mvn test'
+      }
     },
     allowMissingJunit : true
   )
@@ -48,10 +54,12 @@ node('ibm-jenkins-slave-nvm') {
   // how we packaging jars/zips
   pipeline.packaging(
       operation: {
-        sh 'mvn package -Dmaven.test.skip=true'
-        dir ('target') {
-          sh 'mv ims-*-javadoc.jar zowe-ims-api-javadoc.jar'
-          sh 'mv ims-*.jar zowe-ims-api.jar'
+        dir('ims') {
+          sh 'mvn package -Dmaven.test.skip=true'
+          dir ('target') {
+            sh 'mv ims-*-javadoc.jar zowe-ims-api-javadoc.jar'
+            sh 'mv ims-*.jar zowe-ims-api.jar'
+          }
         }
       }
   )
@@ -59,8 +67,8 @@ node('ibm-jenkins-slave-nvm') {
   // define we need publish stage
   pipeline.publish(
     artifacts: [
-      'target/zowe-ims-api-javadoc.jar',
-      'target/zowe-ims-api.jar',
+      'ims/target/zowe-ims-api-javadoc.jar',
+      'ims/target/zowe-ims-api.jar',
     ]
   )
 
