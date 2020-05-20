@@ -53,6 +53,7 @@ node('ibm-jenkins-slave-nvm') {
 
   // how we packaging jars/zips
   pipeline.packaging(
+      name: 'ims-api',
       operation: {
         dir('ims') {
           sh 'mvn package -Dmaven.test.skip=true'
