@@ -18,7 +18,7 @@ node('ibm-jenkins-slave-nvm') {
   pipeline.admins.add("jackjia")
 
   pipeline.setup(
-    packageName: 'org.zowe.plugins.ims-operations-api',
+    packageName: 'org.zowe.plugins.ims_api',
     disablePax: true,
     extraInit: {
       // find project version
@@ -50,8 +50,8 @@ node('ibm-jenkins-slave-nvm') {
       operation: {
         sh 'mvn package -Dmaven.test.skip=true'
         dir ('target') {
-          sh 'mv ims-*-javadoc.jar zowe-ims-plugin-javadoc.jar'
-          sh 'mv ims-*.jar zowe-ims-plugin.jar'
+          sh 'mv ims-*-javadoc.jar zowe-ims-api-javadoc.jar'
+          sh 'mv ims-*.jar zowe-ims-api.jar'
         }
       }
   )
@@ -59,8 +59,8 @@ node('ibm-jenkins-slave-nvm') {
   // define we need publish stage
   pipeline.publish(
     artifacts: [
-      'target/zowe-ims-plugin-javadoc.jar',
-      'target/zowe-ims-plugin.jar',
+      'target/zowe-ims-api-javadoc.jar',
+      'target/zowe-ims-api.jar',
     ]
   )
 
