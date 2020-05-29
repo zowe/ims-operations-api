@@ -13,7 +13,7 @@
           info:
               serviceTitle:  ${environment.serviceTitle}
               description:  ${environment.serviceDescription}
-              swaggerLocation: http://localhost:8081/ims/apis/v1/openapi.json
+              swaggerLocation: http://localhost:8081/ims/api/v1/openapi.json
           fetchRegistry: false
           region: default
       service:
@@ -27,7 +27,7 @@
       server:
           scheme: http
           port: ${environment.port}
-          contextPath: /ims/apis/v1
+          contextPath: /ims/api/v1
 
   eureka:
       instance:
