@@ -45,4 +45,4 @@ To start or stop the resources, Susan can invoke additional APIs outlined in the
 
 ## Build, install and test IMS Operations API
 
-To build, install and test IMS Operations API, refer to the instructions in the wiki page. 
+To build, install and test IMS Operations API, refer to the instructions in [the wiki page](https://github.com/zowe/ims-operations-api/wiki). 
