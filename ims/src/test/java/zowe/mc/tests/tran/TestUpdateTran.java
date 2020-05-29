@@ -45,6 +45,21 @@ public class TestUpdateTran {
 	 */
 	@BeforeAll
 	public static void setUp() {
+		logger.info("TESTING CREATE and DELETE TRAN");
+
+		logger.info("Need to create program first");
+		List<String[]> queryParams = new ArrayList<>();
+		String[] names = new String[] {"name", "JUNIT"};
+		queryParams.add(names);
+		RequestUtils.postRequest(queryParams, TestProperties.contextPath + TestProperties.plex + "/program");
+		
+		List<String[]> queryParams1 = new ArrayList<>();
+		String[] names1 = new String[] {"name", "JUNIT"};
+		String[] pgm1 = new String[] {"pgm", "JUNIT"};
+		queryParams1.add(names1);
+		queryParams1.add(pgm1);
+		RequestUtils.postRequest(queryParams1, TestProperties.contextPath + TestProperties.plex + "/transaction");
+		
 	}
 
 	/**
@@ -104,7 +119,6 @@ public class TestUpdateTran {
 		
 		
 	}
-	
 	
 
 }

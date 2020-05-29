@@ -14,7 +14,7 @@ package zowe.mc;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import application.main.MC;
+import application.main.ApiLauncher;
 
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
@@ -34,7 +34,7 @@ public class SuiteExtension implements BeforeAllCallback, ExtensionContext.Store
 		//We start our Spring Boot instance before running tests
 		if (!started) {
 			started = true;
-			MC.main(new String[] {});
+			ApiLauncher.main(new String[] {});
 			context.getRoot().getStore(GLOBAL).put("any unique name", this);
 		}
 	}

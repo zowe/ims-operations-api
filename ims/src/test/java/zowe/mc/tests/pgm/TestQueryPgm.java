@@ -42,7 +42,6 @@ public class TestQueryPgm
 
 	private static final Logger logger = LoggerFactory.getLogger(TestQueryPgm.class);
 
-
 	/**
 	 * Setup rest client
 	 */
@@ -57,6 +56,7 @@ public class TestQueryPgm
 	@Test
 	public void testQueryPgm() {
 		logger.info("TESTING Query PGM");
+		
 		
 		//QUERY PGM
 		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  TestProperties.contextPath + TestProperties.plex + "/program");

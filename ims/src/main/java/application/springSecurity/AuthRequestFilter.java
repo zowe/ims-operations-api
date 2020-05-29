@@ -1,4 +1,3 @@
-
 /**
  * This program and the accompanying materials are made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -9,7 +8,7 @@
  * Copyright IBM Corporation 2019
  */
 
-package filters;
+package application.springSecurity;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,12 +18,16 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.stereotype.Component;
 
 import annotations.CheckHeader;
 
 @CheckHeader
+@Component
+@Provider
 public class AuthRequestFilter implements ContainerRequestFilter {
 
 	@Override
