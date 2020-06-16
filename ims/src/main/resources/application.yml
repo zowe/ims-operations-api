@@ -1,6 +1,6 @@
-    ##############################################################################################
-  # Application configuration section
-  ##############################################################################################
+##############################################################################################
+# Application configuration section
+##############################################################################################
 spring:
     application:
         name: ${apiml.service.id}
@@ -57,8 +57,8 @@ apiml:
       ssl:
           enabled: ${server.ssl.enabled}
           verifySslCertificatesOfServices: true
-          ciphers: ${server.ssl.ciphers}
-          protocol: ${server.ssl.protocol}
+          ciphers: TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+          protocol: TLSv1.2
           enabled-protocols: ${server.ssl.protocol}
           keyStoreType: ${server.ssl.keyStoreType}
           trustStoreType: ${server.ssl.trustStoreType}
@@ -71,111 +71,26 @@ apiml:
           trustStore: ${server.ssl.trustStore} #keystore/localhost/localhost.truststore.p12-blah
           trustStorePassword: ${server.ssl.trustStorePassword} #password-blah
 
+server:
+    scheme: ${apiml.service.scheme}
+    hostname: ${apiml.service.hostname} #localhost # Hostname that is advertised in Eureka. Default is valid only for localhost
+    port: ${apiml.service.port} #10012         # Default port name for discoverable-client service
+    address: ${apiml.service.ipAddress} #127.0.0.1
+
+    servlet:
+        contextPath: /${apiml.service.contextPath}
+
+    ssl:
+        enabled: true
+        protocol: TLSv1.2
+        enabled-protocols: TLSv1.2
+        ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+        keyStoreType: PKCS12
+        trustStoreType: PKCS12
+
 logging:
  level:
    ROOT: INFO
    org.zowe.apiml: DEBUG  
   
   
-  ##############################################################################################
-  # MFAAS configuration section
-  ##############################################################################################
-  #mfaas:
-  #    discovery:
-  #        locations: ${environment.discoveryLocations}
-  #        serviceId: ${environment.serviceId}
-  #        enabled: ${environment.discoveryEnabled:true}
-  #        endpoints:
-  #            statusPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/info
-  #            healthPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/health
-  #            homePage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.yaml
-  #        info:
-  #            serviceTitle:  ${environment.serviceTitle}
-  #            description:  ${environment.serviceDescription}
-  #            swaggerLocation: http://localhost:8081/ims/apis/v1/openapi.json
-  #        fetchRegistry: false
-  #        region: default
-  #    service:
-  #        hostname: ${environment.hostname}
-  #        ipAddress: ${environment.ipAddress}
-  #    catalog-ui-tile:
-  #        id: IMS
-  #        title: IMS Operations API
-  #        description: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-  #        version:  1.0.0
-  #    server:
-  #        scheme: http
-  #        port: ${environment.port}
-  #        contextPath: /ims/apis/v1
-
-  #eureka:
-  #    instance:
-  #        nonSecurePortEnabled: false
-  #        securePortEnabled: true       
-  #        appname: ${mfaas.discovery.serviceId}
-  #        hostname: ${mfaas.service.hostname}
-  #        statusPageUrlPath: ${mfaas.discovery.endpoints.statusPage}
-  #        healthCheckUrl: ${mfaas.discovery.endpoints.healthPage}
-  #        homePageUrl: ${mfaas.discovery.endpoints.homePage}
-  #        metadata-map:
-  #            routed-services:
-  #                api_v1:
-  #                    gateway-url: "api/v1" 
-  #                    service-url: ${mfaas.server.contextPath}
-  #            apiml:
-  #                apiInfo:
-  #                    - apiId: ${mfaas.discovery.serviceId}
-  #                      gatewayUrl: api/v1
-  #                      swaggerUrl: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.json
-  #                      documentationUrl: https://www.zowe.org
-  #            mfaas:
-  #                api-info:
-  #                    apiVersionProperties:
-  #                        v1:
-  #                            title: IMS Operations API
-  #                            description: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-  #                            version: 1.0.0
-  #                            #basePackage: application
-  #                            apiPattern: /v1/.*  # alternative to basePackage for exposing endpoints which match the regex pattern to swagger JSON
-  #                discovery:
-  #                    catalogUiTile:
-  #                        id: ${mfaas.catalog-ui-tile.id}
-  #                        title:  ${mfaas.catalog-ui-tile.title}
-  #                        description: ${mfaas.catalog-ui-tile.description}
-  #                        version: ${mfaas.catalog-ui-tile.version}
-  #                    enableApiDoc: ${mfaas.discovery.info.enableApiDoc:true}
-  #                    service:
-  #                        title: ${mfaas.discovery.info.serviceTitle}
-  #                        description: ${mfaas.discovery.info.description}
-  #    client:
-  #        enabled: ${mfaas.discovery.enabled}
-  #        healthcheck:
-  #            enabled: true
-  #        serviceUrl:
-  #            defaultZone: ${mfaas.discovery.locations}
-  #        fetchRegistry:  ${mfaas.discovery.fetchRegistry}
-  #        region: ${mfaas.discovery.region}
-
-
-##############################################################################################
-# HTTPS Configuration
-##############################################################################################
-    
-#server:
-# address: ${mfaas.service.ipAddress}
-#    port: ${mfaas.server.port}
-#    servlet:
-#        contextPath: ${mfaas.server.contextPath}
-# 
-#    ssl:
-#        ciphers: TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_EMPTY_RENEGOTIATION_INFO_SCSV
-#        protocol: TLSv1.2
-#        keyAlias: localhost
-#        keyPassword: password
-#        keyStore: /Users/lij@us.ibm.com/Keystore/localhost.keystore.p12
-#        keyStoreType: PKCS12
-#        keyStorePassword: password
-#        trustStore: /Users/lij@us.ibm.com/Keystore/localhost.truststore.p12
-#        trustStoreType: PKCS12
-#        trustStorePassword: password
-#        enabled: false
