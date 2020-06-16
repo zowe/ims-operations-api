@@ -1,0 +1,85 @@
+#!groovy
+
+/**
+ * This program and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v20.html
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Copyright IBM Corporation 2020
+ */
+
+node('ibm-jenkins-slave-nvm') {
+  def lib = library("jenkins-library").org.zowe.jenkins_shared_library
+
+  def pipeline = lib.pipelines.generic.GenericPipeline.new(this)
+
+  pipeline.admins.add("jackjia")
+   pipeline.admins.add("joewinchester")
+
+  pipeline.setup(
+    packageName: 'org.zowe.plugins.ims_api',
+    disablePax: true,
+    extraInit: {
+      dir('ims') {
+        // find project version
+        def version = sh(script: 'cat pom.xml | grep \'<version>\' | head -1 | awk -F\'<\' \'{ print \$2; }\' | awk -F\'>\' \'{print \$2;}\'', returnStdout: true).trim()
+        def versionTrunks = lib.Utils.parseSemanticVersion(version)
+        pipeline.setVersion("${versionTrunks['major']}.${versionTrunks['minor']}.${versionTrunks['patch']}".toString())
+      }
+    }
+  )
+
+  // maven build
+  pipeline.build(
+    isSkippable   : false,
+    operation     : {
+      dir('ims') {
+        sh 'mvn compile'
+      }
+    }
+  )
+
+  pipeline.test(
+    name          : 'Unit and Integretion',
+    operation     : {
+      dir('ims') {
+        // FIXME: until we figure
+        // sh 'mvn test'
+      }
+    },
+    allowMissingJunit : true
+  )
+
+  // how we packaging jars/zips
+  pipeline.packaging(
+      name: 'ims-api',
+      operation: {
+        dir('ims') {
+          sh 'mvn package -Dmaven.test.skip=true'
+          dir ('target') {
+            sh 'mv ims-*-javadoc.jar zowe-ims-api-javadoc.jar'
+            sh 'mv ims-*.jar zowe-ims-api.jar'
+          }
+        }
+      }
+  )
+
+  // define we need publish stage
+  pipeline.publish(
+    artifacts: [
+      'ims/target/zowe-ims-api-javadoc.jar',
+      'ims/target/zowe-ims-api.jar',
+    ]
+  )
+
+  // define we need release stage
+  // FIXME: currently we don't support bumping version on Maven build. There are
+  //        two ways to fix:
+  //        1. add support of Maven build in Jenkins library
+  //        2. convert this project to gradle build
+  // pipeline.release()
+
+  pipeline.end()
+}
