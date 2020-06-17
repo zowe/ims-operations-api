@@ -29,22 +29,18 @@ apiml:
       ### discoveryServiceUrls: ${apiml.service.discoveryServiceUrls} # discoveryServiceUrls must be defined by -Dapiml.service.discoveryServiceUrls on MF:
 
       routes:
-          -   gateway-url: "ui/v1"
-              service-url: ${apiml.service.contextPath}
           -   gateway-url: "api/v1"
-              service-url: ${apiml.service.contextPath}/api/v1
-          -   gateway-url: "ws/v1"
-              service-url: ${apiml.service.contextPath}/ws
+              service-url: ${apiml.service.contextPath}
 
       authentication:
           scheme: httpBasicPassTicket
           applid: ZOWEAPPL
 
       apiInfo:
-          -   apiId: org.zowe.discoverableclient
+          -   apiId: ${apiml.service.id}
               version: 1.0.0
               gatewayUrl: api/v1
-              swaggerUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}${apiml.service.contextPath}/v2/api-docs
+              swaggerUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}${apiml.service.contextPath}/openapi.json
               documentationUrl: https://www.zowe.org
 
       catalog:
