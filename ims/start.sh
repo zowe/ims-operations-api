@@ -12,11 +12,12 @@ java -Xms16m -Xmx512m \
 	-Dapiml.service.contextPath=/api/v1/ims \
 	-Dapiml.service.discoveryServiceUrls=https://winmvs3b.hursley.ibm.com:26501/eureka/ \
 	-Dserver.ssl.keyStore=/u/winchj/zowe-keystore-111/localhost/localhost.keystore.p12 \
+	-Dserver.ssl.keyPassword=password \
 	-Dserver.ssl.keyStorePassword=password \
 	-Dserver.ssl.trustStore=/u/winchj/zowe-keystore-111/localhost/localhost.truststore.p12 \
 	-Dserver.ssl.keyAlias=localhost \
 	-Dserver.ssl.trustStorePassword=password \
-	-Dserver.ssl.trustStoreType-Dserver.ssl.trustStorePassword=password \
 	-Dserver.ssl.keyStoreType="PKCS12" \
 	-Dserver.ssl.trustStoreType="PKCS12" \
 	-jar zowe-ims-api-1.0.2.jar
+	
