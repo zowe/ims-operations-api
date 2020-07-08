@@ -6,7 +6,7 @@ spring:
         name: ${apiml.service.id}
 
 apiml:
-  enabled: true                           # Decision if the service should automatically register with API ML discovery service
+  enabled: ${apiml.service.register}      # Decision if the service should automatically register with API ML discovery service
   enableUrlEncodedCharacters: true        # Decision if the service requests the API ML GW to receive encoded characters in the URL
   service:                                # The root of API ML onboarding configuration
 
@@ -83,10 +83,3 @@ server:
         ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
         keyStoreType: ${server.ssl.keyStoreType}
         trustStoreType: ${server.ssl.trustStoreType}
-
-logging:
- level:
-   ROOT: INFO
-   org.zowe.apiml: DEBUG  
-  
-  
