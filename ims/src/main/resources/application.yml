@@ -78,8 +78,8 @@ server:
 
     ssl:
         enabled: true
-        protocol: TLSv1.2
-        enabled-protocols: TLSv1.2
+        protocol: ${server.ssl.protocol}
+        enabled-protocols: ${server.ssl.protocol}
         ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
         keyStoreType: ${server.ssl.keyStoreType}
         trustStoreType: ${server.ssl.trustStoreType}
