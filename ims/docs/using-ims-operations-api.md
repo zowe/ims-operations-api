@@ -10,7 +10,7 @@ You can use the REST APIs that are provided with IMS Operations API to perform t
 
 In order to add a new feature to an existing IMS application APIs can be invoked to refresh application resources in the IMS system.
 
-To refresh existing IMS application resources, Susan issues the stop region API followed by the start region API:
+To refresh existing IMS application resources issues the stop region API followed by the start region API:
 
 •	Stop the IMS application region
 <p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/stop?jobname={jobname}</code>
