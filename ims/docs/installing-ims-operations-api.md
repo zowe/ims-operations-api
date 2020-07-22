@@ -6,7 +6,7 @@
 
 ## Downloading IMS Operations API
 
-Download the pax file `zowe-ims-ops-api-1.0.0.pax`.  This is available in github at https://github.com/zowe/ims-operations-api/blob/BasicAuth/build/ims-ops-api-1.0.0.pax.
+Download the pax file `zowe-ims-ops-api-1.0.0.pax`.  This is available in github at https://github.com/zowe/ims-operations-api/blob/master/build/ims-ops-api-1.0.0.pax.
 
 The next step is to transfer the pax file from your PC to a z/OS USS directory where Zowe has already been installed.  
 
