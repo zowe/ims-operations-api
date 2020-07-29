@@ -10,7 +10,7 @@
 	<groupId>com.ibm.zowe</groupId>
 	<artifactId>ims</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<!-- <name>ims</name> -->
 	<url>http://maven.apache.org</url>
@@ -30,12 +30,9 @@
 	<repositories>
 		<repository>
 			<id>Gizaartificatory</id>
-			<url>https://gizaartifactory.jfrog.io/gizaartifactory/libs-release</url>
+			<url>https://zowe.jfrog.io/zowe/libs-release-local</url>
 		</repository>
 	</repositories>
-
-
-
 	<!-- Spring Boot dependencies -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -80,6 +77,12 @@
 			<version>2.1.1</version>
 		</dependency>
 
+		<!-- <dependency>
+    		<groupId>io.springfox</groupId>
+    		<artifactId>springfox-swagger2</artifactId>
+    		<version>2.9.2</version>
+		</dependency> -->
+
 		<!-- IMS Connect API -->
 		<dependency>
 			<groupId>com.ibm.ims</groupId>
@@ -88,18 +91,16 @@
 		</dependency>
 
 		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
+			</dependency> -->
 
 
 		<!-- Zowe API Mediation Layer -->
 		<dependency>
-			<groupId>com.ca.mfaas.sdk</groupId>
-			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
-			<version>1.1.0</version>
-		</dependency>
+    		<groupId>org.zowe.apiml.sdk</groupId>
+    		<artifactId>onboarding-enabler-spring-v2-springboot-2.1.1.RELEASE</artifactId>
+    		<version>1.12.2</version>
+		</dependency>	
 
 		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
 			from Apache CXF JAX-RS endpoints -->
@@ -171,7 +172,7 @@
 
 	<build>
 
-		<finalName>ims</finalName>
+		<!-- <finalName>ims</finalName> -->
 
 		<plugins>
 			<plugin>
@@ -197,7 +198,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<skipTests>true</skipTests>
+					<skipTests>false</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -206,25 +207,24 @@
 					<execution>
 						<phase>package</phase>
 						<configuration>
-							<target>
-								<copy file="${project.build.directory}/ims.war"
-									todir="${project.basedir}/Docker/Tomcat/" />
-								<copy file="${project.build.directory}/ims.war"
-									todir="${project.basedir}/Docker/Liberty/" />
-							</target>
+							<!-- <target> <copy file="${project.build.directory}/ims.war" todir="${project.basedir}/Docker/Tomcat/" 
+								/> <copy file="${project.build.directory}/ims.war" todir="${project.basedir}/Docker/Liberty/" 
+								/> </target> -->
 						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
-			</plugin> 
-			<plugin>
+			</plugin>
+
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<additionalJOption>-Xdoclint:none</additionalJOption>
 					<source>1.8</source>
+					<javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
 				</configuration>
 				<executions>
 					<execution>
@@ -234,16 +234,11 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-					</archive>
-				</configuration>
 			</plugin> -->
+
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-war-plugin</artifactId> 
+				<configuration> <archive> <addMavenDescriptor>false</addMavenDescriptor> 
+				</archive> </configuration> </plugin> -->
 			<!-- For compiling into a FAT runnable jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

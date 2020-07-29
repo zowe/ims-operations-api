@@ -1,123 +1,85 @@
-  ##############################################################################################
-  # MFAAS configuration section
-  ##############################################################################################
-  mfaas:
-      discovery:
-          serviceId: ${environment.serviceId}
-          locations: ${environment.discoveryLocations}
-          enabled: ${environment.discoveryEnabled:true}
-          endpoints:
-              statusPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/info
-              healthPage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/application/health
-              homePage: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.yaml
-          info:
-              serviceTitle:  ${environment.serviceTitle}
-              description:  ${environment.serviceDescription}
-              swaggerLocation: http://localhost:8081/ims/apis/v1/openapi.json
-          fetchRegistry: false
-          region: default
-      service:
-          hostname: ${environment.hostname}
-          ipAddress: ${environment.ipAddress}
-      catalog-ui-tile:
-          id: IMS
-          title: IMS Operations API
-          description: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-          version:  1.0.0
-      server:
-          scheme: http
-          port: ${environment.port}
-          contextPath: /ims/apis/v1
+##############################################################################################
+# Application configuration section
+##############################################################################################
+spring:
+    application:
+        name: ${apiml.service.id}
 
-  eureka:
-      instance:
-          nonSecurePortEnabled: false
-          securePortEnabled: true       
-          appname: ${mfaas.discovery.serviceId}
-          hostname: ${mfaas.service.hostname}
-          statusPageUrlPath: ${mfaas.discovery.endpoints.statusPage}
-          healthCheckUrl: ${mfaas.discovery.endpoints.healthPage}
-          homePageUrl: ${mfaas.discovery.endpoints.homePage}
-          metadata-map:
-              routed-services:
-                  api_v1:
-                      gateway-url: "api/v1" 
-                      service-url: ${mfaas.server.contextPath}
-              apiml:
-                  apiInfo:
-                      - apiId: ${mfaas.discovery.serviceId}
-                        gatewayUrl: api/v1
-                        swaggerUrl: ${mfaas.server.scheme}://${mfaas.service.hostname}:${mfaas.server.port}${mfaas.server.contextPath}/openapi.json
-                        documentationUrl: https://www.zowe.org
-              mfaas:
-                  api-info:
-                      apiVersionProperties:
-                          v1:
-                              title: IMS Operations API
-                              description: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-                              version: 1.0.0
-                              #basePackage: application
-                              apiPattern: /v1/.*  # alternative to basePackage for exposing endpoints which match the regex pattern to swagger JSON
-                  discovery:
-                      catalogUiTile:
-                          id: ${mfaas.catalog-ui-tile.id}
-                          title:  ${mfaas.catalog-ui-tile.title}
-                          description: ${mfaas.catalog-ui-tile.description}
-                          version: ${mfaas.catalog-ui-tile.version}
-                      enableApiDoc: ${mfaas.discovery.info.enableApiDoc:true}
-                      service:
-                          title: ${mfaas.discovery.info.serviceTitle}
-                          description: ${mfaas.discovery.info.description}
-      client:
-          enabled: ${mfaas.discovery.enabled}
-          healthcheck:
-              enabled: true
-          serviceUrl:
-              defaultZone: ${mfaas.discovery.locations}
-          fetchRegistry:  ${mfaas.discovery.fetchRegistry}
-          region: ${mfaas.discovery.region}
+apiml:
+  enabled: ${apiml.service.register}      # Decision if the service should automatically register with API ML discovery service
+  enableUrlEncodedCharacters: true        # Decision if the service requests the API ML GW to receive encoded characters in the URL
+  service:                                # The root of API ML onboarding configuration
 
-  ##############################################################################################
-  # Application configuration section
-  ##############################################################################################
-  spring:
-      application:
-          name: ${mfaas.discovery.serviceId}    
-          
-          
-  ##############################################################################################
-  # Local configuration section
-  ##############################################################################################
+      serviceId: ${apiml.service.id}      # The symbolic name of the service. Must be the same as `spring.application.name`
+      title: ${service.title}
+      description: ${service.description} # API service description
 
-  environment: 
-      serviceId: IMS
-      serviceTitle: IMS Operations API
-      serviceDescription: The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources.
-      discoveryEnabled: false
-      hostname: localhost
-      port: 8081
-      discoveryLocations: https://localhost:10011/eureka
-      ipAddress: 127.0.0.1
-    
-  ##############################################################################################
-  # HTTPS Configuration
-  ##############################################################################################
-      
-  server:
-   # address: ${mfaas.service.ipAddress}
-      port: ${mfaas.server.port}
-      servlet:
-          contextPath: ${mfaas.server.contextPath}
-   
+      scheme: https
+      ### hostname:                                # Hostname must be defined by -Dapiml.service.hostname on MF
+      ### port:                                    # Port must be defined by -Dapiml.service.port on MF:
+      serviceIpAddress: ${apiml.service.ipAddress} # serviceIpAddress must be provided by -Dapiml.service.ipAddress on MF
+
+      baseUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}
+      contextPath: /${apiml.service.id}            # By default the contextPath is set to be the same as apiml.service.serviceId
+
+      homePageRelativeUrl: ${apiml.service.contextPath}
+      statusPageRelativeUrl: ${apiml.service.contextPath}/application/info
+      healthCheckRelativeUrl: ${apiml.service.contextPath}/application/health
+
+      ### discoveryServiceUrls: ${apiml.service.discoveryServiceUrls} # discoveryServiceUrls must be defined by -Dapiml.service.discoveryServiceUrls on MF:
+
+      routes:
+          -   gateway-url: "api/v1"
+              service-url: ${apiml.service.contextPath}
+
+      authentication:
+          scheme: httpBasicPassTicket
+          applid: ZOWEAPPL
+
+      apiInfo:
+          -   apiId: ${apiml.service.id}
+              version: 1.0.0
+              gatewayUrl: api/v1
+              swaggerUrl: ${apiml.service.scheme}://${apiml.service.hostname}:${apiml.service.port}${apiml.service.contextPath}/openapi.json
+              documentationUrl: https://www.zowe.org
+
+      catalog:
+          tile:
+              id: IMS                                    # Provide ID for your service Catalog tile
+              title: IMS Operations API
+              description: IMS Operations API
+              version: 1.0.0
+
       ssl:
-          protocol: TLSv1.2
+          enabled: ${server.ssl.enabled}
+          verifySslCertificatesOfServices: true
           ciphers: TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_EMPTY_RENEGOTIATION_INFO_SCSV
-          keyAlias: localhost
-          keyPassword: password
-          keyStore: /Users/lij@us.ibm.com/Keystore/localhost.keystore.p12
-          keyStoreType: PKCS12
-          keyStorePassword: password
-          trustStore: /Users/lij@us.ibm.com/Keystore/localhost.truststore.p12
-          trustStoreType: PKCS12
-          trustStorePassword: password
-          enabled: false
+          protocol: TLSv1.2
+          enabled-protocols: ${server.ssl.protocol}
+          keyStoreType: ${server.ssl.keyStoreType}
+          trustStoreType: ${server.ssl.trustStoreType}
+
+          ### DEFINE FOLLOWING PROPERTIES IN EXTERNAL CONFIGURATION
+          keyAlias: ${server.ssl.keyAlias} #localhost-blah
+          keyPassword: ${server.ssl.keyPassword} #password-blah
+          keyStore: ${server.ssl.keyStore} #keystore/localhost/localhost.keystore.p12-blah
+          keyStorePassword: ${server.ssl.keyStorePassword} #password-blah
+          trustStore: ${server.ssl.trustStore} #keystore/localhost/localhost.truststore.p12-blah
+          trustStorePassword: ${server.ssl.trustStorePassword} #password-blah
+
+server:
+    scheme: ${apiml.service.scheme}
+    hostname: ${apiml.service.hostname} #localhost # Hostname that is advertised in Eureka. Default is valid only for localhost
+    port: ${apiml.service.port} #10012         # Default port name for discoverable-client service
+    address: ${apiml.service.ipAddress} #127.0.0.1
+
+    servlet:
+        contextPath: ${apiml.service.contextPath}
+
+    ssl:
+        enabled: true
+        protocol: ${server.ssl.protocol}
+        enabled-protocols: ${server.ssl.protocol}
+        ciphers: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+        keyStoreType: ${server.ssl.keyStoreType}
+        trustStoreType: ${server.ssl.trustStoreType}

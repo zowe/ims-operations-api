@@ -12,37 +12,12 @@ Also, because you can write scripts that use the Zowe CLI commands, which, in tu
 
 ## Use cases and scenario
 
-You can use the REST APIs that are provided with IMS Operations API to perform the following tasks:
+For more information on using the IMS Operations API see [Using the IMS Operations API](./ims/docs/using-ims-operations-api.md)
 
-•	Create, define, manage, query, and delete IMS program resources for application programs.
+## Install and test IMS Operations API
 
-•	Create, manage, query, and delete IMS transactions and transaction resources.
+To obtain, install, and launch the IMS Operations API see [Installing IMS Operations API](./ims/docs/installing-ims-operations-api.md)
 
-•	Start, stop, and display information about IMS message and application processing regions.
+## Build and test IMS Operations API
 
-### Scenario: Updating an existing IMS application by using the IMS Operations API
-
-Susan, an application developer, needs to add a new feature to an existing IMS application. To integrate and deliver the updated code for the new feature, she needs to refresh the application resources in the IMS system.
-
-To refresh existing IMS application resources, Susan issues the stop region API followed by the start region API:
-
-•	Stop the IMS application region
-<p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/stop?jobname={jobname}</code>
-
-•	Start the IMS application region
-<p><t><code>PUT {host}:{port}/ims/apis/v1/{imsplex}/region/start?jobname={jobname}</code>
-
-•	Verify the application region status
-<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/region</code>
-
-If the transaction or program resource does not run properly, Susan might need to restart the resource. Susan might need to restart the resource. To check the status of the resources, she can invoke the following APIs:
-
-<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/pgm?names={appname}&show=STATUS</code>
-
-<p><t><code>GET {host}:{port}/ims/apis/v1/{imsplex}/tran?names={traname}&show=STATUS</code>
-
-To start or stop the resources, Susan can invoke additional APIs outlined in the OpenAPI documentation.
-
-## Build, install and test IMS Operations API
-
-To build, install and test IMS Operations API, refer to the instructions in the wiki page. 
+To build and test IMS Operations API, refer to the instructions in the wiki page. 

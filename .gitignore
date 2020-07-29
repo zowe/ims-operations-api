@@ -15,6 +15,7 @@
 
 # Log file
 *.log
+*.log.*
 
 *.class
 

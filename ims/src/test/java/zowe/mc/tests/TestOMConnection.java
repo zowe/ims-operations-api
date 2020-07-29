@@ -48,6 +48,8 @@ public class TestOMConnection {
 	private static MCInteraction mcSpec = new MCInteraction();
 	private static final Logger logger = LoggerFactory.getLogger(TestOMConnection.class);
 	private static Client client;
+	private final String DEFAULT_USER = "admin";
+	private final String DEFAULT_PASSWORD = "password";
 
 	@BeforeAll
 	public static void setUp() {
@@ -91,7 +93,7 @@ public class TestOMConnection {
 		logger.info("TESTING BAD PLEX NAME");		
 
 		//SHOW=TIMESTAMP
-		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  TestProperties.contextPath + "FOO" + "/program");
+		Response response = RequestUtils.getRequest(new ArrayList<String[]>(),  TestProperties.contextPath + "FOO" + "/program", DEFAULT_USER, DEFAULT_PASSWORD);
 
 		QueryProgramOutput queryProgramResponses= response.readEntity(QueryProgramOutput.class);
 		

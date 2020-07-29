@@ -118,7 +118,7 @@ public class RequestUtils {
 
 	}
 
-	public static Response postRequest(List<String[]> queryParams, String path) {
+	public static Response postRequest(List<String[]> queryParams, String path, String username, String password) {
 
 		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
 
@@ -127,7 +127,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
-		webTarget.register(new Authenticator("admin", "password"));
+		webTarget.register(new Authenticator(username, password));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -139,7 +139,7 @@ public class RequestUtils {
 
 	}
 
-	public static Response deleteRequest(List<String[]> queryParams, String path) {
+	public static Response deleteRequest(List<String[]> queryParams, String path, String username, String password) {
 
 		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
 
@@ -148,7 +148,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
-		webTarget.register(new Authenticator("admin", "password"));
+		webTarget.register(new Authenticator(username, password));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -159,7 +159,7 @@ public class RequestUtils {
 
 	}
 
-	public static Response putRequest(List<String[]> queryParams, String path) {
+	public static Response putRequest(List<String[]> queryParams, String path, String username, String password) {
 
 		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
 
@@ -167,7 +167,7 @@ public class RequestUtils {
 			webTarget = webTarget.queryParam(sArray[0], sArray[1]);
 		}
 		webTarget.register(new JacksonJsonProvider());
-		webTarget.register(new Authenticator("admin", "password"));
+		webTarget.register(new Authenticator(username, password));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON)
 				.header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
@@ -183,7 +183,7 @@ public class RequestUtils {
 	 * @param queryParams
 	 * @return
 	 */
-	public static Response getRequest(List<String[]> queryParams, String path) {
+	public static Response getRequest(List<String[]> queryParams, String path, String username, String password) {
 		WebTarget webTarget = client.target(urlPrefix + host + ":" + port);
 
 		for (String[] sArray : queryParams) {
@@ -191,7 +191,7 @@ public class RequestUtils {
 		}
 
 		webTarget.register(new JacksonJsonProvider());
-		webTarget.register(new Authenticator("admin", "password"));
+		webTarget.register(new Authenticator(username, password));
 		Invocation.Builder builder =  webTarget.path(path).request(MediaType.APPLICATION_JSON).header("hostname", TestProperties.hostname)
 				.header("port", TestProperties.port)
 				.accept(MediaType.APPLICATION_JSON);
@@ -199,6 +199,7 @@ public class RequestUtils {
 		Response responses = builder.get();
 		return responses;
 	}
+	
 
 	public static UpdateTransactionOutput validateUTRSuccess(Response responses) {
 		UpdateTransactionOutput updateTranResponses = responses.readEntity(UpdateTransactionOutput.class);
@@ -324,7 +325,12 @@ public class RequestUtils {
 	}
 	
 	public static HttpHeaders createHeaders(String username, String password){
-		   return new HttpHeaders() {{
+		   return new HttpHeaders() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+		{
 		         String auth = username + ":" + password;
 		         byte[] encodedAuth = Base64.encodeBase64( 
 		            auth.getBytes(Charset.forName("US-ASCII")) );
