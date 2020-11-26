@@ -27,7 +27,7 @@ IMS_OPS_CODE=IM
 
  _BPX_JOBNAME=${ZOWE_PREFIX}${IMS_OPS_CODE} java -Xms16m -Xmx512m \
 	-Dapiml.service.register=true \
-	-Dapiml.service.id=IMS \
+	-Dapiml.service.id=ims \
 	-Dservice.title=IMS_Operations \
 	-Dservice.description=IMS_Operations_API \
 	-Dapiml.service.port=${ZWE_IMS_OPS_API_PORT} \
@@ -46,4 +46,5 @@ IMS_OPS_CODE=IM
 	-Dserver.ssl.trustStore=${TRUSTSTORE} \
 	-Dserver.ssl.trustStoreType=${KEYSTORE_TYPE} \
 	-Dserver.ssl.trustStorePassword=${KEYSTORE_PASSWORD} \
+	-Djava.protocol.handler.pkgs=com.ibm.crypto.provider \
 	-jar ${LAUNCH_COMPONENT}/../ims-ops-api-1.0.0.jar &

@@ -54,7 +54,7 @@ The file permissions of `rw-------` only give the owner read (and write) access,
 
 ```
 >chmod a+r ims-ops-api-1.0.0.jar
->chmod a+rw zowe-scripts
+>chmod -R a+rx zowe-scripts
 ```
 
 The permissions should now have been set correctly, and you can check this using `ls -alT`.

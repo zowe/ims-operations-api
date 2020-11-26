@@ -20,4 +20,9 @@ To obtain, install, and launch the IMS Operations API see [Installing IMS Operat
 
 ## Build and test IMS Operations API
 
-To build and test IMS Operations API, refer to the instructions in the wiki page. 
+The IMS Operations API have to be built locally using maven and the .jar file transferred to z/OS and paxed up.
+This will be moved to the pipeline to get into artifactory but that work isn't done yet.
+
+To build the IMS Operations API, see [Building IMS Operations API](./ims/docs/building-ims-operations-api.md)
+
+( To build and test IMS Operations API, refer to the instructions in the wiki page ).
