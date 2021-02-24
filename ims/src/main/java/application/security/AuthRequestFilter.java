@@ -91,6 +91,9 @@ public class AuthRequestFilter implements ContainerRequestFilter {
 						}
 					}
 				}
+			} else {
+				ctx.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+						.entity("No credentials provided").build());
 			}
 		}
 	}

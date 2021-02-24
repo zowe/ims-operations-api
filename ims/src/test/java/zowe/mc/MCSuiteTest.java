@@ -24,6 +24,7 @@ import zowe.mc.tests.TestOMConnection;
 import zowe.mc.tests.pgm.TestCreateDeletePgm;
 import zowe.mc.tests.pgm.TestQueryPgm;
 import zowe.mc.tests.pgm.TestUpdatePgm;
+import zowe.mc.tests.security.TestBasicAuth;
 import zowe.mc.tests.tran.TestCreateDeleteTran;
 import zowe.mc.tests.tran.TestQueryTran;
 import zowe.mc.tests.tran.TestUpdateTran;
@@ -45,12 +46,8 @@ import zowe.mc.tests.tran.TestUpdateTran;
 				  TestCreateDeletePgm.class,
 				  TestQueryTran.class,
 				  TestUpdateTran.class,
-				  TestCreateDeleteTran.class
-//				  TestBasicAuthenticationPgmUser.class,
-//				  TestBasicAuthenticationDeleteUser.class,
-//				  TestBasicAuthenticationRegionUser.class,
-//				  TestBasicAuthenticationGetUser.class,
-//				  TestBasicAuthenticationPostUser.class
+				  TestCreateDeleteTran.class,
+				  TestBasicAuth.class
 				  } )
 public class MCSuiteTest {
 
