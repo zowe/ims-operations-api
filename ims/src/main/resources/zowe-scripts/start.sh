@@ -13,7 +13,7 @@
 # Variables required on shell:
 # - ZOWE_PREFIX
 # - ZOWE_IMS_OPS_API_PORT - The port on which the Springboot server listens
-# - ZOWE_EXPLORER_HOST 
+# - ZOWE_EXPLORER_HOST
 # - ZOWE_IP_ADDRESS
 # - DISCOVERY_PORT - The port the APIML Discovery server is listening (that the IMS Ops API registers with)
 # - KEYSTORE - The keystore to use for SSL certificates
@@ -34,7 +34,7 @@ IMS_OPS_CODE=IM
 	-Dapiml.service.ipAddress=${ZOWE_IP_ADDRESS} \
 	-Dapiml.service.scheme=https \
 	-Dapiml.service.hostname=${ZOWE_EXPLORER_HOST} \
-	-Dapiml.service.contextPath=/api/v1/ims \
+	-Dapiml.service.contextPath=/apis/v1/ims \
 	-Dapiml.service.discoveryServiceUrls=${ZWE_DISCOVERY_SERVICES_LIST} \
 	-Dserver.ssl.protocol="TLSv1.2" \
 	-Dserver.ssl.enabled=true \

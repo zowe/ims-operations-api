@@ -30,7 +30,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
  * @author jerryli
  *
  */
-@ApplicationPath("/api/v1")
+@ApplicationPath("/apis/v1")
 public class LibertyApp extends Application{
 
 //	public LibertyConfig(@Context ServletConfig servletConfig) {
@@ -52,7 +52,7 @@ public class LibertyApp extends Application{
 		resources.add(RegionService.class);
 		resources.add(OMServlet.class);
 		resources.add(AuthRequestFilter.class);
-		
+
 		return resources;
 	}
 

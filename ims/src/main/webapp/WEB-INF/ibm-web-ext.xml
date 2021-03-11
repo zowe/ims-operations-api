@@ -6,7 +6,7 @@
 	version="1.1">
 
 	<reload-interval value="3"/>
-	<context-root uri="ims/api/v1" />
+	<context-root uri="ims/apis/v1" />
 	<enable-directory-browsing value="false"/>
 	<enable-file-serving value="true"/>
 	<enable-reloading value="true"/>
