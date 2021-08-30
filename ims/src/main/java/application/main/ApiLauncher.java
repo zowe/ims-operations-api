@@ -18,7 +18,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan({"com.ca.mfaas.enable", "com.ca.mfaas.product", "application.main", "application.services", "application.models", "application.resources", "application.rest", "application.springSecurity"})
-@org.zowe.apiml.enable.EnableApiDiscovery
 public class ApiLauncher {
 	
 	public static void main(String[] args) {

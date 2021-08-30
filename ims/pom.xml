@@ -19,22 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>zowe</id>
-			<url>https://eu.artifactory.swg-devops.com:443/artifactory/sys-zowe-ext-maven-local/</url>
-		</repository>
-	</distributionManagement>
-
-	<!-- For API Mediation Layer -->
-	<repositories>
-		<repository>
-			<id>Gizaartificatory</id>
-			<url>https://zowe.jfrog.io/zowe/libs-release-local</url>
-		</repository>
-	</repositories>
-
-
 
 	<!-- Spring Boot dependencies -->
 	<parent>
@@ -88,18 +72,7 @@
 		</dependency>
 
 		<!-- Logging -->
-		<!-- <dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-		</dependency> -->
 
-
-		<!-- Zowe API Mediation Layer -->
-		<dependency>
-			<groupId>org.zowe.apiml.sdk</groupId>
-			<artifactId>onboarding-enabler-spring-v2-springboot-2.1.1.RELEASE</artifactId>
-			<version>1.7.0</version>
-		</dependency>
 
 		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
 			from Apache CXF JAX-RS endpoints -->
@@ -109,6 +82,20 @@
 			<version>3.2.4</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.15</version>
+		</dependency>
+
+
 
 		<!-- Spring Boot with jax-rs (with Apache CXF implementation of JAX-RS) 
 			We also exclude the embedded logging (we want to use sl4j -->
@@ -116,12 +103,7 @@
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-spring-boot-starter-jaxrs</artifactId>
 			<version>3.2.4</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+
 		</dependency>
 
 		<!-- More Spring Boot (including security) -->
@@ -183,6 +165,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.junit.jupiter</groupId>
@@ -190,13 +175,6 @@
 						<version>5.3.2</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>false</skipTests>
-				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
