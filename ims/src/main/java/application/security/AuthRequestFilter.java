@@ -91,6 +91,11 @@ public class AuthRequestFilter implements ContainerRequestFilter {
 						}
 					}
 				}
+				
+			} else {
+				ctx.abortWith(Response.status(Response.Status.BAD_REQUEST)
+					.entity("Must specify credentials")
+					.build());
 			}
 		}
 	}

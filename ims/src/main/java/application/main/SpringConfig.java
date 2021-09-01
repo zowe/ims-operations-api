@@ -24,13 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-import application.LibertyApp;
-import application.rest.OMServlet;
 import application.rest.services.PgmService;
 import application.rest.services.RegionService;
 import application.rest.services.TranService;
@@ -40,18 +37,22 @@ import application.security.AuthRequestFilter;
 
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "application")
 public class SpringConfig {
 
 	@Autowired
     private Bus bus;
+	@Autowired 
+	private PgmService pgm;
+	@Autowired 
+	private TranService tran;
+	@Autowired 
+	private RegionService region;
 	
 	
 	@Bean
     public Server jaxRsServer() {
         final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
-        factory.setApplication(new LibertyApp());
-        factory.setServiceBeans(Arrays.<Object>asList(new PgmService(), new TranService(), new RegionService(), new OMServlet()));
+        factory.setServiceBeans(Arrays.<Object>asList(pgm, tran, region));
         //for JSON marshalling/unmarshalling into objects
         factory.setProvider(new JacksonJsonProvider());
         //Server request filter
@@ -67,5 +68,6 @@ public class SpringConfig {
         servletRegistrationBean.setLoadOnStartup(1);
         return servletRegistrationBean;
     }
+    
 
 }

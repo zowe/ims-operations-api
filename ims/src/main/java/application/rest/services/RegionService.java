@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -48,7 +49,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import json.java.JSONObject;
 
-@Stateless
 @Path("/{plex}/region")
 @Tag(name = "Region")
 @CheckHeader
@@ -56,8 +56,8 @@ public class RegionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionService.class);
 
-
-	OMServlet omServlet = new OMServlet();
+	@Autowired
+	OMServlet omServlet;
 
 	@Path("/stop")
 	@PUT

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -34,6 +33,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -89,20 +90,16 @@ import utils.Type2CommandSerializable;
  *
  */
 
-@Stateless
+@Component
 @Path("/{plex}/program")
 @Tag(name = "Program")
 @SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
 @CheckHeader
 public class PgmService {
 
-	//@Autowired
-	//@EJB
-	OMServlet omServlet = new OMServlet();
-
-	//@Resource(name = "mc_cf")
-	//ConnectionFactory mc_cf;
-
+	@Autowired
+	OMServlet omServlet;
+	
 	private static final Logger logger = LoggerFactory.getLogger(PgmService.class);
 
 	@Path("/")

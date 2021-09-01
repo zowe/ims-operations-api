@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import annotations.CheckHeader;
 import application.rest.OMServlet;
@@ -83,15 +84,14 @@ import utils.Type2CommandSerializable;
  * @author jerryli
  *
  */
-@Stateless
 @Path("/{plex}/transaction")
 @Tag(name = "Transaction")
 @SecurityScheme(name = "Basic Auth", type = SecuritySchemeType.HTTP, scheme = "basic", in = SecuritySchemeIn.HEADER)
 @CheckHeader
 public class TranService {
 
-
-	OMServlet omServlet = new OMServlet();
+	@Autowired
+	OMServlet omServlet;
 
 	private static final Logger logger = LoggerFactory.getLogger(TranService.class);
 

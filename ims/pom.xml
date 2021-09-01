@@ -19,22 +19,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>zowe</id>
-			<url>https://eu.artifactory.swg-devops.com:443/artifactory/sys-zowe-ext-maven-local/</url>
-		</repository>
-	</distributionManagement>
-
-	<!-- For API Mediation Layer -->
-	<repositories>
-		<repository>
-			<id>Gizaartificatory</id>
-			<url>https://gizaartifactory.jfrog.io/gizaartifactory/libs-release</url>
-		</repository>
-	</repositories>
-
-
 
 	<!-- Spring Boot dependencies -->
 	<parent>
@@ -93,14 +77,6 @@
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 
-
-		<!-- Zowe API Mediation Layer -->
-		<dependency>
-			<groupId>com.ca.mfaas.sdk</groupId>
-			<artifactId>mfaas-integration-enabler-spring-v2-springboot-2.0.4.RELEASE</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
 		<!-- Apache Open API 3.0 feature, allows generation of OpenAPI documents 
 			from Apache CXF JAX-RS endpoints -->
 		<dependency>
@@ -108,6 +84,20 @@
 			<artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId>
 			<version>3.2.4</version>
 		</dependency>
+
+		<!--  Standard Apache http implementations -->
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+
 
 
 		<!-- Spring Boot with jax-rs (with Apache CXF implementation of JAX-RS) 
@@ -129,10 +119,8 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-security</artifactId> 
+			</dependency> -->
 
 		<!-- Swagger UI for Spring Boot + Apache CXF -->
 		<dependency>
@@ -206,19 +194,16 @@
 					<execution>
 						<phase>package</phase>
 						<configuration>
-							<!-- <target>
-								<copy file="${project.build.directory}/ims.war"
-									todir="${project.basedir}/Docker/Tomcat/" />
-								<copy file="${project.build.directory}/ims.war"
-									todir="${project.basedir}/Docker/Liberty/" />
-							</target> -->
+							<!-- <target> <copy file="${project.build.directory}/ims.war" todir="${project.basedir}/Docker/Tomcat/" 
+								/> <copy file="${project.build.directory}/ims.war" todir="${project.basedir}/Docker/Liberty/" 
+								/> </target> -->
 						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
 				</executions>
-			</plugin> 
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -235,15 +220,9 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-					</archive>
-				</configuration>
-			</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-war-plugin</artifactId> 
+				<configuration> <archive> <addMavenDescriptor>false</addMavenDescriptor> 
+				</archive> </configuration> </plugin> -->
 			<!-- For compiling into a FAT runnable jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
