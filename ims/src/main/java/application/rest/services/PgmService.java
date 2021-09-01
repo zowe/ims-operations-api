@@ -152,7 +152,6 @@ public class PgmService {
 			) {
 
 		try {
-
 			MCInteraction mcSpec = new MCInteraction();
 			mcSpec.setHostname(hostname);
 			mcSpec.setPort(Integer.parseInt(port));

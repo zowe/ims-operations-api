@@ -85,7 +85,7 @@
 			<version>3.2.4</version>
 		</dependency>
 
-		<!--  Standard Apache http implementations -->
+		<!-- Standard Apache http implementations -->
 		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -121,6 +121,13 @@
 		</dependency>
 		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-security</artifactId> 
 			</dependency> -->
+
+
+		<!-- Spring Boot devtools -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
 
 		<!-- Swagger UI for Spring Boot + Apache CXF -->
 		<dependency>
@@ -185,7 +192,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<skipTests>false</skipTests>
+					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>
