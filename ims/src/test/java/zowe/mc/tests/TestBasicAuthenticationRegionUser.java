@@ -14,10 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import application.rest.responses.tran.create.CreateTransaction;
-import application.rest.responses.tran.create.CreateTransactionOutput;
-import application.rest.responses.tran.delete.DeleteTransaction;
-import application.rest.responses.tran.delete.DeleteTransactionOutput;
 import zowe.mc.RequestUtils;
 import zowe.mc.SuiteExtension;
 import zowe.mc.TestProperties;
@@ -30,7 +26,7 @@ public class TestBasicAuthenticationRegionUser {
 	private static final Logger logger = LoggerFactory.getLogger(TestBasicAuthenticationRegionUser.class);
 	private static final String ADMIN_USER = "admin";
 	private static final String REGION_USER = "region";
-	private static final String DELETE_USER = "delete";
+	//private static final String DELETE_USER = "delete";
 	private static final String DEFAULT_PASSWORD = "password";
 	private static String PGM_PATH = TestProperties.contextPath + TestProperties.plex + "/program";
 	private static String TRAN_PATH = TestProperties.contextPath + TestProperties.plex + "/transaction";

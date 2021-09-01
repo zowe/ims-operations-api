@@ -13,10 +13,8 @@
 package zowe.mc.tests.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -44,7 +42,7 @@ public class TestBasicAuth
 	private static final Logger logger = LoggerFactory.getLogger(TestBasicAuth.class);
 	private final String GET_USER = "get";
 	private final String PGM_USER = "pgm";
-	private final String ADMIN_USER = "admin";
+	//private final String ADMIN_USER = "admin";
 	private final String POST_USER = "post";
 	private final String TRAN_USER = "tran";
 	private final String DEFAULT_PASSWORD = "password";

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
