@@ -41,15 +41,7 @@ import om.result.OmResultSet;
 import om.service.CommandService;
 import om.services.Om;
 
-@OpenAPIDefinition(
-		info = @Info(
-				title = "IMS Operations API",
-				version = "1.0.0",
-				description = "The IMS Operations API allows you to use RESTful APIs to perform IMS operational tasks. You can call the RESTful APIs to invoke the IMS commands that are required to deploy IMS applications and manage application resources."),
-		servers = {@Server(url = "/ims")},
-		security = {@SecurityRequirement(name = "Basic Auth")})
-@Stateless
-@Service
+
 public class OMServlet {
 
 	static final Logger logger = LoggerFactory.getLogger(OMServlet.class);

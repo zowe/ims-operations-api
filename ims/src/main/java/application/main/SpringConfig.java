@@ -52,6 +52,7 @@ public class SpringConfig {
 	@Bean
     public Server jaxRsServer() {
         final JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
+        factory.setApplication(new App());
         factory.setServiceBeans(Arrays.<Object>asList(pgm, tran, region));
         //for JSON marshalling/unmarshalling into objects
         factory.setProvider(new JacksonJsonProvider());
