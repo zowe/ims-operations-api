@@ -323,8 +323,7 @@ public class RegionService {
 		}
 
 
-		try {
-			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
+		try {			result = omServlet.executeImsCommand(sb.toString(), mcSpec);
 		} catch (RestException e) {
 			logger.debug("OM returned non-zero return code: " + e.getResponse().toString());
 			return Response.status(Status.BAD_REQUEST).entity(e.getResponse()).build();
