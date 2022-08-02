@@ -33,8 +33,7 @@ apiml:
               service-url: ${apiml.service.contextPath}
 
       authentication:
-          scheme: httpBasicPassTicket
-          applid: ZOWEAPPL
+          scheme: bypass
 
       apiInfo:
           -   apiId: ${apiml.service.id}

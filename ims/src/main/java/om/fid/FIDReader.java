@@ -318,10 +318,11 @@ public class FIDReader {
 		
 		//Get file
 		InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath);
-		Scanner input = new Scanner(is);
-
+		Scanner input = new Scanner(is,"UTF-8");
+		
 		//Read each line
-		while (input.hasNextLine()) {
+
+			while (input.hasNextLine()) {
 			String line = input.nextLine();
 			/*
 			 * We separate the file by specific lines. The lines are the 
